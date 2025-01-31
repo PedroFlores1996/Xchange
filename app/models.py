@@ -16,7 +16,7 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return new_user
 
-    def check_credentials(username, password):
+    def authenticate(username, password):
         user = User.get_user_by_username(username)
         if user and check_password_hash(user.password, password):
             return user

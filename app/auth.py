@@ -26,8 +26,7 @@ def logged_out(func):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        if User.check_credentials(form.username.data, form.password.data):
-            user = User.get_user_by_username(form.username.data)
+        if user := User.authenticate(form.username.data, form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect(url_for('index.home_page'))
         else:
@@ -46,6 +45,7 @@ def signin():
             login_user(new_user, remember=form.remember_me.data)
             return redirect(url_for('index.home_page'))
         else:
+            flash('Username already exists')
             return redirect(url_for('auth.signin'))
     return render_template('signin.html', form=form)
 
