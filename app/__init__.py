@@ -11,10 +11,10 @@ def create_app(config=None):
     else:
         app.config.from_object(config)
 
-    from app.models import db
+    from app.user.models import db
     db.init_app(app)
 
-    from app.auth import loginManager, bp as auth_bp
+    from app.auth.auth import loginManager, bp as auth_bp
     loginManager.init_app(app)
     loginManager.login_view = 'auth.login'
     app.register_blueprint(auth_bp)

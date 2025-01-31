@@ -1,9 +1,9 @@
 from functools import wraps
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, request, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, current_user
 
-from app.models import db, User
-from app.forms import LoginForm, SigninForm
+from app.user.models import db, User
+from app.auth.forms import LoginForm, SigninForm
 
 loginManager = LoginManager()
 
@@ -26,13 +26,14 @@ def logged_out(func):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
+        next = request.args.get('next')
         if user := User.authenticate(form.username.data, form.password.data):
             login_user(user, remember=form.remember_me.data)
-            return redirect(url_for('index.home_page'))
+            return redirect(next or url_for('index.home_page'))
         else:
             flash('Invalid username or password')
-            return redirect(url_for('auth.login'))
-    return render_template('login.html', form=form)
+            return redirect(url_for('auth.login', next=next))
+    return render_template('auth/login.html', form=form)
 
 @bp.route('/signin', methods=['GET', 'POST'])
 @logged_out
@@ -47,9 +48,9 @@ def signin():
         else:
             flash('Username already exists')
             return redirect(url_for('auth.signin'))
-    return render_template('signin.html', form=form)
+    return render_template('auth/signin.html', form=form)
 
 @bp.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('index.home_page'))
+    return redirect(url_for('auth.login'))
