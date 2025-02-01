@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_migrate import Migrate
 
 from app.config import Config
 
@@ -11,8 +12,9 @@ def create_app(config=None):
     else:
         app.config.from_object(config)
 
-    from app.user.models import db
+    from app.database import db
     db.init_app(app)
+    app.migrate = Migrate(app, db)
 
     from app.auth.auth import loginManager, bp as auth_bp
     loginManager.init_app(app)

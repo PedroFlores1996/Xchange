@@ -2,7 +2,8 @@ from functools import wraps
 from flask import Blueprint, render_template, redirect, request, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, current_user
 
-from app.user.models import db, User
+from app.database import db
+from app.model.user import User
 from app.auth.forms import LoginForm, SigninForm
 
 loginManager = LoginManager()
