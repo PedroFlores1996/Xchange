@@ -9,18 +9,18 @@ class Debt(db.Model):
     borrower = db.relationship("User", foreign_keys=[borrower_id], back_populates='borrower_debts')
     amount = db.Column(Float, nullable=False)
     description = db.Column(String, nullable=True)
-    group_debt_id = db.Column(Integer, db.ForeignKey('group_debt.id'), nullable=True)
-    group_debt = db.relationship("GroupDebt", foreign_keys='GroupDebt.debt_id', uselist=False, back_populates='debt')
-    __table_args__ = (db.UniqueConstraint('lender_id', 'borrower_id', 'group_debt_id'),)
+    group_id = db.Column(Integer, db.ForeignKey('group.id'), nullable=True)
+    group = db.relationship("Group", back_populates='debts')
+    __table_args__ = (db.UniqueConstraint('lender_id', 'borrower_id', 'group_id'),)
 
     def get_reversed_debt(lender_id, borrower_id):
         return Debt.get_reversed_debt(lender_id, borrower_id, None)
     
-    def get_reversed_debt(lender_id, borrower_id, group_debt_id):
-        return Debt.query.filter_by(lender_id=borrower_id, borrower_id=lender_id, group_debt_id=group_debt_id).first()
+    def get_reversed_debt(lender_id, borrower_id, group_id):
+        return Debt.query.filter_by(lender_id=borrower_id, borrower_id=lender_id, group_id=group_id).first()
 
-    def update_debt(lender, borrower, amount, description=None, group_debt=None):
-        if reverse_debt := Debt.get_reversed_debt(lender.id, borrower.id, group_debt.id if group_debt else None):
+    def update_debt(lender, borrower, amount, description=None, group=None):
+        if reverse_debt := Debt.get_reversed_debt(lender.id, borrower.id, group.id if group else None):
             if reverse_debt.amount == amount:
                 db.session.delete(reverse_debt)
                 db.session.commit()
@@ -33,7 +33,7 @@ class Debt(db.Model):
                 amount -= reverse_debt.amount
                 db.session.delete(reverse_debt)
                 db.session.commit()
-        new_debt = Debt(lender=lender, borrower=borrower, amount=amount, description=description, group_debt=group_debt)
+        new_debt = Debt(lender=lender, borrower=borrower, amount=amount, description=description, group=group)
         db.session.add(new_debt)
         db.session.commit()
         return new_debt

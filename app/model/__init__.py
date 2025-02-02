@@ -1,3 +1,3 @@
 from .debt import Debt
-from .group import Group, GroupDebt, group_members
+from .group import Group
 from .user import User
