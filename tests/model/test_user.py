@@ -7,7 +7,7 @@ from app.model.group import Group
 
 def test_create_new_user(db_session):
     """Simply creates a new user."""
-    User.create_user("user1", "password")
+    User.create("user1", "password")
 
     assert User.query.count() == 1
     assert User.query.first().username == "user1"
@@ -17,15 +17,15 @@ def test_create_duplicate_user(db_session):
     """Tries to create a user with a duplicate username.
     Unique constrain on username enforced.
     """
-    User.create_user("user1", "password")
+    User.create("user1", "password")
 
     with pytest.raises(IntegrityError):
-        User.create_user("user1", "password")
+        User.create("user1", "password")
 
 
 def test_create_user_hashes_password(db_session):
     """Creates a new user and hashes the password."""
-    User.create_user("user1", "password")
+    User.create("user1", "password")
     user = User.query.first()
 
     assert user.password != "password"
@@ -34,7 +34,7 @@ def test_create_user_hashes_password(db_session):
 
 def test_authenticate_user(db_session):
     """Creates a new user and authenticates it."""
-    User.create_user("user1", "password")
+    User.create("user1", "password")
 
     user = User.authenticate("user1", "password")
 
@@ -44,7 +44,7 @@ def test_authenticate_user(db_session):
 
 def test_get_user_by_username(db_session):
     """Creates a new user and retrieves it by username."""
-    User.create_user("user1", "password")
+    User.create("user1", "password")
 
     user = User.get_user_by_username("user1")
     non_existent_user = User.get_user_by_username("non_existent_user")
@@ -56,7 +56,7 @@ def test_get_user_by_username(db_session):
 
 def test_add_to_group(db_session):
     """Creates a new user and adds it to a group."""
-    user = User.create_user("user1", "password")
+    user = User.create("user1", "password")
     group = Group.create("group1")
 
     user.add_to_group(group)
@@ -69,7 +69,7 @@ def test_add_to_group(db_session):
 
 def test_add_to_same_group(db_session):
     """Adding a user to a group is idempotent."""
-    user = User.create_user("user1", "password")
+    user = User.create("user1", "password")
     group = Group.create("group1")
 
     user.add_to_group(group)
@@ -83,7 +83,7 @@ def test_add_to_same_group(db_session):
 
 def test_add_to_multiple_groups(db_session):
     """Adding a user to multiple groups."""
-    user = User.create_user("user1", "password")
+    user = User.create("user1", "password")
     group1 = Group.create("group1")
     group2 = Group.create("group2")
 
@@ -99,8 +99,8 @@ def test_add_to_multiple_groups(db_session):
 
 def test_add_multiple_users_to_group(db_session):
     """Adding multiple users to a group."""
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
     group = Group.create("group1")
 
     user1.add_to_group(group)

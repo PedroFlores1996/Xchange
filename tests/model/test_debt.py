@@ -7,8 +7,8 @@ from app.model.debt import Debt
 
 def test_update_new_debt(db_session):
     """Simply creates a new debt between two users."""
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
 
     Debt.update(user1, user2, 100)
 
@@ -21,8 +21,8 @@ def test_update_new_debt(db_session):
 
 def test_update_existing_debt(db_session):
     """Updates an existing debt."""
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
 
     Debt.update(user1, user2, 100)
     Debt.update(user1, user2, 50)
@@ -34,8 +34,8 @@ def test_update_existing_debt(db_session):
 
 def test_update_reverse_debt_settle_partly(db_session):
     """Updates existing debt with a reverse debt for part of the amount."""
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
 
     Debt.update(user1, user2, 100)
     Debt.update(user2, user1, 50)
@@ -47,8 +47,8 @@ def test_update_reverse_debt_settle_partly(db_session):
 
 def test_update_reverse_debt_settle(db_session):
     """Deletes existing debt by updating with a reverse debt for the exact amount."""
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
 
     Debt.update(user1, user2, 100)
     Debt.update(user2, user1, 100)
@@ -58,8 +58,8 @@ def test_update_reverse_debt_settle(db_session):
 
 def test_update_reverse_debt_overflow(db_session):
     """Deletes existing and creates new reverse debt by updating with a reverse debt for a higher amount."""
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
 
     Debt.update(user1, user2, 100)
     Debt.update(user2, user1, 150)
@@ -77,8 +77,8 @@ def test_update_group_debt(db_session):
     Updates a debt with another group between same users but reversed.
     Three separate debts are created.
     """
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
     group1 = Group.create("group1")
     group2 = Group.create("group2")
 
@@ -96,8 +96,8 @@ def test_update_group_debt_reversed_settle(db_session):
     Updates the second debt with the exact amount.
     Two separate debts are created.
     """
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
     group = Group.create("group")
 
     Debt.update(user1, user2, 100, group=group)
@@ -110,8 +110,8 @@ def test_update_unique_constraint_on_lender_borrower_and_no_group(db_session):
     """
     Creates a debt with no group.
     Unique constraint on lender, borrower, and group is enforced."""
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
 
     Debt.update(user1, user2, 100)
     with pytest.raises(IntegrityError):
@@ -123,8 +123,8 @@ def test_update_unique_constraint_on_lender_borrower_and_group(db_session):
     """
     Creates a debt with a group.
     Unique constraint on lender, borrower, and group is enforced."""
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
     group = Group.create("group")
 
     Debt.update(user1, user2, 100, group=group)

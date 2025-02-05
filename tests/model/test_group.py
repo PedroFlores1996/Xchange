@@ -36,7 +36,7 @@ def test_update_group_description(db_session):
 def test_add_user(db_session):
     """Adds a user to a group."""
     group = Group.create("group1")
-    user = User.create_user("user1", "password")
+    user = User.create("user1", "password")
 
     group.add_user(user)
 
@@ -62,7 +62,7 @@ def test_add_user(db_session):
 def test_add_user_is_idempotent(db_session):
     """Adding user to a group is idempotent."""
     group = Group.create("group1")
-    user = User.create_user("user1", "password")
+    user = User.create("user1", "password")
 
     group.add_user(user)
     group.add_user(user)
@@ -75,8 +75,8 @@ def test_add_user_is_idempotent(db_session):
 def test_add_multiple_users(db_session):
     """Adding multiple users to a group."""
     group = Group.create("group1")
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
 
     group.add_user(user1)
     group.add_user(user2)
@@ -90,7 +90,7 @@ def test_add_multiple_users(db_session):
 def test_remove_last_user(db_session):
     """Removes last user from a group and deletes group."""
     group = Group.create("group1")
-    user = User.create_user("user1", "password")
+    user = User.create("user1", "password")
 
     group.add_user(user)
     group.remove_user(user)
@@ -104,8 +104,8 @@ def test_remove_last_user(db_session):
 def test_remove_not_last_user(db_session):
     """Removes a user (not the last) from a group."""
     group = Group.create("group1")
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
 
     group.add_user(user1)
     group.add_user(user2)
@@ -122,8 +122,8 @@ def test_remove_not_last_user(db_session):
 def test_remove_user_not_in_group(db_session):
     """Remove a user that is not in the group."""
     group = Group.create("group1")
-    user1 = User.create_user("user1", "password")
-    user2 = User.create_user("user2", "password")
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
 
     group.add_user(user1)
     group.remove_user(user2)

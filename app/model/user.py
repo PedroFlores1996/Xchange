@@ -16,7 +16,7 @@ class User(db.Model, UserMixin):
     )
 
     @classmethod
-    def create_user(cls, username, password):
+    def create(cls, username, password):
         hashed_password = generate_password_hash(password)
         new_user = cls(username=username, password=hashed_password)
         db.session.add(new_user)
