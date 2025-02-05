@@ -1,5 +1,6 @@
 from app.database import db
 
+
 def setup_db(app):
     db.app = app
     db.create_all()
