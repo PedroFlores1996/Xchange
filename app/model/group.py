@@ -23,3 +23,23 @@ class Group(db.Model):
         db.session.add(new_group)
         db.session.commit()
         return new_group
+
+    def update_description(self, description):
+        self.description = description
+        db.session.commit()
+        return self
+
+    def add_user(self, user):
+        if user not in self.users:
+            self.users.append(user)
+            db.session.commit()
+        return self
+
+    def remove_user(self, user):
+        if user in self.users:
+            self.users.remove(user)
+            db.session.commit()
+        if not self.users:
+            db.session.delete(self)
+            db.session.commit()
+        return self
