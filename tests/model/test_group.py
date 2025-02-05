@@ -5,7 +5,7 @@ from app.model.user import User
 
 def test_create_new_group(db_session):
     """Simply creates a new group."""
-    Group.create_group("group1")
+    Group.create("group1")
 
     assert Group.query.count() == 1
     assert Group.query.first().name == "group1"
@@ -15,15 +15,15 @@ def test_create_duplicate_group(db_session):
     """Create a group with a duplicate name.
     Allowed.
     """
-    Group.create_group("group1")
-    Group.create_group("group1")
+    Group.create("group1")
+    Group.create("group1")
 
     assert Group.query.count() == 2
 
 
 def test_update_group_description(db_session):
     """Updates the description of a group."""
-    group = Group.create_group("group1")
+    group = Group.create("group1")
 
     assert group.description is None
 
@@ -35,7 +35,7 @@ def test_update_group_description(db_session):
 
 def test_add_user(db_session):
     """Adds a user to a group."""
-    group = Group.create_group("group1")
+    group = Group.create("group1")
     user = User.create_user("user1", "password")
 
     group.add_user(user)
@@ -61,7 +61,7 @@ def test_add_user(db_session):
 
 def test_add_user_is_idempotent(db_session):
     """Adding user to a group is idempotent."""
-    group = Group.create_group("group1")
+    group = Group.create("group1")
     user = User.create_user("user1", "password")
 
     group.add_user(user)
@@ -74,7 +74,7 @@ def test_add_user_is_idempotent(db_session):
 
 def test_add_multiple_users(db_session):
     """Adding multiple users to a group."""
-    group = Group.create_group("group1")
+    group = Group.create("group1")
     user1 = User.create_user("user1", "password")
     user2 = User.create_user("user2", "password")
 
@@ -89,7 +89,7 @@ def test_add_multiple_users(db_session):
 
 def test_remove_last_user(db_session):
     """Removes last user from a group and deletes group."""
-    group = Group.create_group("group1")
+    group = Group.create("group1")
     user = User.create_user("user1", "password")
 
     group.add_user(user)
@@ -103,7 +103,7 @@ def test_remove_last_user(db_session):
 
 def test_remove_not_last_user(db_session):
     """Removes a user (not the last) from a group."""
-    group = Group.create_group("group1")
+    group = Group.create("group1")
     user1 = User.create_user("user1", "password")
     user2 = User.create_user("user2", "password")
 
@@ -121,7 +121,7 @@ def test_remove_not_last_user(db_session):
 
 def test_remove_user_not_in_group(db_session):
     """Remove a user that is not in the group."""
-    group = Group.create_group("group1")
+    group = Group.create("group1")
     user1 = User.create_user("user1", "password")
     user2 = User.create_user("user2", "password")
 

@@ -18,7 +18,7 @@ class Group(db.Model):
     debts = db.relationship("Debt", back_populates="group")
 
     @classmethod
-    def create_group(cls, name, description=None):
+    def create(cls, name, description=None):
         new_group = cls(name=name, description=description)
         db.session.add(new_group)
         db.session.commit()

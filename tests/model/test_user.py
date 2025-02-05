@@ -57,7 +57,7 @@ def test_get_user_by_username(db_session):
 def test_add_to_group(db_session):
     """Creates a new user and adds it to a group."""
     user = User.create_user("user1", "password")
-    group = Group.create_group("group1")
+    group = Group.create("group1")
 
     user.add_to_group(group)
 
@@ -70,7 +70,7 @@ def test_add_to_group(db_session):
 def test_add_to_same_group(db_session):
     """Adding a user to a group is idempotent."""
     user = User.create_user("user1", "password")
-    group = Group.create_group("group1")
+    group = Group.create("group1")
 
     user.add_to_group(group)
     user.add_to_group(group)
@@ -84,8 +84,8 @@ def test_add_to_same_group(db_session):
 def test_add_to_multiple_groups(db_session):
     """Adding a user to multiple groups."""
     user = User.create_user("user1", "password")
-    group1 = Group.create_group("group1")
-    group2 = Group.create_group("group2")
+    group1 = Group.create("group1")
+    group2 = Group.create("group2")
 
     user.add_to_group(group1)
     user.add_to_group(group2)
@@ -101,7 +101,7 @@ def test_add_multiple_users_to_group(db_session):
     """Adding multiple users to a group."""
     user1 = User.create_user("user1", "password")
     user2 = User.create_user("user2", "password")
-    group = Group.create_group("group1")
+    group = Group.create("group1")
 
     user1.add_to_group(group)
     user2.add_to_group(group)
