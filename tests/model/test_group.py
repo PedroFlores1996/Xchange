@@ -42,21 +42,21 @@ def test_add_user(db_session):
 
     ## Check group object
     assert len(group.users) == 1
-    assert group.users[0].username == "user1"
+    assert user in group.users
 
     ## Check group database entry
     db_group = Group.query.filter_by(name="group1").first()
     assert len(db_group.users) == 1
-    assert db_group.users[0].username == "user1"
+    assert user in db_group.users
 
     ## Check user object
     assert len(user.groups) == 1
-    assert user.groups[0].name == "group1"
+    assert group in user.groups
 
     ## Check user database entry
     db_user = User.query.filter_by(username="user1").first()
     assert len(db_user.groups) == 1
-    assert db_user.groups[0].name == "group1"
+    assert group in db_user.groups
 
 
 def test_add_user_is_idempotent(db_session):
@@ -115,7 +115,7 @@ def test_remove_not_last_user(db_session):
     assert len(user1.groups) == 0
     assert len(user2.groups) == 1
     assert Group.query.count() == 1
-    assert Group.query.first().users[0] == user2
+    assert user2 in Group.query.first().users
     assert User.query.count() == 2
 
 
