@@ -38,3 +38,7 @@ class User(db.Model, UserMixin):
         if group not in self.groups:
             self.groups.append(group)
             db.session.commit()
+
+    def remove_from_group(self, group):
+        if group in self.groups:
+            group.remove_user(self)
