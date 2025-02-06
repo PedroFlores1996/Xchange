@@ -28,3 +28,10 @@ def db_session(db):
     yield db.session
     db.session.rollback()
     db.session.close()
+
+
+@pytest.fixture(scope="session")
+def client(app):
+    """Fixture to provide a test client for the Flask application."""
+    with app.test_client() as client:
+        yield client
