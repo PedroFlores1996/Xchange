@@ -6,14 +6,8 @@ from app.database import db
 from app.model.user import User
 from app.auth.forms import LoginForm, SigninForm
 
-loginManager = LoginManager()
 
 bp = Blueprint("auth", __name__)
-
-
-@loginManager.user_loader
-def load_user(id):
-    return db.session.get(User, int(id))
 
 
 def logged_out(func):
