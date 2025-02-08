@@ -33,5 +33,11 @@ def db_session(db):
 @pytest.fixture(scope="session")
 def client(app):
     """Fixture to provide a test client for the Flask application."""
-    with app.test_client() as client:
-        yield client
+    return app.test_client()
+
+
+@pytest.fixture(scope="function")
+def request_context(app):
+    """Fixture to provide a request context for each test function."""
+    with app.test_request_context():
+        yield
