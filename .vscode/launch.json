@@ -10,15 +10,9 @@
             "request": "launch",
             "module": "pytest",
             "args": [
-                "${relativeFileDirname}"
+                "${workspaceFolder}"
             ],
-            "justMyCode": true
-        },
-        {
-            "name": "Python Debugger: Current File",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
+            "justMyCode": false,
             "console": "integratedTerminal"
         }
     ]
