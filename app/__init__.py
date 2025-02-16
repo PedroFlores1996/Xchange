@@ -33,6 +33,6 @@ def create_app(config=None):
 
     from app.cli import database
 
-    app.cli.add_command(database.cli, 'database')
+    app.cli.add_command(database.cli, "database")
 
     return app

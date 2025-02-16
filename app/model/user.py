@@ -10,7 +10,9 @@ class User(db.Model, UserMixin):
     username = db.Column(String(150), unique=True, nullable=False)
     password = db.Column(String(150), nullable=False)
     groups = db.relationship("Group", secondary="group_members", back_populates="users")
-    lender_debts = db.relationship("Debt", foreign_keys="Debt.lender_id", back_populates="lender")
+    lender_debts = db.relationship(
+        "Debt", foreign_keys="Debt.lender_id", back_populates="lender"
+    )
     borrower_debts = db.relationship(
         "Debt", foreign_keys="Debt.borrower_id", back_populates="borrower"
     )

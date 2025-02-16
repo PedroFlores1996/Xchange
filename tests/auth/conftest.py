@@ -7,7 +7,11 @@ from app.model.user import User
 @pytest.fixture(scope="function")
 def csrf_token(client):
     response = client.get("/login")
-    return response.data.decode().split('name="csrf_token" type="hidden" value="')[1].split('"')[0]
+    return (
+        response.data.decode()
+        .split('name="csrf_token" type="hidden" value="')[1]
+        .split('"')[0]
+    )
 
 
 @pytest.fixture(scope="function")

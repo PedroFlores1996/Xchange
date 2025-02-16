@@ -7,19 +7,27 @@ NO_GROUP = "no-group"
 class Debt(db.Model):
     id = db.Column(Integer, primary_key=True)
     lender_id = db.Column(Integer, db.ForeignKey("user.id"), nullable=False)
-    lender = db.relationship("User", foreign_keys=[lender_id], back_populates="lender_debts")
+    lender = db.relationship(
+        "User", foreign_keys=[lender_id], back_populates="lender_debts"
+    )
     borrower_id = db.Column(Integer, db.ForeignKey("user.id"), nullable=False)
-    borrower = db.relationship("User", foreign_keys=[borrower_id], back_populates="borrower_debts")
+    borrower = db.relationship(
+        "User", foreign_keys=[borrower_id], back_populates="borrower_debts"
+    )
     amount = db.Column(Float, nullable=False)
     description = db.Column(String, nullable=True)
-    group_id = db.Column(Integer, db.ForeignKey("group.id"), nullable=True, default=NO_GROUP)
+    group_id = db.Column(
+        Integer, db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
+    )
     group = db.relationship("Group", back_populates="debts")
     __table_args__ = (db.UniqueConstraint("lender_id", "borrower_id", "group_id"),)
 
     @classmethod
     def find(cls, lender, borrower, group=None):
         return cls.query.filter_by(
-            lender_id=lender.id, borrower_id=borrower.id, group_id=group.id if group else NO_GROUP
+            lender_id=lender.id,
+            borrower_id=borrower.id,
+            group_id=group.id if group else NO_GROUP,
         ).first()
 
     @classmethod
@@ -48,7 +56,11 @@ class Debt(db.Model):
                 db.session.commit()
 
         new_debt = cls(
-            lender=lender, borrower=borrower, amount=amount, description=description, group=group
+            lender=lender,
+            borrower=borrower,
+            amount=amount,
+            description=description,
+            group=group,
         )
         db.session.add(new_debt)
         db.session.commit()

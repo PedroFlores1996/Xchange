@@ -43,7 +43,11 @@ def test_login_post_invalid_password(db_session, client, reset_login, csrf_token
 
     response = client.post(
         "/login",
-        data={"username": "user1", "password": "invalid_password", "csrf_token": csrf_token},
+        data={
+            "username": "user1",
+            "password": "invalid_password",
+            "csrf_token": csrf_token,
+        },
     )
 
     assert response.status_code == 302
@@ -51,17 +55,25 @@ def test_login_post_invalid_password(db_session, client, reset_login, csrf_token
     assert not current_user.is_authenticated
 
 
-def test_login_post_missing_csrf_token(db_session, client, reset_login, captured_templates):
-    response = client.post("/login", data={"username": "user1", "password": "password1"})
+def test_login_post_missing_csrf_token(
+    db_session, client, reset_login, captured_templates
+):
+    response = client.post(
+        "/login", data={"username": "user1", "password": "password1"}
+    )
 
     assert response.status_code == 200
     assert captured_templates[0][0].name == "auth/login.html"
     assert isinstance(captured_templates[0][1]["form"], LoginForm)
-    assert captured_templates[0][1]["form"].errors == {"csrf_token": ["The CSRF token is missing."]}
+    assert captured_templates[0][1]["form"].errors == {
+        "csrf_token": ["The CSRF token is missing."]
+    }
     assert not current_user.is_authenticated
 
 
-def test_login_invalid_form(db_session, client, reset_login, csrf_token, captured_templates):
+def test_login_invalid_form(
+    db_session, client, reset_login, csrf_token, captured_templates
+):
     response = client.post("/login", data={"csrf_token": csrf_token})
 
     assert response.status_code == 200
