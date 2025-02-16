@@ -1,19 +1,19 @@
-from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped
 from app.database import db
 
 # Association table
 group_members = db.Table(
     "group_members",
     db.metadata,
-    db.Column("user_id", Integer, db.ForeignKey("user.id"), primary_key=True),
-    db.Column("group_id", Integer, db.ForeignKey("group.id"), primary_key=True),
+    db.Column("user_id", db.ForeignKey("user.id"), primary_key=True),
+    db.Column("group_id", db.ForeignKey("group.id"), primary_key=True),
 )
 
 
 class Group(db.Model):
-    id = db.Column(Integer, primary_key=True)
-    name = db.Column(String, nullable=False)
-    description = db.Column(String, nullable=True)
+    id: Mapped[int] = db.mapped_column(primary_key=True)
+    name: Mapped[str] = db.mapped_column(nullable=False)
+    description: Mapped[str] = db.mapped_column(nullable=True)
     users = db.relationship("User", secondary=group_members, back_populates="groups")
     debts = db.relationship("Debt", back_populates="group")
 

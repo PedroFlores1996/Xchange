@@ -1,23 +1,25 @@
-from sqlalchemy import Integer, String, Float
+from sqlalchemy.orm import Mapped
 from app.database import db
 
 NO_GROUP = "no-group"
 
 
 class Debt(db.Model):
-    id = db.Column(Integer, primary_key=True)
-    lender_id = db.Column(Integer, db.ForeignKey("user.id"), nullable=False)
+    id: Mapped[int] = db.mapped_column(primary_key=True)
+    lender_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=False)
     lender = db.relationship(
         "User", foreign_keys=[lender_id], back_populates="lender_debts"
     )
-    borrower_id = db.Column(Integer, db.ForeignKey("user.id"), nullable=False)
+    borrower_id: Mapped[int] = db.mapped_column(
+        db.ForeignKey("user.id"), nullable=False
+    )
     borrower = db.relationship(
         "User", foreign_keys=[borrower_id], back_populates="borrower_debts"
     )
-    amount = db.Column(Float, nullable=False)
-    description = db.Column(String, nullable=True)
-    group_id = db.Column(
-        Integer, db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
+    amount: Mapped[float] = db.mapped_column(nullable=False)
+    description: Mapped[str] = db.mapped_column(nullable=True)
+    group_id: Mapped[int] = db.mapped_column(
+        db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
     )
     group = db.relationship("Group", back_populates="debts")
     __table_args__ = (db.UniqueConstraint("lender_id", "borrower_id", "group_id"),)

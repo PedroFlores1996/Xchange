@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
@@ -6,9 +6,9 @@ from app.database import db
 
 
 class User(db.Model, UserMixin):
-    id = db.Column(Integer, primary_key=True)
-    username = db.Column(String(150), unique=True, nullable=False)
-    password = db.Column(String(150), nullable=False)
+    id: Mapped[int] = db.mapped_column(primary_key=True)
+    username: Mapped[str] = db.mapped_column(unique=True, nullable=False)
+    password: Mapped[str] = db.mapped_column(nullable=False)
     groups = db.relationship("Group", secondary="group_members", back_populates="users")
     lender_debts = db.relationship(
         "Debt", foreign_keys="Debt.lender_id", back_populates="lender"
