@@ -27,8 +27,12 @@ def create_app(config=None):
 
     app.register_blueprint(auth_bp)
 
-    from app.index import bp as index_bp
+    from app.index.views import bp as index_bp
 
     app.register_blueprint(index_bp)
+
+    from app.cli import database
+
+    app.cli.add_command(database.cli, 'database')
 
     return app
