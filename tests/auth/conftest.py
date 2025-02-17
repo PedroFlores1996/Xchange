@@ -1,6 +1,6 @@
 import pytest
 from flask import template_rendered
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_user, logout_user, current_user  #
 from app.model.user import User
 
 

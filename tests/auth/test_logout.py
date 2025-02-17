@@ -1,5 +1,5 @@
 from flask import url_for
-from flask_login import current_user
+from flask_login import current_user  #
 
 
 def test_logout_authenticated_user(client, login_before):
