@@ -32,7 +32,9 @@ class Debt(db.Model):  # type: ignore
     __table_args__ = (db.UniqueConstraint("lender_id", "borrower_id", "group_id"),)
 
     @classmethod
-    def find(cls, lender, borrower, group=None):
+    def find(
+        cls, lender: User, borrower: User, group: Group | None = None
+    ) -> Debt | None:
         return cls.query.filter_by(
             lender_id=lender.id,
             borrower_id=borrower.id,
@@ -40,11 +42,20 @@ class Debt(db.Model):  # type: ignore
         ).first()
 
     @classmethod
-    def __find_reversed(cls, lender, borrower, group=None):
+    def __find_reversed(
+        cls, lender: User, borrower: User, group: Group | None = None
+    ) -> Debt | None:
         return cls.find(borrower, lender, group)
 
     @classmethod
-    def update(cls, lender, borrower, amount, description=None, group=None):
+    def update(
+        cls,
+        lender: User,
+        borrower: User,
+        amount: float,
+        description: str | None = None,
+        group: Group | None = None,
+    ) -> None:
         if existing_debt := cls.find(lender, borrower, group):
             existing_debt.amount += amount
             db.session.commit()

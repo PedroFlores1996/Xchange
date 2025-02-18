@@ -28,24 +28,24 @@ class Group(db.Model):  # type: ignore
     debts: Mapped[List[Debt]] = relationship(back_populates="group")
 
     @classmethod
-    def create(cls, name, description=None):
+    def create(cls, name: str, description: str | None = None) -> Group:
         new_group = cls(name=name, description=description)
         db.session.add(new_group)
         db.session.commit()
         return new_group
 
-    def update_description(self, description):
+    def update_description(self, description: str) -> Group:
         self.description = description
         db.session.commit()
         return self
 
-    def add_user(self, user):
+    def add_user(self, user: User) -> Group:
         if user not in self.users:
             self.users.append(user)
             db.session.commit()
         return self
 
-    def remove_user(self, user: User):
+    def remove_user(self, user: User) -> Group:
         if user in self.users:
             self.users.remove(user)
             db.session.commit()
