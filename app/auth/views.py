@@ -31,7 +31,7 @@ def login() -> str | Response:
     form = LoginForm()
     if form.validate_on_submit():
         next: str | None = request.args.get("next")
-        if user := User.authenticate(form.username.data, form.password.data):  # type: ignore
+        if user := User.authenticate(form.username.data, form.password.data):  # type: ignore # form data is valid at this point
             login_user(user, remember=form.remember_me.data)
             return redirect(next or url_for("index.home_page"))
         else:
@@ -46,8 +46,8 @@ def signin() -> str | Response:
     form = SigninForm()
     if form.validate_on_submit():
         # Add signin logic here
-        if not User.get_user_by_username(form.username.data):  # type: ignore
-            new_user = User.create(form.username.data, form.password.data)  # type: ignore
+        if not User.get_user_by_username(form.username.data):  # type: ignore # form data is valid at this point
+            new_user = User.create(form.username.data, form.password.data)  # type: ignore # form data is valid at this point
             login_user(new_user, remember=form.remember_me.data)
             return redirect(url_for("index.home_page"))
         else:
