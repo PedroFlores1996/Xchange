@@ -10,7 +10,7 @@ group_members = db.Table(
 )
 
 
-class Group(db.Model):
+class Group(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     name: Mapped[str] = db.mapped_column(nullable=False)
     description: Mapped[str] = db.mapped_column(nullable=True)

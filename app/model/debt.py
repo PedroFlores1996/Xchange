@@ -4,7 +4,7 @@ from app.database import db
 NO_GROUP = "no-group"
 
 
-class Debt(db.Model):
+class Debt(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     lender_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=False)
     lender = db.relationship(
