@@ -1,5 +1,13 @@
-from sqlalchemy.orm import Mapped
+from __future__ import annotations
+from typing import TYPE_CHECKING, List
+
+if TYPE_CHECKING:
+    from app.model.user import User
+    from app.model.debt import Debt
+
+from sqlalchemy.orm import Mapped, relationship
 from app.database import db
+
 
 # Association table
 group_members = db.Table(
@@ -14,8 +22,10 @@ class Group(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     name: Mapped[str] = db.mapped_column(nullable=False)
     description: Mapped[str] = db.mapped_column(nullable=True)
-    users = db.relationship("User", secondary=group_members, back_populates="groups")
-    debts = db.relationship("Debt", back_populates="group")
+    users: Mapped[List[User]] = relationship(
+        secondary=group_members, back_populates="groups"
+    )
+    debts: Mapped[List[Debt]] = relationship(back_populates="group")
 
     @classmethod
     def create(cls, name, description=None):
@@ -35,7 +45,7 @@ class Group(db.Model):  # type: ignore
             db.session.commit()
         return self
 
-    def remove_user(self, user):
+    def remove_user(self, user: User):
         if user in self.users:
             self.users.remove(user)
             db.session.commit()

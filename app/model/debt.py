@@ -1,4 +1,11 @@
-from sqlalchemy.orm import Mapped
+from __future__ import annotations
+from typing import TYPE_CHECKING, Self, List
+
+if TYPE_CHECKING:
+    from app.model.user import User
+    from app.model.group import Group
+
+from sqlalchemy.orm import Mapped, relationship
 from app.database import db
 
 NO_GROUP = "no-group"
@@ -7,21 +14,21 @@ NO_GROUP = "no-group"
 class Debt(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     lender_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=False)
-    lender = db.relationship(
+    lender: Mapped[User] = relationship(
         "User", foreign_keys=[lender_id], back_populates="lender_debts"
     )
     borrower_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("user.id"), nullable=False
     )
-    borrower = db.relationship(
-        "User", foreign_keys=[borrower_id], back_populates="borrower_debts"
+    borrower: Mapped[User] = relationship(
+        foreign_keys=[borrower_id], back_populates="borrower_debts"
     )
     amount: Mapped[float] = db.mapped_column(nullable=False)
     description: Mapped[str] = db.mapped_column(nullable=True)
     group_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
     )
-    group = db.relationship("Group", back_populates="debts")
+    group: Mapped[Group] = relationship("Group", back_populates="debts")
     __table_args__ = (db.UniqueConstraint("lender_id", "borrower_id", "group_id"),)
 
     @classmethod

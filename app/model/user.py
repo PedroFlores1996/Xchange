@@ -1,6 +1,11 @@
-from typing import Self
+from __future__ import annotations
+from typing import TYPE_CHECKING, Self, List
 
-from sqlalchemy.orm import Mapped
+if TYPE_CHECKING:
+    from app.model.group import Group
+    from app.model.debt import Debt
+
+from sqlalchemy.orm import Mapped, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
@@ -12,12 +17,14 @@ class User(db.Model, UserMixin):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     username: Mapped[str] = db.mapped_column(unique=True, nullable=False)
     password: Mapped[str] = db.mapped_column(nullable=False)
-    groups = db.relationship("Group", secondary="group_members", back_populates="users")
-    lender_debts = db.relationship(
-        "Debt", foreign_keys="Debt.lender_id", back_populates="lender"
+    groups: Mapped[List[Group]] = relationship(
+        secondary="group_members", back_populates="users"
     )
-    borrower_debts = db.relationship(
-        "Debt", foreign_keys="Debt.borrower_id", back_populates="borrower"
+    lender_debts: Mapped[List[Debt]] = relationship(
+        foreign_keys="Debt.lender_id", back_populates="lender"
+    )
+    borrower_debts: Mapped[List[Debt]] = relationship(
+        foreign_keys="Debt.borrower_id", back_populates="borrower"
     )
 
     @classmethod
@@ -39,11 +46,11 @@ class User(db.Model, UserMixin):  # type: ignore
     def get_user_by_username(cls, username: str) -> Self | None:
         return cls.query.filter_by(username=username).first()
 
-    def add_to_group(self, group):
+    def add_to_group(self, group: Group) -> None:
         if group not in self.groups:
             self.groups.append(group)
             db.session.commit()
 
-    def remove_from_group(self, group):
+    def remove_from_group(self, group: Group) -> None:
         if group in self.groups:
             group.remove_user(self)
