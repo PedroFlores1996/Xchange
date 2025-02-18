@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Self, List
+from typing import TYPE_CHECKING, Self
 
 if TYPE_CHECKING:
     from app.model.user import User
@@ -34,7 +34,7 @@ class Debt(db.Model):  # type: ignore
     @classmethod
     def find(
         cls, lender: User, borrower: User, group: Group | None = None
-    ) -> Debt | None:
+    ) -> Self | None:
         return cls.query.filter_by(
             lender_id=lender.id,
             borrower_id=borrower.id,
@@ -44,7 +44,7 @@ class Debt(db.Model):  # type: ignore
     @classmethod
     def __find_reversed(
         cls, lender: User, borrower: User, group: Group | None = None
-    ) -> Debt | None:
+    ) -> Self | None:
         return cls.find(borrower, lender, group)
 
     @classmethod
