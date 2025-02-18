@@ -39,7 +39,7 @@ def test_authenticate_user(db_session):
     user = User.authenticate("user1", "password")
 
     assert user.username == "user1"
-    assert User.authenticate("user1", "wrong_password") is False
+    assert User.authenticate("user1", "wrong_password") is None
 
 
 def test_get_user_by_username(db_session):

@@ -31,7 +31,7 @@ class User(db.Model, UserMixin):
         user = cls.get_user_by_username(username)
         if user and check_password_hash(user.password, password):
             return user
-        return False
+        return None
 
     @classmethod
     def get_user_by_username(cls, username):
