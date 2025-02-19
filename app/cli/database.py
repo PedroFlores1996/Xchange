@@ -15,7 +15,7 @@ def is_db_empty() -> bool:
     )
 
 
-@cli.command("create_tables")
+@cli.command("create-tables")
 def create_tables() -> None:
     """Create all database tables."""
     if is_db_empty():

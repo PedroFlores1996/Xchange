@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Self, List
 if TYPE_CHECKING:
     from app.model.group import Group
     from app.model.debt import Debt
+    from app.model.balance import Balance
 
 from sqlalchemy.orm import Mapped, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -26,6 +27,7 @@ class User(db.Model, UserMixin):  # type: ignore
     borrower_debts: Mapped[List[Debt]] = relationship(
         foreign_keys="Debt.borrower_id", back_populates="borrower"
     )
+    balances: Mapped[List[Balance]] = relationship(back_populates="user")
 
     @classmethod
     def create(cls, username: str, password: str) -> Self:

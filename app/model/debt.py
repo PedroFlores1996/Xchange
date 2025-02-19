@@ -15,7 +15,7 @@ class Debt(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     lender_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=False)
     lender: Mapped[User] = relationship(
-        "User", foreign_keys=[lender_id], back_populates="lender_debts"
+        foreign_keys=[lender_id], back_populates="lender_debts"
     )
     borrower_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("user.id"), nullable=False
@@ -28,7 +28,7 @@ class Debt(db.Model):  # type: ignore
     group_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
     )
-    group: Mapped[Group] = relationship("Group", back_populates="debts")
+    group: Mapped[Group] = relationship(back_populates="debts")
     __table_args__ = (db.UniqueConstraint("lender_id", "borrower_id", "group_id"),)
 
     @classmethod

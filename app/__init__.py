@@ -1,22 +1,21 @@
 from flask import Flask
-from flask_migrate import Migrate
 
 from app.config import Config
 
 
 def create_app(config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
 
     if config is None:
         app.config.from_object(Config)
     else:
         app.config.from_object(config)
 
-    from app.database import db
+    from app.database import db, migrate
 
     db.init_app(app)
-    app.migrate = Migrate(app, db)
+    migrate.init_app(app, db)
 
     from app.auth import loginManager
 
