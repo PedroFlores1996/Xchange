@@ -12,23 +12,24 @@ from app.database import db
 class Balance(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     user_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=False)
-    user: Mapped[User] = relationship(back_populates="balances")
+    user: Mapped[User] = relationship()
     expense_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("expense.id"), nullable=False
     )
-    expense: Mapped[Expense] = relationship(back_populates="balances")
-    owed_amount: Mapped[float] = db.mapped_column(nullable=False)
+    borrowed_amount: Mapped[float] = db.mapped_column(nullable=False)
     lent_amount: Mapped[float] = db.mapped_column(nullable=False)
     total_amount: Mapped[float] = db.mapped_column(nullable=False)
-    positive: Mapped[bool] = db.mapped_column(nullable=False)
-    __table_args__ = (db.UniqueConstraint("user_id", "expense_id", "positive"),)
+    __table_args__ = (db.UniqueConstraint("user_id", "expense_id"),)
 
-    def create(cls, user: User, expense: Expense, amount: float) -> Self:
+    def create(
+        cls, user: User, expense: Expense, borrowed_amount: float, lent_amount: float
+    ) -> Self:
         new_balance = cls(
             user=user,
             expense=expense,
-            amount=amount,
-            positive=True if amount > 0 else False,
+            borrowed_amount=borrowed_amount,
+            lent_amount=lent_amount,
+            total_amount=lent_amount - borrowed_amount,
         )
         db.session.add(new_balance)
         db.session.commit()
