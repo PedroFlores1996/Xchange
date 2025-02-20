@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from app.model.user import User
     from app.model.debt import Debt
+    from app.model.expense import Expense
 
 from sqlalchemy.orm import Mapped, relationship
 from app.database import db
@@ -26,6 +27,7 @@ class Group(db.Model):  # type: ignore
         secondary=group_members, back_populates="groups"
     )
     debts: Mapped[List[Debt]] = relationship(back_populates="group")
+    expenses: Mapped[List[Expense]] = relationship(back_populates="group")
 
     @classmethod
     def create(cls, name: str, description: str | None = None) -> Group:
