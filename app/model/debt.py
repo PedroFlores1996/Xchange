@@ -7,8 +7,7 @@ if TYPE_CHECKING:
 
 from sqlalchemy.orm import Mapped, relationship
 from app.database import db
-
-NO_GROUP = "no-group"
+from app.model.constants import NO_GROUP
 
 
 class Debt(db.Model):  # type: ignore
