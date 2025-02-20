@@ -6,14 +6,15 @@ if TYPE_CHECKING:
     from app.model.balance import Balance
     from app.model.group import Group
 
+from enum import Enum
 from datetime import datetime
 from sqlalchemy.orm import Mapped, relationship
 
 from app.database import db
-from enum import Enum
+from app.model.constants import NO_GROUP
 
 
-class ExpenseType(Enum):
+class ExpenseCategory(Enum):
     ACCOMMODATION = "accommodation"
     DRINKS = "drinks"
     ENTERTAINMENT = "entertainment"
@@ -29,7 +30,7 @@ class Expense(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     amount: Mapped[float] = db.mapped_column(nullable=False)
     description: Mapped[str] = db.mapped_column(nullable=False)
-    type: Mapped[ExpenseType] = db.mapped_column(nullable=True)
+    category: Mapped[ExpenseCategory] = db.mapped_column(nullable=True)
     balances: Mapped[List[Balance]] = relationship()
     group_id: Mapped[int] = db.mapped_column(db.ForeignKey("group.id"), nullable=False)
     group: Mapped[Group] = relationship(back_populates="expenses")
