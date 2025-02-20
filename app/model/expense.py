@@ -42,3 +42,23 @@ class Expense(db.Model):  # type: ignore
     updater_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=True)
     updater: Mapped[User] = relationship(foreign_keys=[updater_id])
     updated_at: Mapped[datetime] = db.mapped_column(onupdate=datetime.now())
+
+    @classmethod
+    def create(
+        cls,
+        amount: float,
+        balances: List[Balance],
+        creator: User,
+        group: Group = None,
+        description: str | None = None,
+        category: ExpenseCategory | None = None,
+    ) -> Self:
+        return cls(
+            amount=amount,
+            balances=balances,
+            creator=creator,
+            group=group,
+            description=description,
+            category=category,
+            updater=creator,
+        )

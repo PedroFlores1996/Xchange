@@ -21,6 +21,7 @@ class Balance(db.Model):  # type: ignore
     total_amount: Mapped[float] = db.mapped_column(nullable=False)
     __table_args__ = (db.UniqueConstraint("user_id", "expense_id"),)
 
+    @classmethod
     def create(
         cls, user: User, expense: Expense, borrowed_amount: float, lent_amount: float
     ) -> Self:
