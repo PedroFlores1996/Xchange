@@ -14,8 +14,8 @@ def test_update_new_debt(db_session):
 
     assert Debt.query.count() == 1
     debt = Debt.find(user1, user2)
-    assert debt.lender == user1
-    assert debt.borrower == user2
+    assert debt.lender is user1
+    assert debt.borrower is user2
     assert debt.amount == 100
 
 
@@ -66,7 +66,7 @@ def test_update_reverse_debt_overflow(db_session):
 
     assert Debt.query.count() == 1
     debt12 = Debt.find(user1, user2)
-    assert debt12 == None
+    assert debt12 is None
     debt21 = Debt.find(user2, user1)
     assert debt21.amount == 50
 
