@@ -31,7 +31,7 @@ class Expense(db.Model):  # type: ignore
     amount: Mapped[float] = db.mapped_column(nullable=False)
     description: Mapped[str] = db.mapped_column(nullable=False)
     category: Mapped[ExpenseCategory] = db.mapped_column(nullable=True)
-    balances: Mapped[List[Balance]] = relationship()
+    balances: Mapped[List[Balance]] = relationship(back_populates="expense")
     group_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("group.id"), nullable=False, default=NO_GROUP
     )
@@ -41,24 +41,28 @@ class Expense(db.Model):  # type: ignore
     created_at: Mapped[datetime] = db.mapped_column(default=datetime.now())
     updater_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=True)
     updater: Mapped[User] = relationship(foreign_keys=[updater_id])
-    updated_at: Mapped[datetime] = db.mapped_column(onupdate=datetime.now())
+    updated_at: Mapped[datetime] = db.mapped_column(
+        onupdate=datetime.now(), nullable=True
+    )
 
     @classmethod
     def create(
         cls,
         amount: float,
-        balances: List[Balance],
         creator: User,
-        group: Group = None,
+        balances: List[Balance],
+        group: Group | None = None,
         description: str | None = None,
         category: ExpenseCategory | None = None,
     ) -> Self:
-        return cls(
+        expense = cls(
             amount=amount,
-            balances=balances,
             creator=creator,
+            balances=balances,
             group=group,
             description=description,
             category=category,
-            updater=creator,
         )
+        db.session.add(expense)
+        db.session.commit()
+        return expense
