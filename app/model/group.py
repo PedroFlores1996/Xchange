@@ -30,8 +30,12 @@ class Group(db.Model):  # type: ignore
     expenses: Mapped[List[Expense]] = relationship(back_populates="group")
 
     @classmethod
-    def create(cls, name: str, description: str | None = None) -> Group:
-        new_group = cls(name=name, description=description)
+    def create(
+        cls, name: str, users: List[User], description: str | None = None
+    ) -> Group:
+        if not users:
+            raise ValueError("The users list cannot be empty.")
+        new_group = cls(name=name, users=users, description=description)
         db.session.add(new_group)
         db.session.commit()
         return new_group

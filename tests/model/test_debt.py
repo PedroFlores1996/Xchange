@@ -79,8 +79,8 @@ def test_update_group_debt(db_session):
     """
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
-    group1 = Group.create("group1")
-    group2 = Group.create("group2")
+    group1 = Group.create("group1", [user1])
+    group2 = Group.create("group2", [user1])
 
     Debt.update(user1, user2, 100)
     Debt.update(user1, user2, 100, group=group1)
@@ -98,7 +98,7 @@ def test_update_group_debt_reversed_settle(db_session):
     """
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
-    group = Group.create("group")
+    group = Group.create("group", [user1])
 
     Debt.update(user1, user2, 100, group=group)
     Debt.update(user2, user1, 100, group=group)
@@ -125,7 +125,7 @@ def test_update_unique_constraint_on_lender_borrower_and_group(db_session):
     Unique constraint on lender, borrower, and group is enforced."""
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
-    group = Group.create("group")
+    group = Group.create("group", [user1])
 
     Debt.update(user1, user2, 100, group=group)
     with pytest.raises(IntegrityError):

@@ -54,78 +54,89 @@ def test_get_user_by_username(db_session):
     assert non_existent_user is None
 
 
-def test_add_to_group(db_session):
+def test_add_to_group(db_session, group_creator):
     """Creates a new user and adds it to a group."""
     user = User.create("user1", "password")
-    group = Group.create("group1")
+    group = Group.create("group1", [group_creator])
 
     user.add_to_group(group)
 
     # Check objects
     assert user.groups == [group]
-    assert group.users == [user]
+    assert group.users == [group_creator, user]
 
     # Check database entries
     assert User.query.filter_by(username="user1").first().groups == [group]
-    assert Group.query.filter_by(name="group1").first().users == [user]
+    assert Group.query.filter_by(name="group1").first().users == [group_creator, user]
 
 
-def test_add_to_same_group(db_session):
+def test_add_to_same_group(db_session, group_creator):
     """Adding a user to a group is idempotent."""
     user = User.create("user1", "password")
-    group = Group.create("group1")
+    group = Group.create("group1", [group_creator])
 
     user.add_to_group(group)
     user.add_to_group(group)
 
     assert user.groups == [group]
-    assert group.users == [user]
-    assert User.query.count() == 1
+    assert group.users == [group_creator, user]
+    assert User.query.count() == 2
     assert Group.query.count() == 1
 
 
-def test_add_to_multiple_groups(db_session):
+def test_add_to_multiple_groups(db_session, group_creator):
     """Adding a user to multiple groups."""
     user = User.create("user1", "password")
-    group1 = Group.create("group1")
-    group2 = Group.create("group2")
+    group1 = Group.create("group1", [group_creator])
+    group2 = Group.create("group2", [group_creator])
 
     user.add_to_group(group1)
     user.add_to_group(group2)
 
     assert user.groups == [group1, group2]
-    assert group1.users == [user]
-    assert group2.users == [user]
-    assert User.query.count() == 1
+    assert group1.users == [group_creator, user]
+    assert group2.users == [group_creator, user]
+    assert User.query.count() == 2
     assert Group.query.count() == 2
 
 
-def test_add_multiple_users_to_group(db_session):
+def test_add_multiple_users_to_group(db_session, group_creator):
     """Adding multiple users to a group."""
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
-    group = Group.create("group1")
+    group = Group.create("group1", [group_creator])
 
     user1.add_to_group(group)
     user2.add_to_group(group)
 
     assert user1.groups == [group]
     assert user2.groups == [group]
-    assert group.users == [user1, user2]
-    assert User.query.count() == 2
+    assert group.users == [group_creator, user1, user2]
+    assert User.query.count() == 3
     assert Group.query.count() == 1
 
 
-def test_remove_from_group_last_user(db_session):
+def test_remove_from_group_last_user(db_session, group_creator):
     """Creates a new user and removes it from a group."""
-    user = User.create("user1", "password")
-    group = Group.create("group1")
+    group = Group.create("group1", [group_creator])
 
-    user.add_to_group(group)
-    user.remove_from_group(group)
+    group_creator.remove_from_group(group)
 
-    assert group not in user.groups
-    assert user not in group.users
+    assert group not in group_creator.groups
+    assert group_creator not in group.users
+    assert User.query.count() == 1
+    assert Group.query.count() == 0
+
+
+def test_remove_from_group_last_user_idempotent(db_session, group_creator):
+    """Creates a new user and removes it from a group."""
+    group = Group.create("group1", [group_creator])
+
+    group_creator.remove_from_group(group)
+    group_creator.remove_from_group(group)
+
+    assert group_creator not in group.users
+    assert group not in group_creator.groups
     assert User.query.count() == 1
     assert Group.query.count() == 0
 
@@ -134,9 +145,8 @@ def test_remove_from_group_not_last_user(db_session):
     """Creates a new user and removes it from a group."""
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
-    group = Group.create("group1")
+    group = Group.create("group1", [user1])
 
-    user1.add_to_group(group)
     user2.add_to_group(group)
     user1.remove_from_group(group)
 
@@ -148,10 +158,10 @@ def test_remove_from_group_not_last_user(db_session):
     assert Group.query.count() == 1
 
 
-def test_remove_from_group_idempotent(db_session):
+def test_remove_from_group_not_last_user_idempotent(db_session, group_creator):
     """Creates a new user and removes it from a group."""
     user = User.create("user1", "password")
-    group = Group.create("group1")
+    group = Group.create("group1", [group_creator])
 
     user.add_to_group(group)
     user.remove_from_group(group)
@@ -159,3 +169,5 @@ def test_remove_from_group_idempotent(db_session):
 
     assert group not in user.groups
     assert user not in group.users
+    assert User.query.count() == 2
+    assert Group.query.count() == 1
