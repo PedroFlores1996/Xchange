@@ -16,22 +16,18 @@ class Balance(db.Model):  # type: ignore
     expense_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("expense.id"), nullable=False
     )
-    borrowed_amount: Mapped[float] = db.mapped_column(nullable=False)
-    lent_amount: Mapped[float] = db.mapped_column(nullable=False)
+    expense: Mapped[Expense] = relationship(back_populates="balances")
+    owed_amount: Mapped[float] = db.mapped_column(nullable=False)
+    payed_amount: Mapped[float] = db.mapped_column(nullable=False)
     total_amount: Mapped[float] = db.mapped_column(nullable=False)
     __table_args__ = (db.UniqueConstraint("user_id", "expense_id"),)
 
     @classmethod
-    def create(
-        cls, user: User, expense: Expense, borrowed_amount: float, lent_amount: float
-    ) -> Self:
+    def create(cls, user: User, owed_amount: float, payed_amount: float) -> Self:
         new_balance = cls(
             user=user,
-            expense=expense,
-            borrowed_amount=borrowed_amount,
-            lent_amount=lent_amount,
-            total_amount=lent_amount - borrowed_amount,
+            owed_amount=owed_amount,
+            payed_amount=payed_amount,
+            total_amount=payed_amount - owed_amount,
         )
-        db.session.add(new_balance)
-        db.session.commit()
         return new_balance
