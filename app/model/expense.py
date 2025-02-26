@@ -29,9 +29,11 @@ class ExpenseCategory(Enum):
 class Expense(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     amount: Mapped[float] = db.mapped_column(nullable=False)
-    description: Mapped[str] = db.mapped_column(nullable=False)
-    category: Mapped[ExpenseCategory] = db.mapped_column(nullable=True)
     balances: Mapped[List[Balance]] = relationship(back_populates="expense")
+    description: Mapped[str] = db.mapped_column(nullable=True)
+    category: Mapped[ExpenseCategory] = db.mapped_column(
+        nullable=True, default=ExpenseCategory.OTHER
+    )
     group_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
     )
@@ -49,16 +51,16 @@ class Expense(db.Model):  # type: ignore
     def create(
         cls,
         amount: float,
-        creator: User,
         balances: List[Balance],
+        creator: User,
         group: Group | None = None,
         description: str | None = None,
         category: ExpenseCategory | None = None,
     ) -> Self:
         expense = cls(
             amount=amount,
-            creator=creator,
             balances=balances,
+            creator=creator,
             group=group,
             description=description,
             category=category,
