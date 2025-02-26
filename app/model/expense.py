@@ -33,7 +33,7 @@ class Expense(db.Model):  # type: ignore
     category: Mapped[ExpenseCategory] = db.mapped_column(nullable=True)
     balances: Mapped[List[Balance]] = relationship(back_populates="expense")
     group_id: Mapped[int] = db.mapped_column(
-        db.ForeignKey("group.id"), nullable=False, default=NO_GROUP
+        db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
     )
     group: Mapped[Group] = relationship(back_populates="expenses")
     creator_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=False)
@@ -64,5 +64,5 @@ class Expense(db.Model):  # type: ignore
             category=category,
         )
         db.session.add(expense)
-        db.session.commit()
+        db.session.flush()
         return expense
