@@ -99,8 +99,7 @@ def test_add_multiple_users(db_session, group_creator):
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
 
-    group.add_user(user1)
-    group.add_user(user2)
+    group.add_users([user1, user2])
 
     assert len(group.users) == 3
     assert len(user1.groups) == 1

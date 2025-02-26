@@ -51,6 +51,11 @@ class Group(db.Model):  # type: ignore
             db.session.commit()
         return self
 
+    def add_users(self, users: List[User]) -> Group:
+        for user in users:
+            self.add_user(user)
+        return self
+
     def remove_user(self, user: User) -> Group:
         if user in self.users:
             self.users.remove(user)
