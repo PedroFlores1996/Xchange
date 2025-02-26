@@ -57,22 +57,22 @@ class Debt(db.Model):  # type: ignore
     ) -> None:
         if existing_debt := cls.find(lender, borrower, group):
             existing_debt.amount += amount
-            db.session.commit()
+            db.session.flush()
             return
 
         if reverse_debt := cls.__find_reversed(lender, borrower, group):
             if reverse_debt.amount == amount:
                 db.session.delete(reverse_debt)
-                db.session.commit()
+                db.session.flush()
                 return
             elif reverse_debt.amount > amount:
                 reverse_debt.amount -= amount
-                db.session.commit()
+                db.session.flush()
                 return
             else:
                 amount -= reverse_debt.amount
                 db.session.delete(reverse_debt)
-                db.session.commit()
+                db.session.flush()
 
         new_debt = cls(
             lender=lender,
@@ -82,5 +82,5 @@ class Debt(db.Model):  # type: ignore
             group=group,
         )
         db.session.add(new_debt)
-        db.session.commit()
+        db.session.flush()
         return
