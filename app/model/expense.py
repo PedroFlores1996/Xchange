@@ -15,15 +15,15 @@ from app.model.constants import NO_GROUP
 
 
 class ExpenseCategory(Enum):
-    ACCOMMODATION = "accommodation"
-    DRINKS = "drinks"
-    ENTERTAINMENT = "entertainment"
-    FOOD = "food"
-    GAS = "gas"
-    GROCERIES = "groceries"
-    OTHER = "other"
-    TICKETS = "tickets"
-    UTILITIES = "utilities"
+    ACCOMMODATION = "Accommodation"
+    DRINKS = "Drinks"
+    ENTERTAINMENT = "Entertainment"
+    FOOD = "Food"
+    GAS = "Gas"
+    GROCERIES = "Groceries"
+    OTHER = "Other"
+    TICKETS = "Tickets"
+    UTILITIES = "Utilities"
 
 
 class Expense(db.Model):  # type: ignore
