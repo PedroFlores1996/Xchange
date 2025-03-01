@@ -8,10 +8,7 @@ def test_single_payer_that_does_not_owe():
 
     balances = split(TOTAL_AMOUNT, payers, owers)
 
-    assert len(balances.items()) == 5
-    assert balances[id1] == TOTAL_AMOUNT
-    for ower in owers:
-        assert balances[ower] == -TOTAL_AMOUNT / len(owers)
+    validate_balances(payers, owers, balances)
 
 
 def test_single_payer_that_owes():
@@ -20,11 +17,7 @@ def test_single_payer_that_owes():
 
     balances = split(TOTAL_AMOUNT, payers, owers)
 
-    assert len(balances.items()) == 5
-    assert balances[id1] == TOTAL_AMOUNT - TOTAL_AMOUNT / len(owers)
-    for ower in owers:
-        if ower not in payers:
-            assert balances[ower] == -TOTAL_AMOUNT / len(owers)
+    validate_balances(payers, owers, balances)
 
 
 def test_multiple_payers_that_do_not_owe():
@@ -33,11 +26,7 @@ def test_multiple_payers_that_do_not_owe():
 
     balances = split(TOTAL_AMOUNT, payers, owers)
 
-    assert len(balances.items()) == 5
-    for payer in payers:
-        assert balances[payer] == TOTAL_AMOUNT / len(payers)
-    for ower in owers:
-        assert balances[ower] == -TOTAL_AMOUNT / len(owers)
+    validate_balances(payers, owers, balances)
 
 
 def test_multiple_payers_that_owe():
@@ -46,9 +35,20 @@ def test_multiple_payers_that_owe():
 
     balances = split(TOTAL_AMOUNT, payers, owers)
 
+    validate_balances(payers, owers, balances)
+
+
+def validate_balances(payers, owers, balances):
     assert len(balances.items()) == 5
     for payer in payers:
-        assert balances[payer] == TOTAL_AMOUNT / len(payers) - TOTAL_AMOUNT / len(owers)
+        owed = TOTAL_AMOUNT / len(owers) if payer in owers else 0
+        payed = TOTAL_AMOUNT / len(payers)
+        assert balances[payer]["owed"] == owed
+        assert balances[payer]["payed"] == payed
+        assert balances[payer]["total"] == payed - owed
     for ower in owers:
-        if ower not in payers:
-            assert balances[ower] == -TOTAL_AMOUNT / len(owers)
+        owed = TOTAL_AMOUNT / len(owers)
+        payed = TOTAL_AMOUNT / len(payers) if ower in payers else 0
+        assert balances[ower]["owed"] == owed
+        assert balances[ower]["payed"] == payed
+        assert balances[ower]["total"] == payed - owed
