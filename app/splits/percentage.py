@@ -1,22 +1,15 @@
-def single_payer(
-    total_amount: float, payer_id: int, owed_percentages: dict[int, float]
+def split(
+    total_amount: float, payers: dict[int, float], owers: dict[int, float]
 ) -> dict[int, float]:
-
-    balances = dict.fromkeys([payer_id] + list(owed_percentages.keys()), 0)
-    balances[payer_id] = total_amount
-    for ower_id, percentage in owed_percentages.items():
-        balances[ower_id] -= percentage / 100 * total_amount
-    return balances
-
-
-def multiple_payers(
-    total_amount: float,
-    payed_percentages: dict[int, float],
-    owed_amounts: dict[int, float],
-) -> dict[int, float]:
-    balances = dict.fromkeys(payed_percentages.keys() | owed_amounts.keys(), 0)
-    for id, percentage in payed_percentages.items():
-        balances[id] = percentage / 100 * total_amount
-    for id, percentage in owed_amounts.items():
-        balances[id] -= percentage / 100 * total_amount
+    balances = {k: -total_amount * v / 100 for k, v in owers.items()}
+    if len(payers) == 1:
+        payer_id: int = next(iter(payers.keys()))
+        balances[payer_id] = total_amount + balances.get(payer_id, 0)
+    else:
+        balances.update(
+            {
+                id: total_amount * v / 100 + balances.get(id, 0)
+                for id, v in payers.items()
+            }
+        )
     return balances

@@ -1,36 +1,40 @@
-from app.splits.amounts import single_payer, multiple_payers
+from app.splits.amounts import split
+from tests.splits import TOTAL_AMOUNT, id1, id2, id3, id4, id5
 
 
 def test_single_payer_that_does_not_owe():
-    id1, id2, id3, id4, id5 = 1, 2, 3, 4, 5
-    total_amount = 100
-    payer = id1
-    owers = {id2: 20, id3: 30, id4: 25, id5: 25}
-    balances = single_payer(total_amount, payer, owers)
+    payers = {id1: TOTAL_AMOUNT}
+    owers = {id2: 200, id3: 300, id4: 250, id5: 250}
+
+    balances = split(TOTAL_AMOUNT, payers, owers)
+
     assert len(balances.items()) == 5
-    assert balances[payer] == total_amount
+    assert balances[id1] == TOTAL_AMOUNT
     for ower, amount in owers.items():
         assert balances[ower] == -amount
 
 
 def test_single_payer_that_owes():
     id1, id2, id3, id4, id5 = 1, 2, 3, 4, 5
-    total_amount = 100
-    payer = id1
-    owers = {id1: 20, id2: 10, id3: 25, id4: 25, id5: 20}
-    balances = single_payer(total_amount, payer, owers)
+    payers = {id1: TOTAL_AMOUNT}
+    owers = {id1: 200, id2: 100, id3: 250, id4: 250, id5: 200}
+
+    balances = split(TOTAL_AMOUNT, payers, owers)
+
     assert len(balances.items()) == 5
-    assert balances[payer] == total_amount - owers[payer]
+    assert balances[id1] == TOTAL_AMOUNT - owers[id1]
     for ower, amount in owers.items():
-        if ower != payer:
+        if ower not in payers:
             assert balances[ower] == -amount
 
 
-def test_add_expense_multiple_payers_that_do_not_owe():
+def test_multiple_payers_that_do_not_owe():
     id1, id2, id3, id4, id5 = 1, 2, 3, 4, 5
-    payers = {id1: 60, id2: 40}
-    owers = {id3: 20, id4: 30, id5: 50}
-    balances = multiple_payers(payers, owers)
+    payers = {id1: 600, id2: 400}
+    owers = {id3: 200, id4: 300, id5: 50}
+
+    balances = split(TOTAL_AMOUNT, payers, owers)
+
     assert len(balances.items()) == 5
     for payer, amount in payers.items():
         assert balances[payer] == amount
@@ -38,11 +42,13 @@ def test_add_expense_multiple_payers_that_do_not_owe():
         assert balances[ower] == -amount
 
 
-def test_add_expense_multiple_payers_that_owe():
+def test_multiple_payers_that_owe():
     id1, id2, id3, id4, id5 = 1, 2, 3, 4, 5
-    payers = {id1: 60, id2: 40}
-    owers = {id1: 10, id2: 20, id3: 30, id4: 20, id5: 20}
-    balances = multiple_payers(payers, owers)
+    payers = {id1: 600, id2: 400}
+    owers = {id1: 100, id2: 200, id3: 300, id4: 200, id5: 200}
+
+    balances = split(TOTAL_AMOUNT, payers, owers)
+
     assert len(balances.items()) == 5
     for id, amount in payers.items():
         assert balances[id] == amount - owers[id]
