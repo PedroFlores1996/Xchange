@@ -1,3 +1,6 @@
+from app.splits.constants import TOTAL, PAYED, OWED
+
+
 def split(
     total_amount: float, payers: dict[int, float], owers: dict[int, float]
 ) -> dict[int, float]:
@@ -8,6 +11,6 @@ def split(
         {id: total.get(id, 0) - total_amount / len(owers) for id in owers.keys()}
     )
     return {
-        k: {"total": v, "payed": payed.get(k, 0), "owed": owed.get(k, 0)}
+        k: {TOTAL: v, PAYED: payed.get(k, 0), OWED: owed.get(k, 0)}
         for k, v in total.items()
     }

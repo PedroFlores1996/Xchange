@@ -1,4 +1,5 @@
 from app.splits.amounts import split
+from app.splits.constants import OWED, PAYED, TOTAL
 from tests.splits import TOTAL_AMOUNT, id1, id2, id3, id4, id5
 
 
@@ -46,12 +47,12 @@ def validate_balances(payers, owers, balances):
     for id, amount in payers.items():
         owed = owers.get(id, 0)
         payed = amount
-        assert balances[id]["owed"] == owed
-        assert balances[id]["payed"] == payed
-        assert balances[id]["total"] == payed - owed
+        assert balances[id][OWED] == owed
+        assert balances[id][PAYED] == payed
+        assert balances[id][TOTAL] == payed - owed
     for id, amount in owers.items():
         owed = amount
         payed = payers.get(id, 0)
-        assert balances[id]["owed"] == owed
-        assert balances[id]["payed"] == payed
-        assert balances[id]["total"] == payed - owed
+        assert balances[id][OWED] == owed
+        assert balances[id][PAYED] == payed
+        assert balances[id][TOTAL] == payed - owed

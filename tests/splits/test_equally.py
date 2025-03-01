@@ -1,4 +1,5 @@
 from app.splits.equally import split
+from app.splits.constants import OWED, PAYED, TOTAL
 from tests.splits import TOTAL_AMOUNT, id1, id2, id3, id4, id5
 
 
@@ -43,12 +44,12 @@ def validate_balances(payers, owers, balances):
     for payer in payers:
         owed = TOTAL_AMOUNT / len(owers) if payer in owers else 0
         payed = TOTAL_AMOUNT / len(payers)
-        assert balances[payer]["owed"] == owed
-        assert balances[payer]["payed"] == payed
-        assert balances[payer]["total"] == payed - owed
+        assert balances[payer][OWED] == owed
+        assert balances[payer][PAYED] == payed
+        assert balances[payer][TOTAL] == payed - owed
     for ower in owers:
         owed = TOTAL_AMOUNT / len(owers)
         payed = TOTAL_AMOUNT / len(payers) if ower in payers else 0
-        assert balances[ower]["owed"] == owed
-        assert balances[ower]["payed"] == payed
-        assert balances[ower]["total"] == payed - owed
+        assert balances[ower][OWED] == owed
+        assert balances[ower][PAYED] == payed
+        assert balances[ower][TOTAL] == payed - owed
