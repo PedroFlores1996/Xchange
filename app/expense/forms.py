@@ -26,7 +26,13 @@ class OwerForm(FlaskForm):
 
 class ExpenseForm(FlaskForm):
 
-    def validate_owers(self: Self, field: FieldList) -> None:
+    def sum_is_total_amount(self, field: FieldList) -> None:
+        if sum([user.data["amount"] for user in field.data]) != self.amount.data:
+            raise ValueError(
+                f"The sum of the {field.label}' amounts must be equal to the total amount."
+            )
+
+    def single_ower_not_payer(self, field: FieldList) -> None:
         if len(field.data) == 1:
             if len(self.payers.data) == 1:
                 if field.data[0]["user_id"] == self.payers.data[0]["user_id"]:
@@ -46,8 +52,16 @@ class ExpenseForm(FlaskForm):
         choices=[(split_type, split_type.value) for split_type in SplitType],
         validators=[DataRequired()],
     )
-    payers = FieldList(FormField(PayerForm), min_entries=1, validators=[DataRequired()])
+    payers = FieldList(
+        "Payers",
+        FormField(PayerForm),
+        min_entries=1,
+        validators=[DataRequired(), sum_is_total_amount],
+    )
     owers = FieldList(
-        FormField(OwerForm), min_entries=1, validators=[DataRequired(), validate_owers]
+        "Owers",
+        FormField(OwerForm),
+        min_entries=1,
+        validators=[DataRequired(), sum_is_total_amount, single_ower_not_payer],
     )
     group_id = IntegerField("Group ID", validators=[Optional()])
