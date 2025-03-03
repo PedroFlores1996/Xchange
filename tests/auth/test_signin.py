@@ -13,14 +13,13 @@ def test_signin_get(client, captured_templates):
     assert isinstance(captured_templates[0][1]["form"], SigninForm)
 
 
-def test_signin_post(db_session, client, reset_login, csrf_token):
+def test_signin_post(db_session, client, reset_login):
     response = client.post(
         "/signin",
         data={
             "username": "user1",
             "password": "password1",
             "confirm_password": "password1",
-            "csrf_token": csrf_token,
         },
     )
 
@@ -30,7 +29,7 @@ def test_signin_post(db_session, client, reset_login, csrf_token):
     assert current_user.is_authenticated
 
 
-def test_signin_post_existing_user(db_session, client, reset_login, csrf_token):
+def test_signin_post_existing_user(db_session, client, reset_login):
     User.create("user1", "password1")
 
     response = client.post(
@@ -39,7 +38,6 @@ def test_signin_post_existing_user(db_session, client, reset_login, csrf_token):
             "username": "user1",
             "password": "password1",
             "confirm_password": "password1",
-            "csrf_token": csrf_token,
         },
     )
 
@@ -52,7 +50,7 @@ def test_signin_post_existing_user(db_session, client, reset_login, csrf_token):
 
 
 def test_signin_post_password_mismatch(
-    db_session, client, reset_login, csrf_token, captured_templates
+    db_session, client, reset_login, captured_templates
 ):
     response = client.post(
         "/signin",
@@ -60,7 +58,6 @@ def test_signin_post_password_mismatch(
             "username": "user1",
             "password": "password1",
             "confirm_password": "password2",
-            "csrf_token": csrf_token,
         },
     )
 
@@ -74,35 +71,8 @@ def test_signin_post_password_mismatch(
     assert not current_user.is_authenticated
 
 
-def test_signin_post_missing_csrf_token(
-    db_session, client, reset_login, captured_templates
-):
-    response = client.post(
-        "/signin",
-        data={
-            "username": "user1",
-            "password": "password1",
-            "confirm_password": "password1",
-        },
-    )
-
-    assert User.query.count() == 0
-    assert response.status_code == 200
-    assert captured_templates[0][0].name == "auth/signin.html"
-    assert isinstance(captured_templates[0][1]["form"], SigninForm)
-    assert captured_templates[0][1]["form"].errors == {
-        "csrf_token": ["The CSRF token is missing."]
-    }
-    assert not current_user.is_authenticated
-
-
-def test_signin_post_invalid_form(
-    db_session, client, reset_login, csrf_token, captured_templates
-):
-    response = client.post(
-        "/signin",
-        data={"csrf_token": csrf_token},
-    )
+def test_signin_post_invalid_form(db_session, client, reset_login, captured_templates):
+    response = client.post("/signin")
 
     assert User.query.count() == 0
     assert response.status_code == 200

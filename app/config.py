@@ -17,3 +17,4 @@ class TestConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SERVER_NAME = "localhost:8000"
     DEBUG = True
+    WTF_CSRF_ENABLED = False
