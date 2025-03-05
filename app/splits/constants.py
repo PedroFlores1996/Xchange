@@ -1,3 +1,3 @@
-TOTAL = "total"
 PAYED = "payed"
 OWED = "owed"
+TOTAL = "total"
