@@ -3,7 +3,7 @@ from app.splits.constants import TOTAL, PAYED, OWED
 
 def split(
     total_amount: float, payers: dict[int, float], owers: dict[int, float]
-) -> dict[int, float]:
+) -> dict[int, dict[str, float]]:
     owed = {k: total_amount / len(owers) for k, v in owers.items()}
     payed = {k: total_amount / len(payers) for k, v in payers.items()}
     total = payed.copy()
