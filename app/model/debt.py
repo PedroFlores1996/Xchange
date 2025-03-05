@@ -12,15 +12,15 @@ from app.model.constants import NO_GROUP
 
 class Debt(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
-    lender_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=False)
-    lender: Mapped[User] = relationship(
-        foreign_keys=[lender_id], back_populates="lender_debts"
-    )
     borrower_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("user.id"), nullable=False
     )
     borrower: Mapped[User] = relationship(
         foreign_keys=[borrower_id], back_populates="borrower_debts"
+    )
+    lender_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=False)
+    lender: Mapped[User] = relationship(
+        foreign_keys=[lender_id], back_populates="lender_debts"
     )
     amount: Mapped[float] = db.mapped_column(nullable=False)
     description: Mapped[str] = db.mapped_column(nullable=True)
@@ -32,35 +32,35 @@ class Debt(db.Model):  # type: ignore
 
     @classmethod
     def find(
-        cls, lender: User, borrower: User, group: Group | None = None
+        cls, borrower: User, lender: User, group: Group | None = None
     ) -> Self | None:
         return cls.query.filter_by(
-            lender_id=lender.id,
             borrower_id=borrower.id,
+            lender_id=lender.id,
             group_id=group.id if group else NO_GROUP,
         ).first()
 
     @classmethod
     def __find_reversed(
-        cls, lender: User, borrower: User, group: Group | None = None
+        cls, borrower: User, lender: User, group: Group | None = None
     ) -> Self | None:
-        return cls.find(borrower, lender, group)
+        return cls.find(lender, borrower, group)
 
     @classmethod
     def update(
         cls,
-        lender: User,
         borrower: User,
+        lender: User,
         amount: float,
         description: str | None = None,
         group: Group | None = None,
     ) -> None:
-        if existing_debt := cls.find(lender, borrower, group):
+        if existing_debt := cls.find(borrower, lender, group):
             existing_debt.amount += amount
             db.session.flush()
             return
 
-        if reverse_debt := cls.__find_reversed(lender, borrower, group):
+        if reverse_debt := cls.__find_reversed(borrower, lender, group):
             if reverse_debt.amount == amount:
                 db.session.delete(reverse_debt)
                 db.session.flush()
@@ -75,8 +75,8 @@ class Debt(db.Model):  # type: ignore
                 db.session.flush()
 
         new_debt = cls(
-            lender=lender,
-            borrower=borrower,
+            borrower_id=borrower.id,
+            lender_id=lender.id,
             amount=amount,
             description=description,
             group=group,

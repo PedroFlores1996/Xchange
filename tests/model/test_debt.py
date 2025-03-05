@@ -14,8 +14,8 @@ def test_update_new_debt(db_session):
 
     assert Debt.query.count() == 1
     debt = Debt.find(user1, user2)
-    assert debt.lender is user1
-    assert debt.borrower is user2
+    assert debt.borrower is user1
+    assert debt.lender is user2
     assert debt.amount == 100
 
 
@@ -115,7 +115,7 @@ def test_update_unique_constraint_on_lender_borrower_and_no_group(db_session):
 
     Debt.update(user1, user2, 100)
     with pytest.raises(IntegrityError):
-        db_session.add(Debt(lender=user1, borrower=user2, amount=100))
+        db_session.add(Debt(borrower=user1, lender=user2, amount=100))
         db_session.commit()
 
 
@@ -129,5 +129,5 @@ def test_update_unique_constraint_on_lender_borrower_and_group(db_session):
 
     Debt.update(user1, user2, 100, group=group)
     with pytest.raises(IntegrityError):
-        db_session.add(Debt(lender=user1, borrower=user2, amount=100, group=group))
+        db_session.add(Debt(borrower=user1, lender=user2, amount=100, group=group))
         db_session.commit()
