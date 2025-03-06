@@ -1,6 +1,5 @@
 from flask_login import current_user
 from dataclasses import dataclass
-from typing import List, Dict
 from app.expense.forms import ExpenseForm
 from app.model.expense import ExpenseCategory
 from app.splits.types import SplitType
@@ -12,13 +11,13 @@ class ExpenseData:
     description: str
     category: ExpenseCategory
     split: SplitType
-    payers: Dict[int, float | None]
-    owers: Dict[int, float | None]
+    payers: dict[int, float | None]
+    owers: dict[int, float | None]
     group_id: int | None
     creator_id: int
 
 
-def extract_from(form: ExpenseForm) -> ExpenseData:
+def expense_data_from(form: ExpenseForm) -> ExpenseData:
     return ExpenseData(
         amount=form.amount.data,  # type: ignore
         description=form.description.data,  # type: ignore
