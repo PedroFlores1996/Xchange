@@ -10,8 +10,8 @@ def test_create_expense(db_session):
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
     group = Group.create("group", [user1, user2])
-    balance1 = Balance.create(user1, owed_amount=50.0, payed_amount=100.0)
-    balance2 = Balance.create(user2, owed_amount=50.0, payed_amount=0.0)
+    balance1 = Balance.create(user1.id, owed=50.0, payed=100.0, total=50.0)
+    balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]
 
     expense = Expense.create(
@@ -40,8 +40,8 @@ def test_create_expense(db_session):
 def test_create_expense_no_group(db_session):
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
-    balance1 = Balance.create(user1, owed_amount=50.0, payed_amount=100.0)
-    balance2 = Balance.create(user2, owed_amount=50.0, payed_amount=0.0)
+    balance1 = Balance.create(user1.id, owed=50.0, payed=100.0, total=50.0)
+    balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]
 
     expense = Expense.create(100.0, balances, user1)
@@ -53,8 +53,8 @@ def test_create_expense_no_group(db_session):
 def test_updating_expense_changes_updated_at(db_session):
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
-    balance1 = Balance.create(user1, owed_amount=50.0, payed_amount=100.0)
-    balance2 = Balance.create(user2, owed_amount=50.0, payed_amount=0.0)
+    balance1 = Balance.create(user1.id, owed=50.0, payed=100.0, total=50.0)
+    balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]
 
     expense = Expense.create(100.0, balances, user1)
