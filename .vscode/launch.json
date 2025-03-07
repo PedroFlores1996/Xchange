@@ -6,7 +6,7 @@
             "name": "Python Debugger: Flask",
             "type": "debugpy",
             "request": "launch",
-            "module": "flask",
+            "module": "runserver",
             "env": {
                 "FLASK_APP": "runserver.py",
                 "FLASK_DEBUG": "1"

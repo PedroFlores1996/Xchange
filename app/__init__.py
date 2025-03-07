@@ -7,10 +7,10 @@ def create_app(config=None):
     # create and configure the app
     app = Flask(__name__)
 
-    if config is None:
-        app.config.from_object(Config)
-    else:
+    if config:
         app.config.from_object(config)
+    else:
+        app.config.from_object(Config)
 
     from app.database import db, migrate
 
@@ -29,6 +29,10 @@ def create_app(config=None):
     from app.index.views import bp as index_bp
 
     app.register_blueprint(index_bp)
+
+    from app.expense.views import bp as expense_bp
+
+    app.register_blueprint(expense_bp)
 
     from app.cli import database
 
