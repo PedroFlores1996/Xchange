@@ -2,8 +2,7 @@ from app.database import db
 from app.model.expense import Expense
 from app.model.debt import Debt
 from app.expense.mapper import ExpenseData
-from app.splits import equally, amounts, percentage
-from app.splits.types import SplitType
+from app.splits import SplitType, equally, amounts, percentage
 from app.model.balance import Balance
 from app.splits.constants import OWED, PAYED, TOTAL
 

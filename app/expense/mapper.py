@@ -2,7 +2,7 @@ from flask_login import current_user
 from dataclasses import dataclass
 from app.expense.forms import ExpenseForm
 from app.model.expense import ExpenseCategory
-from app.splits.types import SplitType
+from app.splits import SplitType
 
 
 @dataclass

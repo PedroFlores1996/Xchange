@@ -10,7 +10,7 @@ from wtforms import (
 from wtforms import ValidationError
 from wtforms.validators import DataRequired, NumberRange, Optional
 from app.model.expense import ExpenseCategory
-from app.splits.types import SplitType
+from app.splits import SplitType
 
 
 def coerce_for(enum):

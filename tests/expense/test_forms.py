@@ -1,7 +1,7 @@
 import pytest
 from wtforms import ValidationError
 from app.expense.forms import ExpenseForm
-from app.splits.types import SplitType
+from app.splits import SplitType
 from app.model.expense import ExpenseCategory
 
 
