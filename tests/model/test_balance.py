@@ -1,7 +1,7 @@
 from app.model.balance import Balance
 from app.model.user import User
 from app.model.expense import Expense
-from app.splits import SplitType
+from app.split import SplitType
 
 
 def test_create_balance_positive(db_session):

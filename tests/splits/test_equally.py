@@ -1,5 +1,5 @@
-from app.splits.equally import split
-from app.splits.constants import OWED, PAYED, TOTAL
+from app.split.equally import split
+from app.split.constants import OWED, PAYED, TOTAL
 from tests.splits import TOTAL_AMOUNT, id1, id2, id3, id4, id5
 
 

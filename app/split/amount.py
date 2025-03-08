@@ -1,4 +1,4 @@
-from app.splits.constants import OWED, PAYED, TOTAL
+from app.split.constants import OWED, PAYED, TOTAL
 
 
 def split(

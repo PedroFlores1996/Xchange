@@ -10,7 +10,7 @@ from wtforms import (
 from wtforms import ValidationError
 from wtforms.validators import DataRequired, NumberRange, Optional
 from app.model.expense import ExpenseCategory
-from app.splits import SplitType
+from app.split import SplitType
 
 
 class PayerForm(FlaskForm):

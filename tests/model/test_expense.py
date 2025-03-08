@@ -4,7 +4,7 @@ from app.model.user import User
 from app.model.balance import Balance
 from app.model.expense import Expense, ExpenseCategory
 from app.model.group import Group
-from app.splits import SplitType
+from app.split import SplitType
 
 
 def test_create_expense(db_session):

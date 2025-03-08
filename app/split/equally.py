@@ -1,4 +1,4 @@
-from app.splits import amounts
+from app.split import amount
 
 
 def split(
@@ -6,4 +6,4 @@ def split(
 ) -> dict[int, dict[str, float]]:
     owers_amounts = {k: total_amount / len(owers) for k in owers}
     payers_amounts = {k: total_amount / len(payers) for k in payers}
-    return amounts.split(payers_amounts, owers_amounts)
+    return amount.split(payers_amounts, owers_amounts)

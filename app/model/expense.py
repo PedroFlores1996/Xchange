@@ -12,7 +12,7 @@ from sqlalchemy.orm import Mapped, relationship
 
 from app.database import db
 from app.model.constants import NO_GROUP
-from app.splits import SplitType
+from app.split import SplitType
 
 
 class ExpenseCategory(FormEnum):
