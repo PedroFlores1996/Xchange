@@ -4,23 +4,9 @@ from app.database import db
 from app.model.expense import Expense
 from app.model.debt import Debt
 from app.expense.mapper import ExpenseData
-from app.split import SplitType, amount, equally, percentage
 from app.model.balance import Balance
 from app.split.constants import OWED, PAYED, TOTAL
-
-
-def split(
-    total_amount: float, payers: list, owers: list, split_type: SplitType
-) -> dict[int, dict[str, float]]:
-    match split_type:
-        case SplitType.EQUALLY:
-            return equally.split(total_amount, payers, owers)
-        case SplitType.AMOUNT:
-            return amount.split(payers, owers)
-        case SplitType.PERCENTAGE:
-            return percentage.split(total_amount, payers, owers)
-        case _:
-            raise ValueError(f"Unknown split type: {split_type}")
+from app.split import split
 
 
 def map_balances(balances: dict[int, dict[str, float]]) -> list[Balance]:
