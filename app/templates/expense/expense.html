@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Expense</title>
+</head>
+<body>
+    <h1>Submit Expense</h1>
+    <form action="{{ url_for('expense.expenses') }}" method="post">
+        {{ form.hidden_tag() }}
+        <div>
+            <label for="amount">Amount:</label>
+            {{ form.amount(size=20) }}
+        </div>
+        <div>
+            <label for="description">Description:</label>
+            {{ form.description(size=50) }}
+        </div>
+        <div>
+            <label for="category">Category:</label>
+            {{ form.category() }}
+        </div>
+        <div>
+            <label for="split">Split:</label>
+            {{ form.split() }}
+        </div>
+        <div>
+            <label>Payers:</label>
+            <div id="payers">
+                {% for payer in form.payers %}
+                    <div>
+                        <label for="payers-{{ loop.index0 }}-user_id">User ID:</label>
+                        {{ payer.user_id(size=10) }}
+                        <label for="payers-{{ loop.index0 }}-amount">Amount:</label>
+                        {{ payer.amount(size=10) }}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" onclick="addPayer()">Add Payer</button>
+        </div>
+        <div>
+            <label>Owers:</label>
+            <div id="owers">
+                {% for ower in form.owers %}
+                    <div>
+                        <label for="owers-{{ loop.index0 }}-user_id">User ID:</label>
+                        {{ ower.user_id(size=10) }}
+                        <label for="owers-{{ loop.index0 }}-amount">Amount:</label>
+                        {{ ower.amount(size=10) }}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" onclick="addOwer()">Add Ower</button>
+        </div>
+        <div>
+            <label for="group_id">Group ID:</label>
+            {{ form.group_id(size=10) }}
+        </div>
+        <div>
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+
+    <script>
+        function addPayer() {
+            const payersDiv = document.getElementById('payers');
+            const newPayerIndex = payersDiv.children.length;
+            const newPayerDiv = document.createElement('div');
+            newPayerDiv.innerHTML = `
+                <label for="payers-${newPayerIndex}-user_id">User ID:</label>
+                <input type="text" name="payers-${newPayerIndex}-user_id" size="10">
+                <label for="payers-${newPayerIndex}-amount">Amount:</label>
+                <input type="text" name="payers-${newPayerIndex}-amount" size="10">
+            `;
+            payersDiv.appendChild(newPayerDiv);
+        }
+
+        function addOwer() {
+            const owersDiv = document.getElementById('owers');
+            const newOwerIndex = owersDiv.children.length;
+            const newOwerDiv = document.createElement('div');
+            newOwerDiv.innerHTML = `
+                <label for="owers-${newOwerIndex}-user_id">User ID:</label>
+                <input type="text" name="owers-${newOwerIndex}-user_id" size="10">
+                <label for="owers-${newOwerIndex}-amount">Amount:</label>
+                <input type="text" name="owers-${newOwerIndex}-amount" size="10">
+            `;
+            owersDiv.appendChild(newOwerDiv);
+        }
+    </script>
+</body>
+</html>

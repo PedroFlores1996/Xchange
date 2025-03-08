@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debts</title>
+</head>
+<body>
+    <h1>All Debts</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Borrower ID</th>
+                <th>Lender ID</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Group ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for debt in debts %}
+                <tr>
+                    <td>{{ debt.borrower_id }}</td>
+                    <td>{{ debt.lender_id }}</td>
+                    <td>{{ debt.amount }}</td>
+                    <td>{{ debt.description }}</td>
+                    <td>{{ debt.group_id }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('expense.expenses') }}">Back to Expenses</a>
+</body>
+</html>

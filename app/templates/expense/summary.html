@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Summary</title>
+</head>
+<body>
+    <h1>Expense Summary</h1>
+    <div>
+        <h2>Expense Details</h2>
+        <p><strong>Amount:</strong> {{ expense.amount }}</p>
+        <p><strong>Description:</strong> {{ expense.description }}</p>
+        <p><strong>Category:</strong> {{ expense.category }}</p>
+        <p><strong>Split:</strong> {{ expense.split }}</p>
+        <p><strong>Group ID:</strong> {{ expense.group_id }}</p>
+    </div>
+    <div>
+        <h2>Payers</h2>
+        <ul>
+            {% for balance in expense.balances %}
+                {% if balance.total > 0 %}
+                    <li>User: {{ balance.user.username }}, Amount: {{ balance.total }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    <div>
+        <h2>Owers</h2>
+        <ul>
+            {% for balance in expense.balances %}
+                {% if balance.total < 0 %}
+                    <li>User: {{ balance.user.username }}, Amount: {{ balance.total }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    <a href="{{ url_for('expense.expenses') }}">Back to Expenses</a>
+</body>
+</html>
