@@ -4,31 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debts</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>All Debts</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Borrower ID</th>
-                <th>Lender ID</th>
-                <th>Amount</th>
-                <th>Description</th>
-                <th>Group ID</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for debt in debts %}
+    <div class="container mt-5">
+        <h1 class="text-center">All Debts</h1>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
                 <tr>
-                    <td>{{ debt.borrower_id }}</td>
-                    <td>{{ debt.lender_id }}</td>
-                    <td>{{ debt.amount }}</td>
-                    <td>{{ debt.description }}</td>
-                    <td>{{ debt.group_id }}</td>
+                    <th>Borrower ID</th>
+                    <th>Lender ID</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Group ID</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="{{ url_for('expense.expenses') }}">Back to Expenses</a>
+            </thead>
+            <tbody>
+                {% for debt in debts %}
+                    <tr>
+                        <td>{{ debt.borrower.username }}</td>
+                        <td>{{ debt.lender.username }}</td>
+                        <td>{{ debt.amount }}</td>
+                        <td>{{ debt.description }}</td>
+                        <td>{{ debt.group_id }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('expense.expenses') }}" class="btn btn-primary">Back to Expenses</a>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

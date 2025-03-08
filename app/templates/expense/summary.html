@@ -4,37 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Summary</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>Expense Summary</h1>
-    <div>
-        <h2>Expense Details</h2>
-        <p><strong>Amount:</strong> {{ expense.amount }}</p>
-        <p><strong>Description:</strong> {{ expense.description }}</p>
-        <p><strong>Category:</strong> {{ expense.category }}</p>
-        <p><strong>Split:</strong> {{ expense.split }}</p>
-        <p><strong>Group ID:</strong> {{ expense.group_id }}</p>
+    <div class="container mt-5">
+        <h1 class="text-center">Expense Summary</h1>
+        <div class="card mt-4">
+            <div class="card-header">
+                <h2>Expense Details</h2>
+            </div>
+            <div class="card-body">
+                <p><strong>Amount:</strong> {{ expense.amount }}</p>
+                <p><strong>Description:</strong> {{ expense.description }}</p>
+                <p><strong>Category:</strong> {{ expense.category }}</p>
+                <p><strong>Split:</strong> {{ expense.split }}</p>
+                <p><strong>Group ID:</strong> {{ expense.group_id }}</p>
+            </div>
+        </div>
+        <div class="card mt-4">
+            <div class="card-header">
+                <h2>Payers</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for balance in expense.balances %}
+                        {% if balance.total > 0 %}
+                            <li class="list-group-item">User: {{ balance.user.username }}, Amount: {{ balance.total }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="card mt-4">
+            <div class="card-header">
+                <h2>Owers</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for balance in expense.balances %}
+                        {% if balance.total < 0 %}
+                            <li class="list-group-item">User: {{ balance.user.username }}, Amount: {{ balance.total }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('expense.expenses') }}" class="btn btn-primary">Back to Expenses</a>
+        </div>
     </div>
-    <div>
-        <h2>Payers</h2>
-        <ul>
-            {% for balance in expense.balances %}
-                {% if balance.total > 0 %}
-                    <li>User: {{ balance.user.username }}, Amount: {{ balance.total }}</li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-    </div>
-    <div>
-        <h2>Owers</h2>
-        <ul>
-            {% for balance in expense.balances %}
-                {% if balance.total < 0 %}
-                    <li>User: {{ balance.user.username }}, Amount: {{ balance.total }}</li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-    </div>
-    <a href="{{ url_for('expense.expenses') }}">Back to Expenses</a>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

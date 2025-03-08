@@ -32,11 +32,7 @@
                                     <span style="color: red;">[{{ error }}]</span>
                                 {% endfor %}
                             </div>
-                            <div class="form-check">
-                                {{ form.remember_me(class="form-check-input", id="remember_me") }}
-                                <label class="form-check-label" for="remember_me">{{ form.remember_me.label }}</label>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block mt-3">{{ form.submit() }}</button>
+                            {{ form.submit(class="btn btn-success btn-block mt-3") }}
                         </form>
                     </div>
                     <div class="card-footer text-center">
