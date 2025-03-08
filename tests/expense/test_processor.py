@@ -1,4 +1,4 @@
-from app.expense.processor import minimum_transactions
+from app.debt import minimum_transactions
 from app.model.user import User
 
 
