@@ -1,0 +1,22 @@
+curl -X POST http://127.0.0.1:5000/expenses \
+    -H "Content-Type: multipart/form-data" \
+    -F "amount=100.0" \
+    -F "description=Test expense" \
+    -F "category=OTHER" \
+    -F "split=PERCENTAGE" \
+    -F "payers-0-user_id=1" \
+    -F "payers-0-amount=50.0" \
+    -F "payers-1-user_id=2" \
+    -F "payers-1-amount=50.0" \
+    -F "owers-0-user_id=3" \
+    -F "owers-0-amount=25.0" \
+    -F "owers-1-user_id=4" \
+    -F "owers-1-amount=25.0" \
+    -F "owers-2-user_id=5" \
+    -F "owers-2-amount=25.0" \
+    -F "owers-3-user_id=6" \
+    -F "owers-3-amount=25.0" \
+    -F "group_id=1"
+
+
+cURL -X POST -H 'Content-Type: application/json' -d '{"username": "admin", "password": "1234"}' http://127.0.0.1:8000/login
