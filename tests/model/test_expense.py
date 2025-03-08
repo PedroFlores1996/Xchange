@@ -1,9 +1,10 @@
 import pytest
+from app.model.constants import NO_GROUP
 from app.model.user import User
 from app.model.balance import Balance
 from app.model.expense import Expense, ExpenseCategory
 from app.model.group import Group
-from app.model.constants import NO_GROUP
+from app.splits import SplitType
 
 
 def test_create_expense(db_session):
@@ -15,7 +16,13 @@ def test_create_expense(db_session):
     balances = [balance1, balance2]
 
     expense = Expense.create(
-        100.0, balances, user1, group, "description", ExpenseCategory.OTHER
+        100.0,
+        balances,
+        user1.id,
+        SplitType.EQUALLY,
+        group,
+        "description",
+        ExpenseCategory.OTHER,
     )
 
     assert Expense.query.count() == 1
@@ -44,7 +51,7 @@ def test_create_expense_no_group(db_session):
     balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]
 
-    expense = Expense.create(100.0, balances, user1)
+    expense = Expense.create(100.0, balances, user1.id, SplitType.EQUALLY)
 
     assert expense.group is None
     assert expense.group_id == NO_GROUP
@@ -57,7 +64,7 @@ def test_updating_expense_changes_updated_at(db_session):
     balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]
 
-    expense = Expense.create(100.0, balances, user1)
+    expense = Expense.create(100.0, balances, user1.id, SplitType.EQUALLY)
 
     assert expense.updater is None
     assert expense.updated_at is None

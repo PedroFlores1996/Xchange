@@ -32,35 +32,35 @@ class Debt(db.Model):  # type: ignore
 
     @classmethod
     def find(
-        cls, borrower: User, lender: User, group: Group | None = None
+        cls, borrower_id: int, lender_id: int, group_id: int | None = None
     ) -> Self | None:
         return cls.query.filter_by(
-            borrower_id=borrower.id,
-            lender_id=lender.id,
-            group_id=group.id if group else NO_GROUP,
+            borrower_id=borrower_id,
+            lender_id=lender_id,
+            group_id=group_id if group_id else NO_GROUP,
         ).first()
 
     @classmethod
     def __find_reversed(
-        cls, borrower: User, lender: User, group: Group | None = None
+        cls, borrower_id: int, lender_id: int, group_id: int | None = None
     ) -> Self | None:
-        return cls.find(lender, borrower, group)
+        return cls.find(lender_id, borrower_id, group_id)
 
     @classmethod
     def update(
         cls,
-        borrower: User,
-        lender: User,
+        borrower_id: int,
+        lender_id: int,
         amount: float,
         description: str | None = None,
-        group: Group | None = None,
+        group_id: int | None = None,
     ) -> None:
-        if existing_debt := cls.find(borrower, lender, group):
+        if existing_debt := cls.find(borrower_id, lender_id, group_id):
             existing_debt.amount += amount
             db.session.flush()
             return
 
-        if reverse_debt := cls.__find_reversed(borrower, lender, group):
+        if reverse_debt := cls.__find_reversed(borrower_id, lender_id, group_id):
             if reverse_debt.amount == amount:
                 db.session.delete(reverse_debt)
                 db.session.flush()
@@ -75,11 +75,11 @@ class Debt(db.Model):  # type: ignore
                 db.session.flush()
 
         new_debt = cls(
-            borrower_id=borrower.id,
-            lender_id=lender.id,
+            borrower_id=borrower_id,
+            lender_id=lender_id,
             amount=amount,
             description=description,
-            group=group,
+            group_id=group_id,
         )
         db.session.add(new_debt)
         db.session.flush()
