@@ -1,6 +1,7 @@
 from app.model.balance import Balance
 from app.model.user import User
 from app.model.expense import Expense
+from app.splits import SplitType
 
 
 def test_create_balance_positive(db_session):
@@ -11,7 +12,9 @@ def test_create_balance_positive(db_session):
         payed=20.0,
         total=10.0,
     )
-    expense = Expense(creator_id=user.id, amount=10.0, balances=[balance])
+    expense = Expense(
+        creator_id=user.id, amount=10.0, balances=[balance], split=SplitType.EQUALLY
+    )
     db_session.add(expense)
     db_session.flush()
 

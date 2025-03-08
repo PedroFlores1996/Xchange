@@ -1,7 +1,7 @@
-from enum import Enum
+from app.enum import FormEnum
 
 
-class SplitType(Enum):
+class SplitType(FormEnum):
     AMOUNT = "Amount"
     EQUALLY = "Equally"
     PERCENTAGE = "Percentage"

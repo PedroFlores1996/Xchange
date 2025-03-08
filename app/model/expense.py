@@ -1,20 +1,21 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Self, List
+from typing import TYPE_CHECKING, Self
 
 if TYPE_CHECKING:
     from app.model.user import User
     from app.model.balance import Balance
     from app.model.group import Group
 
-from enum import Enum
+from app.enum import FormEnum
 from datetime import datetime
 from sqlalchemy.orm import Mapped, relationship
 
 from app.database import db
 from app.model.constants import NO_GROUP
+from app.splits import SplitType
 
 
-class ExpenseCategory(Enum):
+class ExpenseCategory(FormEnum):
     ACCOMMODATION = "Accommodation"
     DRINKS = "Drinks"
     ENTERTAINMENT = "Entertainment"
@@ -29,11 +30,12 @@ class ExpenseCategory(Enum):
 class Expense(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     amount: Mapped[float] = db.mapped_column(nullable=False)
-    balances: Mapped[List[Balance]] = relationship(back_populates="expense")
+    balances: Mapped[list[Balance]] = relationship(back_populates="expense")
     description: Mapped[str] = db.mapped_column(nullable=True)
     category: Mapped[ExpenseCategory] = db.mapped_column(
         nullable=True, default=ExpenseCategory.OTHER
     )
+    split: Mapped[SplitType] = db.mapped_column(nullable=False)
     group_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
     )
@@ -51,8 +53,9 @@ class Expense(db.Model):  # type: ignore
     def create(
         cls,
         amount: float,
-        balances: List[Balance],
-        creator: User,
+        balances: list[Balance],
+        creator_id: int,
+        split: SplitType,
         group: Group | None = None,
         description: str | None = None,
         category: ExpenseCategory | None = None,
@@ -60,7 +63,8 @@ class Expense(db.Model):  # type: ignore
         expense = cls(
             amount=amount,
             balances=balances,
-            creator=creator,
+            creator_id=creator_id,
+            split=split,
             group=group,
             description=description,
             category=category,
