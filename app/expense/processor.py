@@ -1,3 +1,5 @@
+from flask_login import current_user
+
 from app.database import db
 from app.model.expense import Expense
 from app.model.debt import Debt
@@ -10,13 +12,15 @@ from app.splits.constants import OWED, PAYED, TOTAL
 def split(
     total_amount: float, payers: list, owers: list, split_type: SplitType
 ) -> dict[int, dict[str, float]]:
-    if split_type == SplitType.EQUALLY:
-        return equally.split(total_amount, payers, owers)
-    if split_type == SplitType.AMOUNT:
-        return amounts.split(payers, owers)
-    if split_type == SplitType.PERCENTAGE:
-        return percentage.split(total_amount, payers, owers)
-    raise ValueError(f"Unknown split type: {split_type}")
+    match split_type:
+        case SplitType.EQUALLY:
+            return equally.split(total_amount, payers, owers)
+        case SplitType.AMOUNT:
+            return amounts.split(payers, owers)
+        case SplitType.PERCENTAGE:
+            return percentage.split(total_amount, payers, owers)
+        case _:
+            raise ValueError(f"Unknown split type: {split_type}")
 
 
 def map_balances(balances: dict[int, dict[str, float]]) -> list[Balance]:
@@ -35,6 +39,7 @@ def create_expense(data: ExpenseData, balances: dict[int, dict[str, float]]) -> 
     return Expense.create(
         amount=data.amount,
         description=data.description,
+        creator_id=current_user.get_id(),
         category=data.category,
         split=data.split,
         balances=map_balances(balances),
@@ -82,8 +87,8 @@ def update_debts(transactions: list[tuple[int, int, float]]):
 
 def create_expense_from(data: ExpenseData) -> Expense:
     balances = split(data.amount, data.payers, data.owers, data.split)
-    expense = create_expense(data, balances)
     transactions = minimum_transactions(balances)
     update_debts(transactions)
+    expense = create_expense(data, balances)
     db.session.commit()
     return expense
