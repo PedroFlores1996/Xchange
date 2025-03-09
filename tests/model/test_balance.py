@@ -13,7 +13,11 @@ def test_create_balance_positive(db_session):
         total=10.0,
     )
     expense = Expense(
-        creator_id=user.id, amount=10.0, balances=[balance], split=SplitType.EQUALLY
+        creator_id=user.id,
+        amount=10.0,
+        balances=[balance],
+        payers_split=SplitType.EQUALLY,
+        owers_split=SplitType.EQUALLY,
     )
     db_session.add(expense)
     db_session.flush()

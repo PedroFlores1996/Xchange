@@ -32,10 +32,13 @@ class Expense(db.Model):  # type: ignore
     amount: Mapped[float] = db.mapped_column(nullable=False)
     balances: Mapped[list[Balance]] = relationship(back_populates="expense")
     description: Mapped[str] = db.mapped_column(nullable=True)
-    category: Mapped[ExpenseCategory] = db.mapped_column(
-        nullable=True, default=ExpenseCategory.OTHER
+    category: Mapped[ExpenseCategory] = db.mapped_column(nullable=True)
+    payers_split: Mapped[SplitType] = db.mapped_column(
+        nullable=False, default=SplitType.EQUALLY
     )
-    split: Mapped[SplitType] = db.mapped_column(nullable=False)
+    owers_split: Mapped[SplitType] = db.mapped_column(
+        nullable=False, default=SplitType.EQUALLY
+    )
     group_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
     )
@@ -55,7 +58,8 @@ class Expense(db.Model):  # type: ignore
         amount: float,
         balances: list[Balance],
         creator_id: int,
-        split: SplitType,
+        payers_split: SplitType | None = None,
+        owers_split: SplitType | None = None,
         group: Group | None = None,
         description: str | None = None,
         category: ExpenseCategory | None = None,
@@ -64,7 +68,8 @@ class Expense(db.Model):  # type: ignore
             amount=amount,
             balances=balances,
             creator_id=creator_id,
-            split=split,
+            payers_split=payers_split,
+            owers_split=owers_split,
             group=group,
             description=description,
             category=category,

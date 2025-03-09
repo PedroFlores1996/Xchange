@@ -20,6 +20,7 @@ def test_create_expense(db_session):
         balances,
         user1.id,
         SplitType.EQUALLY,
+        SplitType.AMOUNT,
         group,
         "description",
         ExpenseCategory.OTHER,
@@ -39,22 +40,28 @@ def test_create_expense(db_session):
     assert expense.created_at is not None
     assert expense.updater is None
     assert expense.updated_at is None
+    assert expense.payers_split is SplitType.EQUALLY
+    assert expense.owers_split is SplitType.AMOUNT
 
     assert balance1.expense is expense
     assert balance2.expense is expense
 
 
-def test_create_expense_no_group(db_session):
+def test_create_expense_defaults(db_session):
     user1 = User.create("user1", "password")
     user2 = User.create("user2", "password")
     balance1 = Balance.create(user1.id, owed=50.0, payed=100.0, total=50.0)
     balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]
 
-    expense = Expense.create(100.0, balances, user1.id, SplitType.EQUALLY)
+    expense = Expense.create(100.0, balances, user1.id)
 
     assert expense.group is None
     assert expense.group_id == NO_GROUP
+    assert expense.description is None
+    assert expense.category is None
+    assert expense.payers_split is SplitType.EQUALLY
+    assert expense.owers_split is SplitType.EQUALLY
 
 
 def test_updating_expense_changes_updated_at(db_session):
@@ -64,7 +71,7 @@ def test_updating_expense_changes_updated_at(db_session):
     balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]
 
-    expense = Expense.create(100.0, balances, user1.id, SplitType.EQUALLY)
+    expense = Expense.create(100.0, balances, user1.id)
 
     assert expense.updater is None
     assert expense.updated_at is None
