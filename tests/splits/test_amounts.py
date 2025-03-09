@@ -9,7 +9,7 @@ def test_single_payer_that_does_not_owe():
 
     balances = split(payers, owers)
 
-    validate_balances(payers, owers, balances)
+    validate_amounts(payers, owers, balances)
 
 
 def test_single_payer_that_owes():
@@ -19,7 +19,7 @@ def test_single_payer_that_owes():
 
     balances = split(payers, owers)
 
-    validate_balances(payers, owers, balances)
+    validate_amounts(payers, owers, balances)
 
 
 def test_multiple_payers_that_do_not_owe():
@@ -29,7 +29,7 @@ def test_multiple_payers_that_do_not_owe():
 
     balances = split(payers, owers)
 
-    validate_balances(payers, owers, balances)
+    validate_amounts(payers, owers, balances)
 
 
 def test_multiple_payers_that_owe():
@@ -39,20 +39,20 @@ def test_multiple_payers_that_owe():
 
     balances = split(payers, owers)
 
-    validate_balances(payers, owers, balances)
+    validate_amounts(payers, owers, balances)
 
 
-def validate_balances(payers, owers, balances):
+def validate_amounts(payers, owers, balances):
     assert len(balances.items()) == 5
     for id, amount in payers.items():
-        owed = owers.get(id, 0)
         payed = amount
-        assert balances[id][OWED] == owed
+        owed = owers.get(id, 0)
         assert balances[id][PAYED] == payed
+        assert balances[id][OWED] == owed
         assert balances[id][TOTAL] == payed - owed
     for id, amount in owers.items():
-        owed = amount
         payed = payers.get(id, 0)
-        assert balances[id][OWED] == owed
+        owed = amount
         assert balances[id][PAYED] == payed
+        assert balances[id][OWED] == owed
         assert balances[id][TOTAL] == payed - owed

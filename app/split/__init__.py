@@ -8,15 +8,25 @@ class SplitType(FormEnum):
     PERCENTAGE = "Percentage"
 
 
-def split(
-    total_amount: float, payers: list, owers: list, split_type: SplitType
-) -> dict[int, dict[str, float]]:
+def _split_by_type(
+    total_amount: float, users: dict[int, float], split_type: SplitType
+) -> dict[int, float]:
     match split_type:
-        case SplitType.EQUALLY:
-            return equally.split(total_amount, payers, owers)
         case SplitType.AMOUNT:
-            return amount.split(payers, owers)
+            return users
+        case SplitType.EQUALLY:
+            return equally.split(total_amount, users)
         case SplitType.PERCENTAGE:
-            return percentage.split(total_amount, payers, owers)
-        case _:
-            raise ValueError(f"Unknown split type: {split_type}")
+            return percentage.split(total_amount, users)
+
+
+def split(
+    total_amount: float,
+    payers: dict[int, float],
+    owers: dict[int, float],
+    payers_split: SplitType,
+    owers_split: SplitType,
+) -> dict[int, dict[str, float]]:
+    payers_amount = _split_by_type(total_amount, payers, payers_split)
+    owers_amount = _split_by_type(total_amount, owers, owers_split)
+    return amount.split(payers_amount, owers_amount)
