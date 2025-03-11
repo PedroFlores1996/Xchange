@@ -15,7 +15,7 @@ from app.split import SplitType
 
 class ExpenseUserForm(FlaskForm):
     user_id = IntegerField("User ID", validators=[DataRequired()])
-    amount = FloatField("Amount", default=0.0, validators=[NumberRange(min=0)])
+    amount = FloatField("Amount", validators=[Optional(), NumberRange(min=0)])
 
 
 class ExpenseForm(FlaskForm):
@@ -59,20 +59,21 @@ class ExpenseForm(FlaskForm):
                 raise ValidationError(error)
 
     def _get_validation_error(self, users: FieldList, split: SplitType) -> str:
+        if split == SplitType.EQUALLY:
+            return
+
         total = sum([user.amount.data for user in users])
         if split == SplitType.AMOUNT and total != self.amount.data:
             return f"{users.label.text} total must equal to the expense total."
         elif split == SplitType.PERCENTAGE and total != 100:
             return f"{users.label.text} percentages must sum to 100."
-        elif split == SplitType.EQUALLY and total != 0:
-            return f"{users.label.text} total must be 0."
 
     def validate_sum(self, users: FieldList, split: SplitType) -> None:
         if error := self._get_validation_error(users, split):
             users.errors += (error,)
             raise ValidationError(error)
 
-    def validate(self) -> bool:
+    def validate(self, extra_validators=None) -> bool:
         if not super().validate():
             return False
 

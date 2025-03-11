@@ -22,8 +22,8 @@ def _split_by_type(
 
 def split(
     total_amount: float,
-    payers: dict[int, float],
-    owers: dict[int, float],
+    payers: dict[int, float | None],
+    owers: dict[int, float | None],
     payers_split: SplitType,
     owers_split: SplitType,
 ) -> dict[int, dict[str, float]]:
