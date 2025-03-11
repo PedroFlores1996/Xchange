@@ -28,13 +28,17 @@ def create_expense(data: ExpenseData, balances: dict[int, dict[str, float]]) -> 
         description=data.description,
         creator_id=current_user.get_id(),
         category=data.category,
-        split=data.split,
+        payers_split=data.payers_split,
+        owers_split=data.owers_split,
+        group_id=data.group_id,
         balances=map_balances(balances),
     )
 
 
 def create_expense_from(data: ExpenseData) -> Expense:
-    balances = split(data.amount, data.payers, data.owers, data.split)
+    balances = split(
+        data.amount, data.payers, data.owers, data.payers_split, data.owers_split
+    )
     update_debts(balances)
     expense = create_expense(data, balances)
     db.session.commit()
