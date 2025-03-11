@@ -60,7 +60,7 @@ class Expense(db.Model):  # type: ignore
         creator_id: int,
         payers_split: SplitType | None = None,
         owers_split: SplitType | None = None,
-        group: Group | None = None,
+        group_id: int | None = None,
         description: str | None = None,
         category: ExpenseCategory | None = None,
     ) -> Self:
@@ -70,7 +70,7 @@ class Expense(db.Model):  # type: ignore
             creator_id=creator_id,
             payers_split=payers_split,
             owers_split=owers_split,
-            group=group,
+            group_id=group_id,
             description=description,
             category=category,
         )
