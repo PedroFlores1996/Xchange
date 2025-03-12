@@ -21,7 +21,7 @@ def test_create_expense(db_session):
         user1.id,
         SplitType.EQUALLY,
         SplitType.AMOUNT,
-        group,
+        group.id,
         "description",
         ExpenseCategory.OTHER,
     )
