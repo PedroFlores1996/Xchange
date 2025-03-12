@@ -32,14 +32,12 @@ def test_single_ower_is_also_payer_raises_validation_error(request_context):
 def test_validate_sum_valid(request_context):
     form = ExpenseForm()
     form.amount.data = 100.0
-
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.payers.append_entry({"user_id": 2, "amount": 50.0})
-    form.owers.append_entry({"user_id": 3, "amount": 0})
-    form.owers.append_entry({"user_id": 4, "amount": 0})
+
     form.validate_sum(form.payers, SplitType.AMOUNT)
+    form.validate_sum(form.payers, SplitType.EQUALLY)
     form.validate_sum(form.payers, SplitType.PERCENTAGE)
-    form.validate_sum(form.owers, SplitType.EQUALLY)
 
     assert not form.payers.errors
     assert not form.owers.errors
@@ -49,21 +47,17 @@ def test_validate_sum_invalid(request_context):
     form = ExpenseForm()
     form.amount.data = 100.0
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
-    form.payers.append_entry({"user_id": 2, "amount": 50.0})
-    form.owers.append_entry({"user_id": 3, "amount": 50.0})
-    form.owers.append_entry({"user_id": 4, "amount": 40.0})
+    form.payers.append_entry({"user_id": 2, "amount": 40.0})
 
+    form.validate_sum(form.payers, SplitType.EQUALLY)
     with pytest.raises(ValidationError):
-        form.validate_sum(form.payers, SplitType.EQUALLY)
+        form.validate_sum(form.payers, SplitType.AMOUNT)
     with pytest.raises(ValidationError):
-        form.validate_sum(form.owers, SplitType.AMOUNT)
-    with pytest.raises(ValidationError):
-        form.validate_sum(form.owers, SplitType.PERCENTAGE)
+        form.validate_sum(form.payers, SplitType.PERCENTAGE)
 
-    assert form.payers.errors == ("Payers total must be 0.",)
-    assert form.owers.errors == (
-        "Owers total must equal to the expense total.",
-        "Owers percentages must sum to 100.",
+    assert form.payers.errors == (
+        "Payers total must equal to the expense total.",
+        "Payers percentages must sum to 100.",
     )
 
 
@@ -83,6 +77,22 @@ def test_validate_valid_form(request_context):
     assert not form.errors
     assert not form.payers.errors
     assert not form.owers.errors
+
+
+def test_validate_invalidated_by_super_first_on_negative_amount(request_context):
+    form = ExpenseForm()
+    form.amount.data = -100.0
+    form.payers_split.data = SplitType.AMOUNT
+    form.owers_split.data = SplitType.PERCENTAGE
+    form.category.data = ExpenseCategory.OTHER
+    form.description.data = "Test"
+    form.payers.append_entry({"user_id": 1, "amount": 50.0})
+    form.payers.append_entry({"user_id": 2, "amount": 40.0})
+
+    assert not form.validate()
+    assert form.errors["amount"] == ["Number must be at least 0."]
+    assert "payers" not in form.errors
+    assert form.payers.errors == []
 
 
 def test_validate_invalid_single_ower_is_payer(request_context):
