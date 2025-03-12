@@ -58,18 +58,18 @@ class ExpenseForm(FlaskForm):
                 self.owers.errors += (error,)
                 raise ValidationError(error)
 
-    def _get_validation_error(self, users: FieldList, split: SplitType) -> str:
-        if split == SplitType.EQUALLY:
+    def _get_validation_error(self, users: FieldList, split_type: SplitType) -> str:
+        if split_type == SplitType.EQUALLY:
             return
 
         total = sum([user.amount.data for user in users])
-        if split == SplitType.AMOUNT and total != self.amount.data:
+        if split_type == SplitType.AMOUNT and total != self.amount.data:
             return f"{users.label.text} total must equal to the expense total."
-        elif split == SplitType.PERCENTAGE and total != 100:
+        elif split_type == SplitType.PERCENTAGE and total != 100:
             return f"{users.label.text} percentages must sum to 100."
 
-    def validate_sum(self, users: FieldList, split: SplitType) -> None:
-        if error := self._get_validation_error(users, split):
+    def validate_sum(self, users: FieldList, split_type: SplitType) -> None:
+        if error := self._get_validation_error(users, split_type):
             users.errors += (error,)
             raise ValidationError(error)
 
