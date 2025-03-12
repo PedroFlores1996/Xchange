@@ -6,6 +6,7 @@ from app.expense.mapper import ExpenseData, expense_data_from
 from app.expense.processor import create_expense_from
 from app.model.expense import Expense
 from app.model.debt import Debt
+from app.model.user import User
 
 bp = Blueprint("expense", __name__)
 
@@ -18,7 +19,7 @@ def expenses() -> str | Response:
         data: ExpenseData = expense_data_from(form)
         expense: Expense = create_expense_from(data)
         return render_template("expense/summary.html", expense=expense)
-    return render_template("expense/expense.html", form=form)
+    return render_template("expense/expense.html", form=form, users=User.query.all())
 
 
 @bp.route("/success")

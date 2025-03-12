@@ -29,7 +29,7 @@
                 <ul class="list-group">
                     {% for balance in expense.balances %}
                         {% if balance.total > 0 %}
-                            <li class="list-group-item">User: {{ balance.user.username }}, Amount: {{ balance.total }}</li>
+                            <li class="list-group-item">User: {{ balance.user.username }}, Total: {{ balance.total }}, Payed: {{ balance.payed }}, Owes: {{ balance.owed }}</li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -43,7 +43,7 @@
                 <ul class="list-group">
                     {% for balance in expense.balances %}
                         {% if balance.total < 0 %}
-                            <li class="list-group-item">User: {{ balance.user.username }}, Amount: {{ balance.total }}</li>
+                            <li class="list-group-item">User: {{ balance.user.username }}, Amount: {{ balance.total }}, Payed: {{ balance.payed }}, Owes: {{ balance.owed }}</li>
                         {% endif %}
                     {% endfor %}
                 </ul>
