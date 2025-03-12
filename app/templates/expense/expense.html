@@ -24,36 +24,50 @@
                 {{ form.category(class="form-control", id="category") }}
             </div>
             <div class="form-group">
-                <label for="split">Split:</label>
-                {{ form.split(class="form-control", id="split") }}
+                <label for="payers_split">Payers Split:</label>
+                {{ form.payers_split(class="form-control", id="payers_split", onchange="togglePayersAmount()") }}
             </div>
             <div class="form-group">
                 <label>Payers:</label>
                 <div id="payers">
                     <div class="form-row">
                         <div class="col">
-                            <label for="payers-0-user_id">User ID:</label>
-                            <input type="text" name="payers-0-user_id" class="form-control" size="10">
+                            <label for="payers-0-username">Username:</label>
+                            <select name="payers-0-username" class="form-control" id="payers-0-username" onchange="updateUserId('payers', 0)">
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.username }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="payers-0-user_id" id="payers-0-user_id">
                         </div>
-                        <div class="col">
+                        <div class="col payers-amount">
                             <label for="payers-0-amount">Amount:</label>
-                            <input type="text" name="payers-0-amount" class="form-control" size="10">
+                            <input type="text" name="payers-0-amount" class="form-control" size="10" value="0">
                         </div>
                     </div>
                 </div>
                 <button type="button" class="btn btn-secondary mt-2" onclick="addPayer()">Add Payer</button>
             </div>
             <div class="form-group">
+                <label for="owers_split">Owers Split:</label>
+                {{ form.owers_split(class="form-control", id="owers_split", onchange="toggleOwersAmount()") }}
+            </div>
+            <div class="form-group">
                 <label>Owers:</label>
                 <div id="owers">
                     <div class="form-row">
                         <div class="col">
-                            <label for="owers-0-user_id">User ID:</label>
-                            <input type="text" name="owers-0-user_id" class="form-control" size="10">
+                            <label for="owers-0-username">Username:</label>
+                            <select name="owers-0-username" class="form-control" id="owers-0-username" onchange="updateUserId('owers', 0)">
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.username }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="owers-0-user_id" id="owers-0-user_id">
                         </div>
-                        <div class="col">
+                        <div class="col owers-amount">
                             <label for="owers-0-amount">Amount:</label>
-                            <input type="text" name="owers-0-amount" class="form-control" size="10">
+                            <input type="text" name="owers-0-amount" class="form-control" size="10" value="0">
                         </div>
                     </div>
                 </div>
@@ -70,6 +84,28 @@
     </div>
 
     <script>
+        function togglePayersAmount() {
+            const payersSplit = document.getElementById('payers_split').value;
+            const payersAmountFields = document.querySelectorAll('.payers-amount');
+            payersAmountFields.forEach(field => {
+                field.style.display = (payersSplit === 'EQUALLY') ? 'none' : 'block';
+            });
+        }
+
+        function toggleOwersAmount() {
+            const owersSplit = document.getElementById('owers_split').value;
+            const owersAmountFields = document.querySelectorAll('.owers-amount');
+            owersAmountFields.forEach(field => {
+                field.style.display = (owersSplit === 'EQUALLY') ? 'none' : 'block';
+            });
+        }
+
+        function updateUserId(type, index) {
+            const selectElement = document.getElementById(`${type}-${index}-username`);
+            const userIdInput = document.getElementById(`${type}-${index}-user_id`);
+            userIdInput.value = selectElement.value;
+        }
+
         function addPayer() {
             const payersDiv = document.getElementById('payers');
             const newPayerIndex = payersDiv.children.length;
@@ -77,15 +113,21 @@
             newPayerDiv.className = 'form-row';
             newPayerDiv.innerHTML = `
                 <div class="col">
-                    <label for="payers-${newPayerIndex}-user_id">User ID:</label>
-                    <input type="text" name="payers-${newPayerIndex}-user_id" class="form-control" size="10">
+                    <label for="payers-${newPayerIndex}-username">Username:</label>
+                    <select name="payers-${newPayerIndex}-username" class="form-control" id="payers-${newPayerIndex}-username" onchange="updateUserId('payers', ${newPayerIndex})">
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="payers-${newPayerIndex}-user_id" id="payers-${newPayerIndex}-user_id">
                 </div>
-                <div class="col">
+                <div class="col payers-amount">
                     <label for="payers-${newPayerIndex}-amount">Amount:</label>
-                    <input type="text" name="payers-${newPayerIndex}-amount" class="form-control" size="10">
+                    <input type="text" name="payers-${newPayerIndex}-amount" class="form-control" size="10" value="0">
                 </div>
             `;
             payersDiv.appendChild(newPayerDiv);
+            togglePayersAmount();
         }
 
         function addOwer() {
@@ -95,16 +137,27 @@
             newOwerDiv.className = 'form-row';
             newOwerDiv.innerHTML = `
                 <div class="col">
-                    <label for="owers-${newOwerIndex}-user_id">User ID:</label>
-                    <input type="text" name="owers-${newOwerIndex}-user_id" class="form-control" size="10">
+                    <label for="owers-${newOwerIndex}-username">Username:</label>
+                    <select name="owers-${newOwerIndex}-username" class="form-control" id="owers-${newOwerIndex}-username" onchange="updateUserId('owers', ${newOwerIndex})">
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="owers-${newOwerIndex}-user_id" id="owers-${newOwerIndex}-user_id">
                 </div>
-                <div class="col">
+                <div class="col owers-amount">
                     <label for="owers-${newOwerIndex}-amount">Amount:</label>
-                    <input type="text" name="owers-${newOwerIndex}-amount" class="form-control" size="10">
+                    <input type="text" name="owers-${newOwerIndex}-amount" class="form-control" size="10" value="0">
                 </div>
             `;
             owersDiv.appendChild(newOwerDiv);
+            toggleOwersAmount();
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            togglePayersAmount();
+            toggleOwersAmount();
+        });
     </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>

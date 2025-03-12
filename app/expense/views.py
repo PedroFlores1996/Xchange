@@ -1,5 +1,5 @@
 from werkzeug import Response
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template
 from flask_login import login_required
 from app.expense.forms import ExpenseForm
 from app.expense.mapper import ExpenseData, expense_data_from
