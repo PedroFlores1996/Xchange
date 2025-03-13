@@ -57,6 +57,10 @@ class User(db.Model, UserMixin):  # type: ignore
         return None
 
     @classmethod
+    def get_user_by_id(cls, user_id: int) -> Self | None:
+        return cls.query.get(user_id)
+
+    @classmethod
     def get_user_by_username(cls, username: str) -> Self | None:
         return cls.query.filter_by(username=username).first()
 

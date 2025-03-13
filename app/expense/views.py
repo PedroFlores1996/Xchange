@@ -1,6 +1,6 @@
 from werkzeug import Response
 from flask import Blueprint, render_template
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app.expense import ExpenseData
 from app.expense.forms import ExpenseForm
 from app.expense.mapper import map_form_to_expense_data
@@ -20,7 +20,8 @@ def expenses() -> str | Response:
         data: ExpenseData = map_form_to_expense_data(form)
         expense: Expense = submit_expense(data)
         return render_template("expense/summary.html", expense=expense)
-    return render_template("expense/expense.html", form=form, users=User.query.all())
+    friends = User.get_user_by_id(current_user.id).friends
+    return render_template("expense/expense.html", form=form, users=friends)
 
 
 @bp.route("/success")
