@@ -9,8 +9,15 @@ from sqlalchemy.orm import Mapped, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-
 from app.database import db
+
+# Association table for the friends relationship
+friends = db.Table(
+    "friends",
+    db.Model.metadata,
+    db.Column("user_id", db.ForeignKey("user.id"), primary_key=True),
+    db.Column("friend_id", db.ForeignKey("user.id"), primary_key=True),
+)
 
 
 class User(db.Model, UserMixin):  # type: ignore
@@ -25,6 +32,13 @@ class User(db.Model, UserMixin):  # type: ignore
     )
     borrower_debts: Mapped[List[Debt]] = relationship(
         foreign_keys="Debt.borrower_id", back_populates="borrower"
+    )
+    friends: Mapped[List[User]] = relationship(
+        "User",
+        secondary=friends,
+        primaryjoin=id == friends.c.user_id,
+        secondaryjoin=id == friends.c.friend_id,
+        backref="friends_with",
     )
 
     @classmethod
@@ -54,3 +68,17 @@ class User(db.Model, UserMixin):  # type: ignore
     def remove_from_group(self, group: Group) -> None:
         if group in self.groups:
             group.remove_user(self)
+
+    def add_friends(self, *friends: User) -> None:
+        for friend in friends:
+            if friend not in self.friends:
+                self.friends.append(friend)
+                friend.add_friends(self)
+        db.session.commit()
+
+    def remove_friends(self, *friends: User) -> None:
+        for friend in friends:
+            if friend in self.friends:
+                self.friends.remove(friend)
+                friend.remove_friends(self)
+        db.session.commit()

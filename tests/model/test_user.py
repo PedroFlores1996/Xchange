@@ -141,19 +141,18 @@ def test_remove_from_group_last_user_idempotent(db_session, group_creator):
     assert Group.query.count() == 0
 
 
-def test_remove_from_group_not_last_user(db_session):
+def test_remove_from_group_not_last_user(db_session, group_creator):
     """Creates a new user and removes it from a group."""
-    user1 = User.create("user1", "password")
-    user2 = User.create("user2", "password")
-    group = Group.create("group1", [user1])
+    user = User.create("user", "password")
+    group = Group.create("group1", [group_creator])
 
-    user2.add_to_group(group)
-    user1.remove_from_group(group)
+    user.add_to_group(group)
+    group_creator.remove_from_group(group)
 
-    assert group not in user1.groups
-    assert user1 not in group.users
-    assert user2 in group.users
-    assert group in user2.groups
+    assert group not in group_creator.groups
+    assert group_creator not in group.users
+    assert user in group.users
+    assert group in user.groups
     assert User.query.count() == 2
     assert Group.query.count() == 1
 
@@ -171,3 +170,73 @@ def test_remove_from_group_not_last_user_idempotent(db_session, group_creator):
     assert user not in group.users
     assert User.query.count() == 2
     assert Group.query.count() == 1
+
+
+def test_add_friends(db_session):
+    """Creates a new user and adds friends."""
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
+    user3 = User.create("user3", "password")
+
+    user1.add_friends(user2, user3)
+
+    assert User.query.count() == 3
+    assert user1.friends == [user2, user3]
+    assert user2.friends == [user1]
+    assert user3.friends == [user1]
+
+
+def test_add_same_friend_idempotent(db_session):
+    """Adding a friend is idempotent."""
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
+
+    user1.add_friends(user2)
+    user1.add_friends(user2)
+
+    assert user1.friends == [user2]
+    assert user2.friends == [user1]
+    assert User.query.count() == 2
+
+
+def test_add_multiple_friends(db_session):
+    """Adding multiple friends."""
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
+    user3 = User.create("user3", "password")
+
+    user1.add_friends(user2, user3)
+
+    assert user1.friends == [user2, user3]
+    assert user2.friends == [user1]
+    assert user3.friends == [user1]
+    assert User.query.count() == 3
+
+
+def test_remove_friends(db_session):
+    """Creates a new user and removes friends."""
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
+    user3 = User.create("user3", "password")
+
+    user1.add_friends(user2, user3)
+    user1.remove_friends(user2, user3)
+
+    assert User.query.count() == 3
+    assert user1.friends == []
+    assert user2.friends == []
+    assert user3.friends == []
+
+
+def test_remove_same_friend_idempotent(db_session):
+    """Removing a friend is idempotent."""
+    user1 = User.create("user1", "password")
+    user2 = User.create("user2", "password")
+
+    user1.add_friends(user2)
+    user1.remove_friends(user2)
+    user1.remove_friends(user2)
+
+    assert user1.friends == []
+    assert user2.friends == []
+    assert User.query.count() == 2
