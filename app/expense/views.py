@@ -20,8 +20,9 @@ def expenses() -> str | Response:
         data: ExpenseData = map_form_to_expense_data(form)
         expense: Expense = submit_expense(data)
         return render_template("expense/summary.html", expense=expense)
-    friends = User.get_user_by_id(current_user.id).friends
-    return render_template("expense/expense.html", form=form, users=friends)
+    return render_template(
+        "expense/expense.html", form=form, users=current_user.friends
+    )
 
 
 @bp.route("/success")
