@@ -23,16 +23,14 @@ def create_app(config=None):
     loginManager.login_view = "auth.login"
 
     from app.auth.views import bp as auth_bp
+    from app.index.views import bp as index_bp
+    from app.expense.views import bp as expense_bp
+    from app.user.views import bp as user_bp
 
     app.register_blueprint(auth_bp)
-
-    from app.index.views import bp as index_bp
-
     app.register_blueprint(index_bp)
-
-    from app.expense.views import bp as expense_bp
-
     app.register_blueprint(expense_bp)
+    app.register_blueprint(user_bp)
 
     from app.cli import database
 

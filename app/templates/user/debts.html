@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Debts</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">User Debts Balance</h1>
+        <p class="text-center">Total Balance: {{ balance }}</p>
+    </div>
+    <div class="container mt-5">
+        <h1 class="text-center">User Debts</h1>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Lender</th>
+                    <th>Borrower</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for debt in debts %}
+                    <tr>
+                        <td>{{ debt.lender.username }}</td>
+                        <td>{{ debt.borrower.username }}</td>
+                        <td>{{ debt.amount }}</td>
+                        <td>{{ debt.description }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
