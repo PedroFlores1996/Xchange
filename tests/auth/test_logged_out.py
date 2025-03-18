@@ -4,7 +4,7 @@ from app.model.user import User
 
 
 def test_logged_out_authenticated(db_session, client, reset_login):
-    user = User.create("user1", "password1")
+    user = User.create("username", "email", "password")
     login_user(user)
 
     response = client.get("/login")

@@ -22,7 +22,8 @@ friends = db.Table(
 
 class User(db.Model, UserMixin):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
-    username: Mapped[str] = db.mapped_column(unique=True, nullable=False)
+    email: Mapped[str] = db.mapped_column(unique=True, nullable=False)
+    username: Mapped[str] = db.mapped_column(nullable=False)
     password: Mapped[str] = db.mapped_column(nullable=False)
     groups: Mapped[List[Group]] = relationship(
         secondary="group_members", back_populates="users"
@@ -42,16 +43,16 @@ class User(db.Model, UserMixin):  # type: ignore
     )
 
     @classmethod
-    def create(cls, username: str, password: str) -> Self:
+    def create(cls, username: str, email: str, password: str) -> Self:
         hashed_password: str = generate_password_hash(password)
-        new_user: Self = cls(username=username, password=hashed_password)
+        new_user: Self = cls(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         return new_user
 
     @classmethod
-    def authenticate(cls, username: str, password: str) -> Self | None:
-        user: User | None = cls.get_user_by_username(username)
+    def authenticate(cls, email: str, password: str) -> Self | None:
+        user: User | None = cls.get_user_by_email(email)
         if user and check_password_hash(user.password, password):
             return user
         return None
@@ -61,8 +62,8 @@ class User(db.Model, UserMixin):  # type: ignore
         return cls.query.get(user_id)
 
     @classmethod
-    def get_user_by_username(cls, username: str) -> Self | None:
-        return cls.query.filter_by(username=username).first()
+    def get_user_by_email(cls, email: str) -> Self | None:
+        return cls.query.filter_by(email=email).first()
 
     def add_to_group(self, group: Group) -> None:
         if group not in self.groups:

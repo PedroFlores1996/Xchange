@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Friend</title>
+    <title>Friends</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center">Add Friend</h1>
+        <h1 class="text-center">Your Friends</h1>
+        <ul class="list-group mb-4">
+            {% for friend in friends %}
+                <li class="list-group-item">{{ friend.username }} ({{ friend.email }})</li>
+            {% endfor %}
+        </ul>
+        <h2 class="text-center">Add a Friend</h2>
         <form action="{{ url_for('user.friends') }}" method="post">
             <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" name="username" class="form-control" id="username" required>
+                <label for="email">Friend's Email:</label>
+                <input type="email" name="email" class="form-control" id="email" required>
             </div>
-            <button type="submit" class="btn btn-primary">Add Friend</button>
+            <button type="submit" class="btn btn-primary">Add</button>
         </form>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -25,14 +31,6 @@
                 </div>
             {% endif %}
         {% endwith %}
-        <div class="mt-4">
-            <h2>Your Friends</h2>
-            <ul class="list-group">
-                {% for friend in friends %}
-                    <li class="list-group-item">{{ friend.username }}</li>
-                {% endfor %}
-            </ul>
-        </div>
     </div>
 </body>
 </html>

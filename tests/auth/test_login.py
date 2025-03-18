@@ -14,11 +14,11 @@ def test_login_get(client, captured_templates):
 
 
 def test_login_post(db_session, client, reset_login):
-    User.create("user1", "password1")
+    User.create("username", "email", "password")
 
     response = client.post(
         "/login",
-        data={"username": "user1", "password": "password1"},
+        data={"email": "email", "password": "password"},
     )
 
     assert current_user.is_authenticated
@@ -29,7 +29,7 @@ def test_login_post(db_session, client, reset_login):
 def test_login_post_inexistent_user(db_session, client, reset_login):
     response = client.post(
         "/login",
-        data={"username": "user1", "password": "password1"},
+        data={"email": "email", "password": "password"},
     )
 
     assert User.query.count() == 0
@@ -39,11 +39,11 @@ def test_login_post_inexistent_user(db_session, client, reset_login):
 
 
 def test_login_post_invalid_password(db_session, client, reset_login):
-    User.create("user1", "password1")
+    User.create("username", "email", "password")
 
     response = client.post(
         "/login",
-        data={"username": "user1", "password": "invalid_password"},
+        data={"email": "email", "password": "invalid_password"},
     )
 
     assert response.status_code == 302
@@ -58,7 +58,7 @@ def test_login_invalid_form(db_session, client, reset_login, captured_templates)
     assert captured_templates[0][0].name == "auth/login.html"
     assert isinstance(captured_templates[0][1]["form"], LoginForm)
     assert captured_templates[0][1]["form"].errors == {
-        "username": ["This field is required."],
+        "email": ["This field is required."],
         "password": ["This field is required."],
     }
     assert not current_user.is_authenticated

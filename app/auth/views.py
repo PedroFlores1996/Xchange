@@ -31,11 +31,11 @@ def login() -> str | Response:
     form = LoginForm()
     if form.validate_on_submit():
         next: str | None = request.args.get("next")
-        if user := User.authenticate(form.username.data, form.password.data):  # type: ignore # form data is valid at this point
+        if user := User.authenticate(form.email.data, form.password.data):  # type: ignore # form data is valid at this point
             login_user(user, remember=form.remember_me.data)
             return redirect(next or url_for("index.home_page"))
         else:
-            flash("Invalid username or password")
+            flash("Invalid email or password")
             return redirect(url_for("auth.login", next=next))
     return render_template("auth/login.html", form=form)
 
@@ -46,12 +46,12 @@ def signin() -> str | Response:
     form = SigninForm()
     if form.validate_on_submit():
         # Add signin logic here
-        if not User.get_user_by_username(form.username.data):  # type: ignore # form data is valid at this point
-            new_user = User.create(form.username.data, form.password.data)  # type: ignore # form data is valid at this point
+        if not User.get_user_by_email(form.email.data):  # type: ignore # form data is valid at this point
+            new_user = User.create(form.username.data, form.email.data, form.password.data)  # type: ignore # form data is valid at this point
             login_user(new_user, remember=form.remember_me.data)
             return redirect(url_for("index.home_page"))
         else:
-            flash("Username already exists")
+            flash("Email already exists")
             return redirect(url_for("auth.signin"))
     return render_template("auth/signin.html", form=form)
 

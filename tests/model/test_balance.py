@@ -5,7 +5,7 @@ from app.split import SplitType
 
 
 def test_create_balance_positive(db_session):
-    user = User.create("username", "password")
+    user = User.create("username", "email", "password")
     balance = Balance(
         user_id=user.id,
         owed=10.0,

@@ -20,7 +20,7 @@ def captured_templates(app):
 
 @pytest.fixture(scope="function")
 def login_before(db_session, request_context):
-    user = User.create("user1", "password1")
+    user = User.create("username", "email", "password")
     login_user(user)
     assert current_user.is_authenticated
     yield

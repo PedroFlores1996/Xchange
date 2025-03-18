@@ -3,11 +3,11 @@ from app.model.user import User
 
 
 def test_update_debts(db_session):
-    user1 = User.create("username1", "password")
-    user2 = User.create("username2", "password")
-    user3 = User.create("username3", "password")
-    user4 = User.create("username4", "password")
-    user5 = User.create("username5", "password")
+    user1 = User.create("username1", "email1", "password")
+    user2 = User.create("username2", "email2", "password")
+    user3 = User.create("username3", "email3", "password")
+    user4 = User.create("username4", "email4", "password")
+    user5 = User.create("username5", "email5", "password")
 
     balances = {
         user1.id: {"owed": 0, "payed": 10, "total": 10},

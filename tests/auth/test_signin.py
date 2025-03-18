@@ -17,9 +17,10 @@ def test_signin_post(db_session, client, reset_login):
     response = client.post(
         "/signin",
         data={
-            "username": "user1",
-            "password": "password1",
-            "confirm_password": "password1",
+            "username": "username",
+            "email": "email",
+            "password": "password",
+            "confirm_password": "password",
         },
     )
 
@@ -30,20 +31,21 @@ def test_signin_post(db_session, client, reset_login):
 
 
 def test_signin_post_existing_user(db_session, client, reset_login):
-    User.create("user1", "password1")
+    User.create("username", "email", "password")
 
     response = client.post(
         "/signin",
         data={
-            "username": "user1",
-            "password": "password1",
-            "confirm_password": "password1",
+            "username": "username",
+            "email": "email",
+            "password": "password",
+            "confirm_password": "password",
         },
     )
 
     assert User.query.count() == 1
     with client.session_transaction() as session:
-        assert "Username already exists" in session["_flashes"][0]
+        assert "Email already exists" in session["_flashes"][0]
     assert response.status_code == 302
     assert response.location == url_for("auth.signin")
     assert not current_user.is_authenticated
@@ -55,7 +57,8 @@ def test_signin_post_password_mismatch(
     response = client.post(
         "/signin",
         data={
-            "username": "user1",
+            "username": "username",
+            "email": "email",
             "password": "password1",
             "confirm_password": "password2",
         },
@@ -80,6 +83,7 @@ def test_signin_post_invalid_form(db_session, client, reset_login, captured_temp
     assert isinstance(captured_templates[0][1]["form"], SigninForm)
     assert captured_templates[0][1]["form"].errors == {
         "username": ["This field is required."],
+        "email": ["This field is required."],
         "password": ["This field is required."],
         "confirm_password": ["This field is required."],
     }

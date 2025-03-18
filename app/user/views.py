@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.model.user import User
+from app.user.forms import AddFriendForm
 
 bp = Blueprint("user", __name__)
 
@@ -22,18 +23,24 @@ def user_groups():
 @bp.route("/users/friends", methods=["GET", "POST"])
 @login_required
 def friends():
-    if request.method == "POST":
-        username = request.form.get("username")
-        if not username:
-            flash("Username is required.", "warning")
-            return redirect(url_for("user.friends"))
-
-        friend = User.query.filter_by(username=username).first()
+    form = AddFriendForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        friend = User.query.filter_by(email=email).first()
         if friend:
-            current_user.add_friends(friend)
-            flash(f"User {username} added as a friend.", "success")
+            if friend in current_user.friends:
+                flash(
+                    f"User {friend.username} with email {email} is already your friend.",
+                    "info",
+                )
+            else:
+                current_user.add_friends(friend)
+                flash(
+                    f"User {friend.username} with email {email} added as a friend.",
+                    "success",
+                )
         else:
-            flash(f"User {username} does not exist.", "danger")
+            flash(f"No user found with email {email}.", "danger")
 
         return redirect(url_for("user.friends"))
 

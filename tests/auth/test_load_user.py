@@ -3,7 +3,7 @@ from app.auth import load_user
 
 
 def test_load_user(db_session):
-    user = User.create("testuser", "password")
+    user = User.create("username", "email", "password")
 
     loaded_user = load_user(user.id)
 

@@ -8,9 +8,9 @@ from app.split import SplitType
 
 
 def test_create_expense(db_session):
-    user1 = User.create("user1", "password")
-    user2 = User.create("user2", "password")
-    group = Group.create("group", [user1, user2])
+    user1 = User.create("user1", "email1", "password")
+    user2 = User.create("user2", "email2", "password")
+    group = Group.create("group_name", [user1, user2])
     balance1 = Balance.create(user1.id, owed=50.0, payed=100.0, total=50.0)
     balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]
@@ -48,8 +48,8 @@ def test_create_expense(db_session):
 
 
 def test_create_expense_defaults(db_session):
-    user1 = User.create("user1", "password")
-    user2 = User.create("user2", "password")
+    user1 = User.create("user1", "email1", "password")
+    user2 = User.create("user2", "email2", "password")
     balance1 = Balance.create(user1.id, owed=50.0, payed=100.0, total=50.0)
     balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]
@@ -65,8 +65,8 @@ def test_create_expense_defaults(db_session):
 
 
 def test_updating_expense_changes_updated_at(db_session):
-    user1 = User.create("user1", "password")
-    user2 = User.create("user2", "password")
+    user1 = User.create("user1", "email1", "password")
+    user2 = User.create("user2", "email2", "password")
     balance1 = Balance.create(user1.id, owed=50.0, payed=100.0, total=50.0)
     balance2 = Balance.create(user2.id, owed=50.0, payed=0.0, total=-50.0)
     balances = [balance1, balance2]

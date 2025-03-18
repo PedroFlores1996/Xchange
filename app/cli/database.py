@@ -33,7 +33,9 @@ def test_data() -> None:
     # Create 10 users
     users = []
     for i in range(1, 11):
-        user = User.create(username=f"user{i}", password="password")
+        user = User.create(
+            username=f"user{i}", email=f"{i}@email.com", password="password"
+        )
         users.append(user)
 
     # Create 2 groups
