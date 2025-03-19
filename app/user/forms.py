@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import SubmitField, EmailField
 from wtforms.validators import DataRequired, Email
 
 
 class AddFriendForm(FlaskForm):
-    email = StringField("Friend's Email", validators=[DataRequired(), Email()])
+    email = EmailField("Friend's Email", validators=[DataRequired()])
     submit = SubmitField("Add Friend")
