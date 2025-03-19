@@ -12,10 +12,6 @@
         <form action="{{ url_for('expense.expenses') }}" method="post">
             {{ form.hidden_tag() }}
             <div class="form-group">
-                <label for="amount">Amount:</label>
-                {{ form.amount(class="form-control", id="amount", size=20) }}
-            </div>
-            <div class="form-group">
                 <label for="description">Description:</label>
                 {{ form.description(class="form-control", id="description", size=50) }}
             </div>
@@ -24,60 +20,66 @@
                 {{ form.category(class="form-control", id="category") }}
             </div>
             <div class="form-group">
-                <label for="payers_split">Payers Split:</label>
-                {{ form.payers_split(class="form-control", id="payers_split", onchange="togglePayersAmount()") }}
+                <label for="amount">Amount:</label>
+                {{ form.amount(class="form-control", id="amount", size=20) }}
             </div>
-            <div class="form-group">
-                <label>Payers:</label>
-                <div id="payers">
-                    <div class="form-row">
-                        <div class="col">
-                            <label for="payers-0-username">Username:</label>
-                            <select name="payers-0-username" class="form-control" id="payers-0-username" onchange="updateUserId('payers', 0)">
-                                {% for user in users %}
-                                    <option value="{{ user.id }}">{{ user.username }}</option>
-                                {% endfor %}
-                            </select>
-                            <input type="hidden" name="payers-0-user_id" id="payers-0-user_id">
+            <div class="row">
+                <!-- Payers Section -->
+                <div class="col-md-6">
+                    <h3>Payers</h3>
+                    <div id="payers">
+                        <div class="form-group">
+                            <label for="payers_split">Payers Split:</label>
+                            {{ form.payers_split(class="form-control", id="payers_split", onchange="togglePayersAmount()") }}
                         </div>
-                        <div class="col payers-amount">
-                            <label for="payers-0-amount">Amount:</label>
-                            <input type="text" name="payers-0-amount" class="form-control" size="10" value="0">
-                        </div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-secondary mt-2" onclick="addPayer()">Add Payer</button>
-            </div>
-            <div class="form-group">
-                <label for="owers_split">Owers Split:</label>
-                {{ form.owers_split(class="form-control", id="owers_split", onchange="toggleOwersAmount()") }}
-            </div>
-            <div class="form-group">
-                <label>Owers:</label>
-                <div id="owers">
-                    <div class="form-row">
-                        <div class="col">
-                            <label for="owers-0-username">Username:</label>
-                            <select name="owers-0-username" class="form-control" id="owers-0-username" onchange="updateUserId('owers', 0)">
-                                {% for user in users %}
-                                    <option value="{{ user.id }}">{{ user.username }}</option>
-                                {% endfor %}
-                            </select>
-                            <input type="hidden" name="owers-0-user_id" id="owers-0-user_id">
-                        </div>
-                        <div class="col owers-amount">
-                            <label for="owers-0-amount">Amount:</label>
-                            <input type="text" name="owers-0-amount" class="form-control" size="10" value="0">
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="payers-0-username">Username:</label>
+                                <select name="payers-0-username" class="form-control" id="payers-0-username" onchange="updateUserId('payers', 0)">
+                                    {% for user in users %}
+                                        <option value="{{ user.id }}">{{ user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="hidden" name="payers-0-user_id" id="payers-0-user_id">
+                            </div>
+                            <div class="col payers-amount">
+                                <label for="payers-0-amount">Amount:</label>
+                                <input type="text" name="payers-0-amount" class="form-control" size="10" value="0">
+                            </div>
                         </div>
                     </div>
+                    <button type="button" class="btn btn-secondary mt-2" onclick="addPayer()">Add Payer</button>
                 </div>
-                <button type="button" class="btn btn-secondary mt-2" onclick="addOwer()">Add Ower</button>
+
+                <!-- Owers Section -->
+                <div class="col-md-6">
+                    <h3>Owers</h3>
+                    <div id="owers">
+                        <div class="form-group">
+                            <label for="owers_split">Owers Split:</label>
+                            {{ form.owers_split(class="form-control", id="owers_split", onchange="toggleOwersAmount()") }}
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="owers-0-username">Username:</label>
+                                <select name="owers-0-username" class="form-control" id="owers-0-username" onchange="updateUserId('owers', 0)">
+                                    {% for user in users %}
+                                        <option value="{{ user.id }}">{{ user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="hidden" name="owers-0-user_id" id="owers-0-user_id">
+                            </div>
+                            <div class="col owers-amount">
+                                <label for="owers-0-amount">Amount:</label>
+                                <input type="text" name="owers-0-amount" class="form-control" size="10" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary mt-2" onclick="addOwer()">Add Ower</button>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="group_id">Group ID:</label>
-                {{ form.group_id(class="form-control", id="group_id", size=10) }}
-            </div>
-            <div class="form-group text-center">
+            <div class="mt-5"></div>
+            <div class="form-group text-center mt-4">
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
         </form>

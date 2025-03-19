@@ -21,7 +21,7 @@ def expenses() -> str | Response:
         expense: Expense = submit_expense(data)
         return render_template("expense/summary.html", expense=expense)
     return render_template(
-        "expense/expense.html", form=form, users=current_user.friends
+        "expense/expense.html", form=form, users=[current_user] + current_user.friends
     )
 
 
