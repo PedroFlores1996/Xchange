@@ -25,6 +25,13 @@ class User(db.Model, UserMixin):  # type: ignore
     email: Mapped[str] = db.mapped_column(unique=True, nullable=False)
     username: Mapped[str] = db.mapped_column(nullable=False)
     password: Mapped[str] = db.mapped_column(nullable=False)
+    friends: Mapped[List[User]] = relationship(
+        "User",
+        secondary=friends,
+        primaryjoin=id == friends.c.user_id,
+        secondaryjoin=id == friends.c.friend_id,
+        backref="friends_with",
+    )
     groups: Mapped[List[Group]] = relationship(
         secondary="group_members", back_populates="users"
     )
@@ -33,13 +40,6 @@ class User(db.Model, UserMixin):  # type: ignore
     )
     borrower_debts: Mapped[List[Debt]] = relationship(
         foreign_keys="Debt.borrower_id", back_populates="borrower"
-    )
-    friends: Mapped[List[User]] = relationship(
-        "User",
-        secondary=friends,
-        primaryjoin=id == friends.c.user_id,
-        secondaryjoin=id == friends.c.friend_id,
-        backref="friends_with",
     )
 
     @classmethod
