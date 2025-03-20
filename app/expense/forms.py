@@ -31,12 +31,14 @@ class ExpenseForm(FlaskForm):
         choices=SplitType.choices(),
         validators=[DataRequired()],
         coerce=SplitType.coerce,
+        default=SplitType.EQUALLY,
     )
     owers_split = SelectField(
         "Split",
         choices=SplitType.choices(),
         validators=[DataRequired()],
         coerce=SplitType.coerce,
+        default=SplitType.EQUALLY,
     )
     payers = FieldList(
         FormField(ExpenseUserForm),
