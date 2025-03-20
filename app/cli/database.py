@@ -24,6 +24,17 @@ def create_tables() -> None:
         stamp()
 
 
+@cli.command("clear-data")
+def clear_data() -> None:
+    """Clear all data from the database tables."""
+    meta = db.metadata
+    for table in reversed(meta.sorted_tables):
+        print(f"Clearing table {table.name}...")
+        db.session.execute(table.delete())
+    db.session.commit()
+    print("All data cleared successfully.")
+
+
 @cli.command("test-data")
 def test_data() -> None:
     """Create test data."""
@@ -50,5 +61,11 @@ def test_data() -> None:
         user.add_to_group(group1)
     for user in users[5:]:
         user.add_to_group(group2)
+
+    # Make all users friends with each other
+    for user in users:
+        for friend in users:
+            if user != friend:  # Avoid adding a user as their own friend
+                user.add_friends(friend)
 
     print("Test data created successfully.")
