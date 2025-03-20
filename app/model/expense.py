@@ -27,6 +27,14 @@ class ExpenseCategory(FormEnum):
     UTILITIES = "Utilities"
 
 
+expense_users = db.Table(
+    "expense_users",
+    db.metadata,
+    db.Column("user_id", db.ForeignKey("user.id"), primary_key=True),
+    db.Column("expense_id", db.ForeignKey("expense.id"), primary_key=True),
+)
+
+
 class Expense(db.Model):  # type: ignore
     id: Mapped[int] = db.mapped_column(primary_key=True)
     amount: Mapped[float] = db.mapped_column(nullable=False)

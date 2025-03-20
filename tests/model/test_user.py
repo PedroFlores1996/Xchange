@@ -3,6 +3,7 @@ from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
 from app.model.user import User
 from app.model.group import Group
+from app.model.expense import Expense
 
 
 def test_create_new_user(db_session):
@@ -255,3 +256,47 @@ def test_remove_same_friend_idempotent(db_session):
     assert user1.friends == []
     assert user2.friends == []
     assert User.query.count() == 2
+
+
+def test_add_expense(db_session):
+    """Creates a new user and adds an expense."""
+    user = User.create("username", "email", "password")
+    expense = Expense.create(10, [], user.id)
+
+    user.add_expense(expense)
+
+    assert user.expenses == [expense]
+
+
+def test_add_same_expense_idempotent(db_session):
+    """Adding an expense is idempotent."""
+    user = User.create("username", "email", "password")
+    expense = Expense.create(10, [], user.id)
+
+    user.add_expense(expense)
+    user.add_expense(expense)
+
+    assert user.expenses == [expense]
+
+
+def test_remove_expense(db_session):
+    """Creates a new user and removes an expense."""
+    user = User.create("username", "email", "password")
+    expense = Expense.create(10, [], user.id)
+
+    user.add_expense(expense)
+    user.remove_expense(expense)
+
+    assert user.expenses == []
+
+
+def test_remove_same_expense_idempotent(db_session):
+    """Removing an expense is idempotent."""
+    user = User.create("username", "email", "password")
+    expense = Expense.create(10, [], user.id)
+
+    user.add_expense(expense)
+    user.remove_expense(expense)
+    user.remove_expense(expense)
+
+    assert user.expenses == []

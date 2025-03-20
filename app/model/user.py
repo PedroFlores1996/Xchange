@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Self, List
 if TYPE_CHECKING:
     from app.model.group import Group
     from app.model.debt import Debt
+    from app.model.expense import Expense
 
 from sqlalchemy.orm import Mapped, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -41,6 +42,7 @@ class User(db.Model, UserMixin):  # type: ignore
     borrower_debts: Mapped[List[Debt]] = relationship(
         foreign_keys="Debt.borrower_id", back_populates="borrower"
     )
+    expenses: Mapped[List[Expense]] = relationship(secondary="expense_users")
 
     @classmethod
     def create(cls, username: str, email: str, password: str) -> Self:
@@ -87,3 +89,13 @@ class User(db.Model, UserMixin):  # type: ignore
                 self.friends.remove(friend)
                 friend.remove_friends(self)
         db.session.commit()
+
+    def add_expense(self, expense: Expense) -> None:
+        if expense not in self.expenses:
+            self.expenses.append(expense)
+            db.session.flush()
+
+    def remove_expense(self, expense: Expense) -> None:
+        if expense in self.expenses:
+            self.expenses.remove(expense)
+            db.session.flush()
