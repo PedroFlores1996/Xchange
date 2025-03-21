@@ -40,3 +40,9 @@ def update_debts(balances: dict[int, dict[str, float]]):
     transactions = minimum_transactions(balances)
     for debtor_id, creditor_id, amount in transactions:
         Debt.update(debtor_id, creditor_id, amount)
+
+
+def get_debts_balance(lender_debts: list[Debt], borrower_debts: list[Debt]) -> float:
+    return sum(debt.amount for debt in lender_debts) - sum(
+        debt.amount for debt in borrower_debts
+    )
