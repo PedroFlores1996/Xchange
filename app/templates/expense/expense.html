@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submit Expense</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .btn-remove {
+            height: 38px; /* Adjust the height to match input fields */
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -30,23 +35,23 @@
                     <div id="payers">
                         <div class="form-group">
                             <label for="payers_split">Payers Split:</label>
-                            {{ form.payers_split(class="form-control", id="payers_split", onchange="togglePayersAmount()") }}
+                            {{ form.payers_split(class="form-control", id="payers_split", onchange="toggleAmount('payers')") }}
                         </div>
-                        <div class="form-row">
-                            <div class="col">
-                                <label for="payers-0-username">Username:</label>
-                                <select name="payers-0-username" class="form-control" id="payers-0-username" onchange="updateUserId('payers', 0)">
-                                    {% for user in users %}
-                                        <option value="{{ user.id }}">{{ user.username }}</option>
-                                    {% endfor %}
-                                </select>
-                                <input type="hidden" name="payers-0-user_id" id="payers-0-user_id">
+                            <div class="form-row align-items-center mb-2 d-flex">
+                                <div class="col">
+                                    <label for="payers-0-username">Username:</label>
+                                    <select name="payers-0-username" class="form-control" id="payers-0-username" onchange="updateUserId('payers', 0)">
+                                        {% for user in users %}
+                                            <option value="{{ user.id }}">{{ user.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <input type="hidden" name="payers-0-user_id" id="payers-0-user_id">
+                                </div>
+                                <div class="col payers-amount" style="display: none;">
+                                    <label for="payers-0-amount">Amount:</label>
+                                    <input type="text" name="payers-0-amount" class="form-control" size="10" value="0">
+                                </div>
                             </div>
-                            <div class="col payers-amount">
-                                <label for="payers-0-amount">Amount:</label>
-                                <input type="text" name="payers-0-amount" class="form-control" size="10" value="0">
-                            </div>
-                        </div>
                     </div>
                     <button type="button" class="btn btn-secondary mt-2" onclick="addPayer()">Add Payer</button>
                 </div>
@@ -57,9 +62,9 @@
                     <div id="owers">
                         <div class="form-group">
                             <label for="owers_split">Owers Split:</label>
-                            {{ form.owers_split(class="form-control", id="owers_split", onchange="toggleOwersAmount()") }}
+                            {{ form.owers_split(class="form-control", id="owers_split", onchange="toggleAmount('owers')") }}
                         </div>
-                        <div class="form-row">
+                        <div class="form-row align-items-center mb-2 d-flex">
                             <div class="col">
                                 <label for="owers-0-username">Username:</label>
                                 <select name="owers-0-username" class="form-control" id="owers-0-username" onchange="updateUserId('owers', 0)">
@@ -69,7 +74,7 @@
                                 </select>
                                 <input type="hidden" name="owers-0-user_id" id="owers-0-user_id">
                             </div>
-                            <div class="col owers-amount">
+                            <div class="col owers-amount" style="display: none;">
                                 <label for="owers-0-amount">Amount:</label>
                                 <input type="text" name="owers-0-amount" class="form-control" size="10" value="0">
                             </div>
@@ -86,33 +91,27 @@
     </div>
 
     <script>
-        function togglePayersAmount() {
-            const payersSplit = document.getElementById('payers_split').value;
-            const payersAmountFields = document.querySelectorAll('.payers-amount');
+        function toggleAmount(users_label) {
+            const payersSplit = document.getElementById(`${users_label}_split`).value;
+            const payersAmountFields = document.querySelectorAll(`.${users_label}-amount`);
             payersAmountFields.forEach(field => {
                 field.style.display = (payersSplit === 'Equally') ? 'none' : 'block';
-            });
-        }
-
-        function toggleOwersAmount() {
-            const owersSplit = document.getElementById('owers_split').value;
-            const owersAmountFields = document.querySelectorAll('.owers-amount');
-            owersAmountFields.forEach(field => {
-                field.style.display = (owersSplit === 'Equally') ? 'none' : 'block';
             });
         }
 
         function updateUserId(type, index) {
             const selectElement = document.getElementById(`${type}-${index}-username`);
             const userIdInput = document.getElementById(`${type}-${index}-user_id`);
-            userIdInput.value = selectElement.value;
+            if (selectElement && userIdInput) {
+                userIdInput.value = selectElement.value; // Update the hidden user_id field with the selected user ID
+            }
         }
 
         function addPayer() {
             const payersDiv = document.getElementById('payers');
             const newPayerIndex = payersDiv.children.length;
             const newPayerDiv = document.createElement('div');
-            newPayerDiv.className = 'form-row';
+            newPayerDiv.className = 'form-row align-items-center mb-2 d-flex';
             newPayerDiv.innerHTML = `
                 <div class="col">
                     <label for="payers-${newPayerIndex}-username">Username:</label>
@@ -127,16 +126,19 @@
                     <label for="payers-${newPayerIndex}-amount">Amount:</label>
                     <input type="text" name="payers-${newPayerIndex}-amount" class="form-control" size="10" value="0">
                 </div>
+                <div class="col-auto d-flex align-self-end">
+                    <button type="button" class="btn btn-danger btn-sm form-control btn-remove" onclick="removeRow(this)">Remove</button>
+                </div>
             `;
             payersDiv.appendChild(newPayerDiv);
-            togglePayersAmount();
+            toggleAmount('payers');
         }
 
         function addOwer() {
             const owersDiv = document.getElementById('owers');
             const newOwerIndex = owersDiv.children.length;
             const newOwerDiv = document.createElement('div');
-            newOwerDiv.className = 'form-row';
+            newOwerDiv.className = 'form-row align-items-center mb-2 d-flex';
             newOwerDiv.innerHTML = `
                 <div class="col">
                     <label for="owers-${newOwerIndex}-username">Username:</label>
@@ -151,14 +153,35 @@
                     <label for="owers-${newOwerIndex}-amount">Amount:</label>
                     <input type="text" name="owers-${newOwerIndex}-amount" class="form-control" size="10" value="0">
                 </div>
+                <div class="col-auto d-flex align-self-end">
+                    <button type="button" class="btn btn-danger btn-sm form-control btn-remove" onclick="removeRow(this)">Remove</button>
+                </div>
             `;
             owersDiv.appendChild(newOwerDiv);
-            toggleOwersAmount();
+            toggleAmount('owers');
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            togglePayersAmount();
-            toggleOwersAmount();
+        function removeRow(button) {
+            const row = button.closest('.form-row');
+            row.remove();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize user_id fields for payers
+            const payerSelectElements = document.querySelectorAll('[id^="payers-"][id$="-username"]');
+            payerSelectElements.forEach((selectElement, index) => {
+                updateUserId('payers', index);
+            });
+
+            // Initialize user_id fields for owers
+            const owerSelectElements = document.querySelectorAll('[id^="owers-"][id$="-username"]');
+            owerSelectElements.forEach((selectElement, index) => {
+                updateUserId('owers', index);
+            });
+
+            // Initialize amount visibility
+            toggleAmount('payers');
+            toggleAmount('owers');
         });
     </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
