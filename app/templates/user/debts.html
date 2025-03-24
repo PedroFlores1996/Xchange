@@ -5,11 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Debts</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .balance-positive {
+            color: green;
+        }
+        .balance-negative {
+            color: red;
+        }
+        .balance-zero {
+            color: black;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="text-center">Total Balance</h1>
-        <p class="text-center">{{ balance }}</p>
+        <h2 class="text-center 
+            {% if balance > 0 %}balance-positive{% elif balance < 0 %}balance-negative{% else %}balance-zero{% endif %}">
+            {{ balance }}
+        </h2>
     </div>
     <div class="container mt-5">
         <h1 class="text-center">User Debts</h1>
