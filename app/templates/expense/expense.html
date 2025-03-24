@@ -28,6 +28,15 @@
                 <label for="amount">Amount:</label>
                 {{ form.amount(class="form-control", id="amount", size=20) }}
             </div>
+            <div class="form-group">
+                <label for="group_select">Select Group:</label>
+                <select id="group_select" class="form-control" onchange="updateUsersByGroup()">
+                    <option value="">-- Select a Group --</option>
+                    {% for group in current_user.groups %}
+                        <option value="{{ group.id }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="row">
                 <!-- Payers Section -->
                 <div class="col-md-6">
@@ -41,8 +50,9 @@
                                 <div class="col">
                                     <label for="payers-0-username">Username:</label>
                                     <select name="payers-0-username" class="form-control" id="payers-0-username" onchange="updateUserId('payers', 0)">
-                                        {% for user in users %}
-                                            <option value="{{ user.id }}">{{ user.username }}</option>
+                                        <option value="{{ current_user.id }}">{{ current_user.username }}</option>
+                                        {% for friend in current_user.friends %}
+                                            <option value="{{ friend.id }}">{{ friend.username }}</option>
                                         {% endfor %}
                                     </select>
                                     <input type="hidden" name="payers-0-user_id" id="payers-0-user_id">
@@ -68,8 +78,9 @@
                             <div class="col">
                                 <label for="owers-0-username">Username:</label>
                                 <select name="owers-0-username" class="form-control" id="owers-0-username" onchange="updateUserId('owers', 0)">
-                                    {% for user in users %}
-                                        <option value="{{ user.id }}">{{ user.username }}</option>
+                                    <option value="{{ current_user.id }}">{{ current_user.username }}</option>
+                                    {% for friend in current_user.friends %}
+                                        <option value="{{ friend.id }}">{{ friend.username }}</option>
                                     {% endfor %}
                                 </select>
                                 <input type="hidden" name="owers-0-user_id" id="owers-0-user_id">
@@ -164,6 +175,76 @@
         function removeRow(button) {
             const row = button.closest('.form-row');
             row.remove();
+        }
+
+        function updateUsersByGroup() {
+            const groupId = document.getElementById("group_select").value;
+
+            if (!groupId) {
+                // If no group is selected, use current_user and current_user.friends
+                const defaultUsers = [
+                    { id: "{{ current_user.id }}", username: "{{ current_user.username }}" },
+                    {% for friend in current_user.friends %}
+                        { id: "{{ friend.id }}", username: "{{ friend.username }}" },
+                    {% endfor %}
+                ];
+
+                // Update Payers dropdowns
+                const payerSelectElements = document.querySelectorAll('[id^="payers-"][id$="-username"]');
+                payerSelectElements.forEach(selectElement => {
+                    updateDropdownOptions(selectElement, defaultUsers);
+                });
+
+                // Update Owers dropdowns
+                const owerSelectElements = document.querySelectorAll('[id^="owers-"][id$="-username"]');
+                owerSelectElements.forEach(selectElement => {
+                    updateDropdownOptions(selectElement, defaultUsers);
+                });
+
+                return;
+            }
+
+            // Fetch users for the selected group
+            fetch(`/groups/${groupId}/users`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch group users.");
+                    }
+                    return response.json();
+                })
+                .then(users => {
+                    // Update Payers dropdowns
+                    const payerSelectElements = document.querySelectorAll('[id^="payers-"][id$="-username"]');
+                    payerSelectElements.forEach(selectElement => {
+                        updateDropdownOptions(selectElement, users);
+                    });
+
+                    // Update Owers dropdowns
+                    const owerSelectElements = document.querySelectorAll('[id^="owers-"][id$="-username"]');
+                    owerSelectElements.forEach(selectElement => {
+                        updateDropdownOptions(selectElement, users);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("An error occurred while fetching group users.");
+                });
+        }
+
+        function updateDropdownOptions(selectElement, users) {
+            // Clear existing options
+            selectElement.innerHTML = "";
+
+            // Add new options
+            users.forEach(user => {
+                const option = document.createElement("option");
+                option.value = user.id;
+                option.textContent = user.username;
+                selectElement.appendChild(option);
+            });
+
+            // Trigger the onchange event to update the hidden user_id field
+            selectElement.dispatchEvent(new Event("change"));
         }
 
         document.addEventListener('DOMContentLoaded', function () {
