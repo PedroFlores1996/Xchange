@@ -26,11 +26,13 @@ def create_app(config=None):
     from app.index.views import bp as index_bp
     from app.expense.views import bp as expense_bp
     from app.user.views import bp as user_bp
+    from app.group.views import bp as group_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(index_bp)
     app.register_blueprint(expense_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(group_bp)
 
     from app.cli import database
 
