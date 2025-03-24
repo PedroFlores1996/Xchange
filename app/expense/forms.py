@@ -60,7 +60,9 @@ class ExpenseForm(FlaskForm):
                 self.owers.errors += (error,)
                 raise ValidationError(error)
 
-    def _get_validation_error(self, users: FieldList, split_type: SplitType) -> str:
+    def _validate_sum_by_split_type(
+        self, users: FieldList, split_type: SplitType
+    ) -> str:
         if split_type == SplitType.EQUALLY:
             return
 
@@ -71,7 +73,7 @@ class ExpenseForm(FlaskForm):
             return f"{users.label.text} percentages must sum to 100."
 
     def validate_sum(self, users: FieldList, split_type: SplitType) -> None:
-        if error := self._get_validation_error(users, split_type):
+        if error := self._validate_sum_by_split_type(users, split_type):
             users.errors += (error,)
             raise ValidationError(error)
 

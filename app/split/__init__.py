@@ -9,7 +9,7 @@ class SplitType(FormEnum):
 
 
 def _split_by_type(
-    total_amount: float, users: dict[int, float], split_type: SplitType
+    total_amount: float, users: dict[int, float | None], split_type: SplitType
 ) -> dict[int, float]:
     match split_type:
         case SplitType.AMOUNT:
