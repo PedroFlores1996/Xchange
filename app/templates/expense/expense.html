@@ -31,7 +31,7 @@
             <div class="form-group">
                 <label for="group_select">Select Group:</label>
                 <select id="group_select" class="form-control" onchange="updateUsersByGroup()">
-                    <option value="">-- Select a Group --</option>
+                    <option value="">No Group</option>
                     {% for group in current_user.groups %}
                         <option value="{{ group.id }}">{{ group.name }}</option>
                     {% endfor %}
@@ -63,7 +63,7 @@
                                 </div>
                             </div>
                     </div>
-                    <button type="button" class="btn btn-secondary mt-2" onclick="addPayer()">Add Payer</button>
+                    <button type="button" class="btn btn-secondary mt-2" onclick="addUserRow('payers')">Add Payer</button>
                 </div>
 
                 <!-- Owers Section -->
@@ -91,7 +91,7 @@
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-secondary mt-2" onclick="addOwer()">Add Ower</button>
+                    <button type="button" class="btn btn-secondary mt-2" onclick="addUserRow('owers')">Add Ower</button>
                 </div>
             </div>
             <div class="mt-5"></div>
@@ -102,6 +102,13 @@
     </div>
 
     <script>
+        let availableUsers = [
+            { id: "{{ current_user.id }}", username: "{{ current_user.username }}" },
+            {% for friend in current_user.friends %}
+                { id: "{{ friend.id }}", username: "{{ friend.username }}" },
+            {% endfor %}
+        ];
+
         function toggleAmount(users_label) {
             const payersSplit = document.getElementById(`${users_label}_split`).value;
             const payersAmountFields = document.querySelectorAll(`.${users_label}-amount`);
@@ -118,58 +125,38 @@
             }
         }
 
-        function addPayer() {
-            const payersDiv = document.getElementById('payers');
-            const newPayerIndex = payersDiv.children.length;
-            const newPayerDiv = document.createElement('div');
-            newPayerDiv.className = 'form-row align-items-center mb-2 d-flex';
-            newPayerDiv.innerHTML = `
-                <div class="col">
-                    <label for="payers-${newPayerIndex}-username">Username:</label>
-                    <select name="payers-${newPayerIndex}-username" class="form-control" id="payers-${newPayerIndex}-username" onchange="updateUserId('payers', ${newPayerIndex})">
-                        {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.username }}</option>
-                        {% endfor %}
-                    </select>
-                    <input type="hidden" name="payers-${newPayerIndex}-user_id" id="payers-${newPayerIndex}-user_id">
-                </div>
-                <div class="col payers-amount">
-                    <label for="payers-${newPayerIndex}-amount">Amount:</label>
-                    <input type="text" name="payers-${newPayerIndex}-amount" class="form-control" size="10" value="0">
-                </div>
-                <div class="col-auto d-flex align-self-end">
-                    <button type="button" class="btn btn-danger btn-sm form-control btn-remove" onclick="removeRow(this)">Remove</button>
-                </div>
-            `;
-            payersDiv.appendChild(newPayerDiv);
-            toggleAmount('payers');
-        }
+        function addUserRow(type) {
+            const containerDiv = document.getElementById(type); // Either 'payers' or 'owers'
+            const newIndex = containerDiv.children.length;
+            const newDiv = document.createElement('div');
+            newDiv.className = 'form-row align-items-center mb-2 d-flex';
 
-        function addOwer() {
-            const owersDiv = document.getElementById('owers');
-            const newOwerIndex = owersDiv.children.length;
-            const newOwerDiv = document.createElement('div');
-            newOwerDiv.className = 'form-row align-items-center mb-2 d-flex';
-            newOwerDiv.innerHTML = `
+            // Generate the dropdown options dynamically from availableUsers
+            const options = availableUsers.map(user => `<option value="${user.id}">${user.username}</option>`).join("");
+
+            // Generate the HTML for the new row
+            newDiv.innerHTML = `
                 <div class="col">
-                    <label for="owers-${newOwerIndex}-username">Username:</label>
-                    <select name="owers-${newOwerIndex}-username" class="form-control" id="owers-${newOwerIndex}-username" onchange="updateUserId('owers', ${newOwerIndex})">
-                        {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.username }}</option>
-                        {% endfor %}
+                    <label for="${type}-${newIndex}-username">Username:</label>
+                    <select name="${type}-${newIndex}-username" class="form-control" id="${type}-${newIndex}-username" onchange="updateUserId('${type}', ${newIndex})">
+                        ${options}
                     </select>
-                    <input type="hidden" name="owers-${newOwerIndex}-user_id" id="owers-${newOwerIndex}-user_id">
+                    <input type="hidden" name="${type}-${newIndex}-user_id" id="${type}-${newIndex}-user_id">
                 </div>
-                <div class="col owers-amount">
-                    <label for="owers-${newOwerIndex}-amount">Amount:</label>
-                    <input type="text" name="owers-${newOwerIndex}-amount" class="form-control" size="10" value="0">
+                <div class="col ${type}-amount">
+                    <label for="${type}-${newIndex}-amount">Amount:</label>
+                    <input type="text" name="${type}-${newIndex}-amount" class="form-control" size="10" value="0">
                 </div>
                 <div class="col-auto d-flex align-self-end">
                     <button type="button" class="btn btn-danger btn-sm form-control btn-remove" onclick="removeRow(this)">Remove</button>
                 </div>
             `;
-            owersDiv.appendChild(newOwerDiv);
-            toggleAmount('owers');
+
+            // Append the new row to the container
+            containerDiv.appendChild(newDiv);
+
+            // Toggle the visibility of the amount fields
+            toggleAmount(type);
         }
 
         function removeRow(button) {
@@ -177,35 +164,40 @@
             row.remove();
         }
 
+        function updateDropdowns(type, users) {
+            // Select all dropdown elements for the specified type (e.g., 'payers' or 'owers')
+            const selectElements = document.querySelectorAll(`[id^="${type}-"][id$="-username"]`);
+            selectElements.forEach(selectElement => {
+                updateDropdownOptions(selectElement, users);
+            });
+        }
+
         function updateUsersByGroup() {
             const groupId = document.getElementById("group_select").value;
 
             if (!groupId) {
-                // If no group is selected, use current_user and current_user.friends
-                const defaultUsers = [
+                // If no group is selected, reset to current_user and friends
+                availableUsers = [
                     { id: "{{ current_user.id }}", username: "{{ current_user.username }}" },
                     {% for friend in current_user.friends %}
                         { id: "{{ friend.id }}", username: "{{ friend.username }}" },
                     {% endfor %}
                 ];
 
-                // Update Payers dropdowns
-                const payerSelectElements = document.querySelectorAll('[id^="payers-"][id$="-username"]');
-                payerSelectElements.forEach(selectElement => {
-                    updateDropdownOptions(selectElement, defaultUsers);
-                });
-
-                // Update Owers dropdowns
-                const owerSelectElements = document.querySelectorAll('[id^="owers-"][id$="-username"]');
-                owerSelectElements.forEach(selectElement => {
-                    updateDropdownOptions(selectElement, defaultUsers);
-                });
+                // Update both Payers and Owers dropdowns
+                updateDropdowns('payers', availableUsers);
+                updateDropdowns('owers', availableUsers);
 
                 return;
             }
 
             // Fetch users for the selected group
-            fetch(`/groups/${groupId}/users`)
+            fetch(`/groups/${groupId}/users`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error("Failed to fetch group users.");
@@ -213,17 +205,12 @@
                     return response.json();
                 })
                 .then(users => {
-                    // Update Payers dropdowns
-                    const payerSelectElements = document.querySelectorAll('[id^="payers-"][id$="-username"]');
-                    payerSelectElements.forEach(selectElement => {
-                        updateDropdownOptions(selectElement, users);
-                    });
+                    // Update the global variable with the group's users
+                    availableUsers = users;
 
-                    // Update Owers dropdowns
-                    const owerSelectElements = document.querySelectorAll('[id^="owers-"][id$="-username"]');
-                    owerSelectElements.forEach(selectElement => {
-                        updateDropdownOptions(selectElement, users);
-                    });
+                    // Update both Payers and Owers dropdowns
+                    updateDropdowns('payers', availableUsers);
+                    updateDropdowns('owers', availableUsers);
                 })
                 .catch(error => {
                     console.error(error);
