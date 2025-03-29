@@ -103,12 +103,14 @@
     </div>
 
     <script>
-        let availableUsers = [
+        let userAndFriends = [
             { id: "{{ current_user.id }}", username: "{{ current_user.username }}" },
             {% for friend in current_user.friends %}
                 { id: "{{ friend.id }}", username: "{{ friend.username }}" },
             {% endfor %}
         ];
+
+        let availableUsers = [...userAndFriends]; // Initialize availableUsers with userAndFriends
 
         function toggleAmount(users_label) {
             const payersSplit = document.getElementById(`${users_label}_split`).value;
@@ -177,13 +179,12 @@
             const groupId = document.getElementById("group_select").value;
 
             if (!groupId) {
-                // If no group is selected, reset to current_user and friends
-                availableUsers = [
-                    { id: "{{ current_user.id }}", username: "{{ current_user.username }}" },
-                    {% for friend in current_user.friends %}
-                        { id: "{{ friend.id }}", username: "{{ friend.username }}" },
-                    {% endfor %}
-                ];
+                // If no group is selected, reset availableUsers to userAndFriends
+                availableUsers = [...userAndFriends];
+
+                // Remove rows with users not in the default list
+                filterRowsByAvailableUsers('payers');
+                filterRowsByAvailableUsers('owers');
 
                 // Update both Payers and Owers dropdowns
                 updateDropdowns('payers', availableUsers);
@@ -209,6 +210,10 @@
                     // Update the global variable with the group's users
                     availableUsers = users;
 
+                    // Remove rows with users not in the selected group
+                    filterRowsByAvailableUsers('payers');
+                    filterRowsByAvailableUsers('owers');
+
                     // Update both Payers and Owers dropdowns
                     updateDropdowns('payers', availableUsers);
                     updateDropdowns('owers', availableUsers);
@@ -220,6 +225,9 @@
         }
 
         function updateDropdownOptions(selectElement, users) {
+            // Store the currently selected value
+            const currentValue = selectElement.value;
+
             // Clear existing options
             selectElement.innerHTML = "";
 
@@ -231,14 +239,38 @@
                 selectElement.appendChild(option);
             });
 
-            // Trigger the onchange event to update the hidden user_id field
-            selectElement.dispatchEvent(new Event("change"));
+            // Restore the previously selected value if it exists in the new options
+            const optionToSelect = Array.from(selectElement.options).find(option => option.value == currentValue);
+            if (optionToSelect) {
+                optionToSelect.selected = true;
+            } else {
+                // Trigger the onchange event to update the hidden user_id field if the selected value is no longer valid
+                selectElement.dispatchEvent(new Event("change"));
+            }
         }
 
         function updateGroupIdField() {
             const groupSelect = document.getElementById("group_select");
             const groupIdField = document.getElementById("group_id");
             groupIdField.value = groupSelect.value; // Set the hidden field's value to the selected group's ID
+        }
+
+        function filterRowsByAvailableUsers(type) {
+            const containerDiv = document.getElementById(type); // Either 'payers' or 'owers'
+            const rows = containerDiv.querySelectorAll('.form-row');
+
+            rows.forEach(row => {
+                const selectElement = row.querySelector(`[id^="${type}-"][id$="-username"]`);
+                if (selectElement) {
+                    const selectedUserId = selectElement.value;
+                    const userExists = availableUsers.some(user => user.id == selectedUserId);
+
+                    // Remove the row if the user is not in the availableUsers list
+                    if (!userExists) {
+                        row.remove();
+                    }
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function () {
