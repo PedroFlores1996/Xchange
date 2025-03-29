@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.model.user import User
 from app.user.forms import AddFriendForm
-from app.debt import get_debts_balance
+from app.debt import get_debts_total_balance
 
 bp = Blueprint("user", __name__)
 
@@ -11,7 +11,9 @@ bp = Blueprint("user", __name__)
 @login_required
 def user_debts():
     debts = current_user.lender_debts + current_user.borrower_debts
-    balance = get_debts_balance(current_user.lender_debts, current_user.borrower_debts)
+    balance = get_debts_total_balance(
+        current_user.lender_debts, current_user.borrower_debts
+    )
     return render_template("user/debts.html", debts=debts, balance=balance)
 
 
