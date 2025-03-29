@@ -41,7 +41,8 @@ def get_group_expenses(group_id):
                 "description": expense.description,
                 "amount": expense.amount,
                 "category": expense.category,
-                "date": expense.date.strftime("%Y-%m-%d"),
+                "creator": expense.creator,
+                "created_at": expense.created_at.strftime("%Y-%m-%d"),
             }
             for expense in group.expenses
         ]
