@@ -54,18 +54,3 @@ def friends():
 def expenses():
     expenses = current_user.expenses
     return render_template("user/expenses.html", expenses=expenses)
-
-
-@bp.route("/expense/<int:expense_id>", methods=["GET"])
-@login_required
-def expense_summary(expense_id):
-    # Fetch the expense by ID
-    expense = next((e for e in current_user.expenses if e.id == expense_id), None)
-
-    # If the expense does not exist or does not belong to the current user, show a 404 error
-    if not expense:
-        flash("Expense not found or you do not have access to it.", "danger")
-        return redirect(url_for("user.expenses"))
-
-    # Render the summary template with the expense details
-    return render_template("expense/summary.html", expense=expense)

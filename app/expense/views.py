@@ -1,5 +1,5 @@
 from werkzeug import Response
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.expense import ExpenseData
 from app.expense.forms import ExpenseForm
@@ -21,6 +21,21 @@ def expenses() -> str | Response:
         expense: Expense = submit_expense(data)
         return render_template("expense/summary.html", expense=expense)
     return render_template("expense/expense.html", form=form, current_user=current_user)
+
+
+@bp.route("/expenses/<int:expense_id>", methods=["GET"])
+@login_required
+def expense_summary(expense_id):
+    # Fetch the expense by ID
+    expense = next((e for e in current_user.expenses if e.id == expense_id), None)
+
+    # If the expense does not exist or does not belong to the current user, show a 404 error
+    if not expense:
+        flash("Expense not found or you do not have access to it.", "danger")
+        return redirect(url_for("user.expenses"))
+
+    # Render the summary template with the expense details
+    return render_template("expense/summary.html", expense=expense)
 
 
 @bp.route("/success")

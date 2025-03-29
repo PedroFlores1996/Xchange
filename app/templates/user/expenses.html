@@ -24,7 +24,7 @@
                     {% for expense in expenses %}
                         <tr>
                             <td>
-                                <a href="{{ url_for('user.expense_summary', expense_id=expense.id) }}">
+                                <a href="{{ url_for('expense.expense_summary', expense_id=expense.id) }}">
                                     {{ expense.description }}
                                 </a>
                             </td>
