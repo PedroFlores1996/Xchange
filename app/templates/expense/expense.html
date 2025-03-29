@@ -30,13 +30,14 @@
             </div>
             <div class="form-group">
                 <label for="group_select">Select Group:</label>
-                <select id="group_select" class="form-control" onchange="updateUsersByGroup()">
+                <select id="group_select" class="form-control" onchange="updateUsersByGroup(); updateGroupIdField();">
                     <option value="">No Group</option>
                     {% for group in current_user.groups %}
                         <option value="{{ group.id }}">{{ group.name }}</option>
                     {% endfor %}
                 </select>
             </div>
+            <input type="hidden" name="group_id" id="group_id" value="">
             <div class="row">
                 <!-- Payers Section -->
                 <div class="col-md-6">
@@ -232,6 +233,12 @@
 
             // Trigger the onchange event to update the hidden user_id field
             selectElement.dispatchEvent(new Event("change"));
+        }
+
+        function updateGroupIdField() {
+            const groupSelect = document.getElementById("group_select");
+            const groupIdField = document.getElementById("group_id");
+            groupIdField.value = groupSelect.value; // Set the hidden field's value to the selected group's ID
         }
 
         document.addEventListener('DOMContentLoaded', function () {
