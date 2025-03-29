@@ -2,7 +2,7 @@ from app.model import Debt
 from app.split.constants import TOTAL
 
 
-def minimum_transactions(
+def min_transactions(
     balances: dict[int, dict[str, float]],
 ) -> list[tuple[int, int, float]]:
     debtors = {
@@ -37,7 +37,7 @@ def minimum_transactions(
 
 
 def update_debts(balances: dict[int, dict[str, float]]):
-    transactions = minimum_transactions(balances)
+    transactions = min_transactions(balances)
     for debtor_id, creditor_id, amount in transactions:
         Debt.update(debtor_id, creditor_id, amount)
 

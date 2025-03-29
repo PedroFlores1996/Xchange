@@ -1,4 +1,4 @@
-from app.debt import minimum_transactions
+from app.debt import min_transactions
 from app.model.user import User
 
 
@@ -17,5 +17,5 @@ def test_update_debts(db_session):
         user5.id: {"owed": 0, "payed": 10, "total": 10},
     }
 
-    transactions = minimum_transactions(balances)
+    transactions = min_transactions(balances)
     print(transactions)
