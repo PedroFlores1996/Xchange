@@ -12,8 +12,8 @@
         <table class="table table-striped table-bordered">
             <thead class="thead-dark">
                 <tr>
-                    <th>Borrower ID</th>
                     <th>Lender ID</th>
+                    <th>Borrower ID</th>
                     <th>Amount</th>
                     <th>Description</th>
                     <th>Group ID</th>
@@ -22,8 +22,8 @@
             <tbody>
                 {% for debt in debts %}
                     <tr>
-                        <td>{{ debt.borrower.username }}</td>
                         <td>{{ debt.lender.username }}</td>
+                        <td>{{ debt.borrower.username }}</td>
                         <td>{{ debt.amount }}</td>
                         <td>{{ debt.description }}</td>
                         <td>{{ debt.group_id }}</td>
