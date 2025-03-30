@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Balances</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Your Balances</h1>
+        <table class="table table-striped mt-4">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Group</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for group_id, balance in group_balances.items() %}
+                    <tr>
+                        <td>
+                            {% if group_id == NO_GROUP %}
+                                No Group
+                            {% else %}
+                                Group {{ group_id }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if balance >= 0 %}
+                                <span class="text-success">${{ "%.2f"|format(balance) }}</span>
+                            {% else %}
+                                <span class="text-danger">-${{ "%.2f"|format(-balance) }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-4">
+            <h3 class="text-center">Overall Balance: 
+                {% if overall_balance >= 0 %}
+                    <span class="text-success">${{ "%.2f"|format(overall_balance) }}</span>
+                {% else %}
+                    <span class="text-danger">-${{ "%.2f"|format(-overall_balance) }}</span>
+                {% endif %}
+            </h3>
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('user.user_groups') }}" class="btn btn-primary">View Groups</a>
+            <a href="{{ url_for('user.expenses') }}" class="btn btn-secondary">View Expenses</a>
+        </div>
+    </div>
+</body>
+</html>

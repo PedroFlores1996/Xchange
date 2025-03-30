@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from app.model.user import User
 from app.user.forms import AddFriendForm
 from app.debt import get_debts_total_balance
+from app.model.constants import NO_GROUP
 
 bp = Blueprint("user", __name__)
 
@@ -56,3 +57,22 @@ def friends():
 def expenses():
     expenses = current_user.expenses
     return render_template("user/expenses.html", expenses=expenses)
+
+
+@bp.route("/user/balances", methods=["GET"])
+@login_required
+def balance():
+    group_balances = dict.fromkeys([group.id for group in current_user.groups], 0)
+    group_balances[NO_GROUP] = 0
+    overall_balance = 0
+    for debt in current_user.lender_debts:
+        group_balances[debt.group_id] += debt.amount
+        overall_balance += debt.amount
+    for debt in current_user.borrower_debts:
+        group_balances[debt.group_id] -= debt.amount
+        overall_balance -= debt.amount
+    return render_template(
+        "user/balances.html",
+        group_balances=group_balances,
+        overall_balance=overall_balance,
+    )
