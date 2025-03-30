@@ -25,7 +25,7 @@ def submit_expense(data: ExpenseData) -> Expense:
     balances = split(
         data.amount, data.payers, data.owers, data.payers_split, data.owers_split
     )
-    update_debts(balances)
+    update_debts(balances, data.group_id)
     expense = create_expense(data, balances)
     update_users_expenses(expense)
     db.session.commit()

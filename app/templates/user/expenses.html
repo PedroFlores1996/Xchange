@@ -16,6 +16,7 @@
                         <th>Description</th>
                         <th>Category</th>
                         <th>Amount</th>
+                        <th>Group</th>
                         <th>Created By</th>
                         <th>Date</th>
                     </tr>
@@ -30,6 +31,7 @@
                             </td>
                             <td>{{ expense.category }}</td>
                             <td>${{ "%.2f"|format(expense.amount) }}</td>
+                            <td>{{ expense.group.name if expense.group else 'No Group' }}</td>
                             <td>{{ expense.creator.username }}</td>
                             <td>{{ expense.created_at.strftime('%Y-%m-%d') }}</td>
                         </tr>

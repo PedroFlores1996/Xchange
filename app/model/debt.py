@@ -52,8 +52,8 @@ class Debt(db.Model):  # type: ignore
         borrower_id: int,
         lender_id: int,
         amount: float,
-        description: str | None = None,
         group_id: int | None = None,
+        description: str | None = None,
     ) -> None:
         if existing_debt := cls.find(borrower_id, lender_id, group_id):
             existing_debt.amount += amount
@@ -78,8 +78,8 @@ class Debt(db.Model):  # type: ignore
             borrower_id=borrower_id,
             lender_id=lender_id,
             amount=amount,
-            description=description,
             group_id=group_id,
+            description=description,
         )
         db.session.add(new_debt)
         db.session.flush()

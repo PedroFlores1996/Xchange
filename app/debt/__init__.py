@@ -47,11 +47,13 @@ def simplify_debts(balances: dict[int, float]) -> list[tuple[int, int, float]]:
     return transactions
 
 
-def update_debts(balances: dict[int, dict[str, float]]):
+def update_debts(
+    balances: dict[int, dict[str, float]], group_id: int | None = None
+) -> None:
     total_balances = {id: balance[TOTAL] for id, balance in balances.items()}
     transactions = simplify_debts(total_balances)
     for debtor_id, creditor_id, amount in transactions:
-        Debt.update(debtor_id, creditor_id, amount)
+        Debt.update(debtor_id, creditor_id, amount, group_id)
 
 
 def get_debts_total_balance(

@@ -33,7 +33,7 @@
                     <th>Lender</th>
                     <th>Borrower</th>
                     <th>Amount</th>
-                    <th>Description</th>
+                    <th>Group</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,7 +42,7 @@
                         <td>{{ debt.lender.username }}</td>
                         <td>{{ debt.borrower.username }}</td>
                         <td>{{ debt.amount }}</td>
-                        <td>{{ debt.description }}</td>
+                        <td>{{ debt.group.name }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
