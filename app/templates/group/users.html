@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Users</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Users in Group: {{ group.name }}</h1>
+        <table class="table table-striped mt-4">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if not users %}
+            <p class="text-center text-muted">No users found in this group.</p>
+        {% endif %}
+        <div class="text-center mt-4">
+            <a href="{{ url_for('groups.get_group_expenses', group_id=group.id) }}" class="btn btn-primary">View Group Expenses</a>
+            <a href="{{ url_for('groups.get_group_users', group_id=group.id) }}" class="btn btn-secondary">Back to Groups</a>
+        </div>
+    </div>
+</body>
+</html>
