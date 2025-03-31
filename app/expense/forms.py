@@ -1,3 +1,4 @@
+from decimal import Decimal
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
@@ -13,13 +14,30 @@ from app.model.expense import ExpenseCategory
 from app.split import SplitType
 
 
+def max_decimals(max) -> None:
+    def _max_decimals(form, field) -> None:
+        """
+        Validates that the value has at most 2 decimal places.
+        """
+        if field.data is not None:
+            decimal_value = Decimal(str(field.data))
+            if decimal_value.as_tuple().exponent < -max:
+                raise ValidationError("Amount must have at most 2 decimal places.")
+
+    return _max_decimals
+
+
 class ExpenseUserForm(FlaskForm):
     user_id = IntegerField("User ID", validators=[DataRequired()])
-    amount = FloatField("Amount", validators=[Optional(), NumberRange(min=0)])
+    amount = FloatField(
+        "Amount", validators=[Optional(), NumberRange(min=0), max_decimals(2)]
+    )
 
 
 class ExpenseForm(FlaskForm):
-    amount = FloatField("Amount", validators=[DataRequired(), NumberRange(min=0)])
+    amount = FloatField(
+        "Amount", validators=[DataRequired(), NumberRange(min=0), max_decimals(2)]
+    )
     description = StringField("Description", validators=[DataRequired()])
     category = SelectField(
         "Category",
@@ -44,11 +62,13 @@ class ExpenseForm(FlaskForm):
         FormField(ExpenseUserForm),
         "Payers",
         validators=[DataRequired()],
+        min_entries=1,
     )
     owers = FieldList(
         FormField(ExpenseUserForm),
         "Owers",
         validators=[DataRequired()],
+        min_entries=1,
     )
     group_id = IntegerField("Group ID", validators=[Optional()])
 

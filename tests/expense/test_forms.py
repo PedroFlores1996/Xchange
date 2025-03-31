@@ -1,6 +1,7 @@
 import pytest
-from wtforms import ValidationError, FormField, FieldList
-from app.expense.forms import ExpenseForm, ExpenseUserForm
+from wtforms import ValidationError, FloatField
+from flask_wtf import FlaskForm
+from app.expense.forms import ExpenseForm, max_decimals
 from app.split import SplitType
 from app.model.expense import ExpenseCategory
 
@@ -146,3 +147,37 @@ def test_validate_invalid_sum_owers_after_payers(request_context):
     assert form.errors["owers"] == ["Owers percentages must sum to 100."]
     assert form.owers.errors == ["Owers percentages must sum to 100."]
     assert "payers" not in form.errors
+
+
+class TestForm(FlaskForm):
+    amount = FloatField(validators=[max_decimals(2)])
+
+
+def test_max_decimals_valid(request_context):
+    form = TestForm(amount=10.12)
+    assert form.validate() is True
+
+
+def test_max_decimals_valid_no_value(request_context):
+    form = TestForm(amount=None)
+    assert form.validate() is True
+
+
+def test_max_decimals_invalid(request_context):
+    form = TestForm(amount=10.123)
+    form.validate()
+
+    assert form.errors["amount"] == ["Amount must have at most 2 decimal places."]
+    assert form.amount.errors == ["Amount must have at most 2 decimal places."]
+
+
+def test_max_decimals_negative_value(request_context):
+    form = TestForm(amount=-10.12)
+    assert form.validate() is True
+
+
+def test_max_decimals_invalid_negative(request_context):
+    form = TestForm(amount=-10.123)
+    form.validate()
+    assert form.errors["amount"] == ["Amount must have at most 2 decimal places."]
+    assert form.amount.errors == ["Amount must have at most 2 decimal places."]
