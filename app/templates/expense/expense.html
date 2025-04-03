@@ -104,9 +104,17 @@
 
     <script>
         let userAndFriends = [
-            { id: "{{ current_user.id }}", username: "{{ current_user.username }}" },
+            { 
+                id: "{{ current_user.id }}", 
+                username: "{{ current_user.username }}", 
+                groupIds: [{% for group in current_user.groups %}{{ group.id }},{% endfor %}] 
+            },
             {% for friend in current_user.friends %}
-                { id: "{{ friend.id }}", username: "{{ friend.username }}" },
+                { 
+                    id: "{{ friend.id }}", 
+                    username: "{{ friend.username }}", 
+                    groupIds: [{% for group in friend.groups %}{{ group.id }},{% endfor %}] 
+                },
             {% endfor %}
         ];
 
@@ -178,50 +186,18 @@
         function updateUsersByGroup() {
             const groupId = document.getElementById("group_select").value;
 
-            if (!groupId) {
-                // If no group is selected, reset availableUsers to userAndFriends
-                availableUsers = [...userAndFriends];
+            // Use a ternary operator to set availableUsers
+            availableUsers = groupId
+                ? userAndFriends.filter(user => user.groupIds.includes(parseInt(groupId)))
+                : [...userAndFriends];
 
-                // Remove rows with users not in the default list
-                filterRowsByAvailableUsers('payers');
-                filterRowsByAvailableUsers('owers');
+            // Remove rows with users not in the selected group
+            filterRowsByAvailableUsers('payers');
+            filterRowsByAvailableUsers('owers');
 
-                // Update both Payers and Owers dropdowns
-                updateDropdowns('payers', availableUsers);
-                updateDropdowns('owers', availableUsers);
-
-                return;
-            }
-
-            // Fetch users for the selected group
-            fetch(`/groups/${groupId}/users`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Failed to fetch group users.");
-                    }
-                    return response.json();
-                })
-                .then(users => {
-                    // Update the global variable with the group's users
-                    availableUsers = users;
-
-                    // Remove rows with users not in the selected group
-                    filterRowsByAvailableUsers('payers');
-                    filterRowsByAvailableUsers('owers');
-
-                    // Update both Payers and Owers dropdowns
-                    updateDropdowns('payers', availableUsers);
-                    updateDropdowns('owers', availableUsers);
-                })
-                .catch(error => {
-                    console.error(error);
-                    alert("An error occurred while fetching group users.");
-                });
+            // Update both Payers and Owers dropdowns
+            updateDropdowns('payers', availableUsers);
+            updateDropdowns('owers', availableUsers);
         }
 
         function updateDropdownOptions(selectElement, users) {

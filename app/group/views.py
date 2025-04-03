@@ -16,13 +16,7 @@ def get_group_users(group_id):
     if group := get_user_group_by_id(current_user, group_id):
         users = [{"id": user.id, "username": user.username} for user in group.users]
 
-        # Check the Accept header
-        if request.accept_mimetypes["text/html"]:
-            return render_template("group/users.html", group=group, users=users)
-        elif request.accept_mimetypes["application/json"]:
-            return jsonify(users)
-        else:
-            return jsonify({"error": "Unsupported content type"}), 406
+        return render_template("group/users.html", group=group, users=users)
     else:
         return jsonify({"error": "Group not found or access denied"}), 404
 
