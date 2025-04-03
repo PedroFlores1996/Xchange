@@ -20,7 +20,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for expense in expenses %}
+                {% for expense in group.expenses %}
                     <tr>
                         <td>
                             <a href="{{ url_for('expenses.get_expense_summary', expense_id=expense.id) }}">

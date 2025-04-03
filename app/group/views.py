@@ -29,26 +29,7 @@ def get_group_expenses(group_id):
     Returns HTML or JSON based on the Accept header.
     """
     if group := get_user_group_by_id(current_user, group_id):
-        expenses = [
-            {
-                "id": expense.id,
-                "description": expense.description,
-                "amount": expense.amount,
-                "category": expense.category,
-                "creator": expense.creator,
-                "created_at": expense.created_at.strftime("%Y-%m-%d"),
-            }
-            for expense in group.expenses
-        ]
+        return render_template("group/expenses.html", group=group)
 
-        # Check the Accept header
-        if request.accept_mimetypes["text/html"]:
-            return render_template(
-                "group/expenses.html", group=group, expenses=expenses
-            )
-        elif request.accept_mimetypes["application/json"]:
-            return jsonify(expenses)
-        else:
-            return jsonify({"error": "Unsupported content type"}), 406
     else:
         return jsonify({"error": "Group not found or access denied"}), 404
