@@ -17,7 +17,6 @@
                 <p><strong>Amount:</strong> {{ expense.amount }}</p>
                 <p><strong>Description:</strong> {{ expense.description }}</p>
                 <p><strong>Category:</strong> {{ expense.category }}</p>
-                <p><strong>Split:</strong> {{ expense.split }}</p>
                 <p><strong>Group ID:</strong> {{ expense.group_id }}</p>
             </div>
         </div>
@@ -26,6 +25,7 @@
                 <h2>Payers</h2>
             </div>
             <div class="card-body">
+                <p><strong>Payers Split:</strong> {{ expense.payers_split }}</p>
                 <ul class="list-group">
                     {% for balance in expense.balances %}
                         {% if balance.total > 0 %}
@@ -40,6 +40,7 @@
                 <h2>Owers</h2>
             </div>
             <div class="card-body">
+                <p><strong>Owers Split:</strong> {{ expense.owers_split }}</p>
                 <ul class="list-group">
                     {% for balance in expense.balances %}
                         {% if balance.total < 0 %}
