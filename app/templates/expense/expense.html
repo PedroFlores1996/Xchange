@@ -121,10 +121,15 @@
         let availableUsers = [...userAndFriends]; // Initialize availableUsers with userAndFriends
 
         function toggleAmount(users_label) {
-            const payersSplit = document.getElementById(`${users_label}_split`).value;
-            const payersAmountFields = document.querySelectorAll(`.${users_label}-amount`);
-            payersAmountFields.forEach(field => {
-                field.style.display = (payersSplit === 'Equally') ? 'none' : 'block';
+            const splitType = document.getElementById(`${users_label}_split`).value;
+            const amountFields = document.querySelectorAll(`.${users_label}-amount`);
+
+            amountFields.forEach(field => {
+                // Show or hide the amount fields based on the split type
+                field.style.display = (splitType === 'Equally') ? 'none' : 'block';
+
+                // Update the label text dynamically
+                field.querySelector('label').textContent = splitType;
             });
         }
 
