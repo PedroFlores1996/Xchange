@@ -42,7 +42,13 @@
                         <td>{{ debt.lender.username }}</td>
                         <td>{{ debt.borrower.username }}</td>
                         <td>{{ debt.amount }}</td>
-                        <td>{{ debt.group.name }}</td>
+                        <td>
+                            {% if debt.group %}
+                                {{ debt.group.name }}
+                            {% else %}
+                                No group
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
