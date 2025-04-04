@@ -60,7 +60,7 @@
                                 </div>
                                 <div class="col payers-amount" style="display: none;">
                                     <label for="payers-0-amount">Amount:</label>
-                                    <input type="text" name="payers-0-amount" class="form-control" size="10" value="0">
+                                    <input type="text" name="payers-0-amount" class="form-control" size="10" value="0" oninput="validateAmount(this)">
                                 </div>
                             </div>
                     </div>
@@ -88,7 +88,7 @@
                             </div>
                             <div class="col owers-amount" style="display: none;">
                                 <label for="owers-0-amount">Amount:</label>
-                                <input type="text" name="owers-0-amount" class="form-control" size="10" value="0">
+                                <input type="text" name="owers-0-amount" class="form-control" size="10" value="0" oninput="validateAmount(this)">
                             </div>
                         </div>
                     </div>
@@ -161,7 +161,7 @@
                 </div>
                 <div class="col ${type}-amount">
                     <label for="${type}-${newIndex}-amount">Amount:</label>
-                    <input type="text" name="${type}-${newIndex}-amount" class="form-control" size="10" value="0">
+                    <input type="text" name="${type}-${newIndex}-amount" class="form-control" size="10" value="0" oninput="validateAmount(this)">
                 </div>
                 <div class="col-auto d-flex align-self-end">
                     <button type="button" class="btn btn-danger btn-sm form-control btn-remove" onclick="removeRow(this)">Remove</button>
@@ -252,6 +252,35 @@
                     }
                 }
             });
+        }
+
+        function validateAmount(input) {
+                        const isPercentage = input.closest('.col').querySelector('label').innerText === 'Percentage';
+
+            if (isPercentage) {
+                // Allow only integers between 0 and 100
+                input.value = input.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                if (input.value !== '') {
+                    const value = parseInt(input.value, 10);
+                    if (value > 100) {
+                        input.value = input.value.slice(0, -1); // Remove the last digit if the value exceeds 100
+                    }
+                }
+            } else {
+                // Allow only numbers and a single decimal point
+                input.value = input.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+
+                // Restrict to 2 decimal places
+                const parts = input.value.split('.');
+                if (parts[1] && parts[1].length > 2) {
+                    input.value = `${parts[0]}.${parts[1].substring(0, 2)}`;
+                }
+
+                // Prevent leading decimal point (e.g., ".5" becomes "0.5")
+                if (input.value.startsWith('.')) {
+                    input.value = `0${input.value}`;
+                }
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function () {
