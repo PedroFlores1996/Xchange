@@ -81,3 +81,9 @@ def get_group_user_debts(
             TOTAL: get_debts_total_balance(lender_debts, borrower_debts),
         }
     return group_debts
+
+
+def get_no_group_debts(user: User):
+    return [debt for debt in user.lender_debts if debt.group_id == NO_GROUP] + [
+        debt for debt in user.borrower_debts if debt.group_id == NO_GROUP
+    ]
