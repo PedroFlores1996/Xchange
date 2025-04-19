@@ -5,7 +5,7 @@ from app.model.expense import Expense
 from app.expense.mapper import ExpenseData, map_balances_to_model
 from app.split import split
 from app.debt import update_debts
-from app.user import update_users_expenses
+from app.user import update_expense_in_users
 
 
 def create_expense(data: ExpenseData, balances: dict[int, dict[str, float]]) -> Expense:
@@ -27,6 +27,6 @@ def submit_expense(data: ExpenseData) -> Expense:
     )
     update_debts(balances, data.group_id)
     expense = create_expense(data, balances)
-    update_users_expenses(expense)
+    update_expense_in_users(expense)
     db.session.commit()
     return expense

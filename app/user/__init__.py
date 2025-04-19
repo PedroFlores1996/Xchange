@@ -4,11 +4,16 @@ from app.model.user import User
 from app.model.constants import NO_GROUP
 
 
-def update_users_expenses(expense: Expense) -> None:
+def update_expense_in_users(expense: Expense) -> None:
     for balance in expense.balances:
         balance.user.add_expense(expense)
     if expense not in expense.creator.expenses:
         expense.creator.add_expense(expense)
+
+
+def update_expenses_in_users(expenses: list[Expense]) -> None:
+    for expense in expenses:
+        update_expense_in_users(expense)
 
 
 def get_user_balances(user: User):
