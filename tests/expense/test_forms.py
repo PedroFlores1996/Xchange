@@ -8,6 +8,8 @@ from app.model.expense import ExpenseCategory
 
 def test_single_ower_not_payer(request_context):
     form = ExpenseForm()
+    form.payers.pop_entry()
+    form.owers.pop_entry()
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.owers.append_entry({"user_id": 2, "amount": 50.0})
 
@@ -19,6 +21,8 @@ def test_single_ower_not_payer(request_context):
 
 def test_single_ower_is_also_payer_raises_validation_error(request_context):
     form = ExpenseForm()
+    form.payers.pop_entry()
+    form.owers.pop_entry()
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.owers.append_entry({"user_id": 1, "amount": 50.0})
 
@@ -33,6 +37,8 @@ def test_single_ower_is_also_payer_raises_validation_error(request_context):
 def test_validate_sum_valid(request_context):
     form = ExpenseForm()
     form.amount.data = 100.0
+    form.payers.pop_entry()
+    form.owers.pop_entry()
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.payers.append_entry({"user_id": 2, "amount": 50.0})
 
@@ -47,6 +53,8 @@ def test_validate_sum_valid(request_context):
 def test_validate_sum_invalid(request_context):
     form = ExpenseForm()
     form.amount.data = 100.0
+    form.payers.pop_entry()
+    form.owers.pop_entry()
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.payers.append_entry({"user_id": 2, "amount": 40.0})
 
@@ -69,6 +77,8 @@ def test_validate_valid_form(request_context):
     form.owers_split.data = SplitType.PERCENTAGE
     form.category.data = ExpenseCategory.OTHER
     form.description.data = "Test"
+    form.payers.pop_entry()
+    form.owers.pop_entry()
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.payers.append_entry({"user_id": 2, "amount": 50.0})
     form.owers.append_entry({"user_id": 3, "amount": 50.0})
@@ -87,6 +97,8 @@ def test_validate_invalidated_by_super_first_on_negative_amount(request_context)
     form.owers_split.data = SplitType.PERCENTAGE
     form.category.data = ExpenseCategory.OTHER
     form.description.data = "Test"
+    form.payers.pop_entry()
+    form.owers.pop_entry()
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.payers.append_entry({"user_id": 2, "amount": 40.0})
 
@@ -103,6 +115,8 @@ def test_validate_invalid_single_ower_is_payer(request_context):
     form.owers_split.data = SplitType.PERCENTAGE
     form.category.data = ExpenseCategory.OTHER
     form.description.data = "Test"
+    form.payers.pop_entry()
+    form.owers.pop_entry()
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.owers.append_entry({"user_id": 1, "amount": 50.0})
 
@@ -120,6 +134,8 @@ def test_validate_invalid_sum_payers_first(request_context):
     form.owers_split.data = SplitType.AMOUNT
     form.category.data = ExpenseCategory.OTHER
     form.description.data = "Test"
+    form.payers.pop_entry()
+    form.owers.pop_entry()
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.payers.append_entry({"user_id": 2, "amount": 40.0})
     form.owers.append_entry({"user_id": 3, "amount": 50.0})
@@ -138,6 +154,8 @@ def test_validate_invalid_sum_owers_after_payers(request_context):
     form.owers_split.data = SplitType.PERCENTAGE
     form.category.data = ExpenseCategory.OTHER
     form.description.data = "Test"
+    form.payers.pop_entry()
+    form.owers.pop_entry()
     form.payers.append_entry({"user_id": 1, "amount": 50.0})
     form.payers.append_entry({"user_id": 2, "amount": 50.0})
     form.owers.append_entry({"user_id": 3, "amount": 50.0})
