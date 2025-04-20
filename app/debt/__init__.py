@@ -76,8 +76,8 @@ def get_group_user_debts(
             debt for debt in user.borrower_debts if debt.group_id == group_id
         ]
         group_debts[user.id] = {
-            OWED: lender_debts,
-            PAYED: borrower_debts,
+            OWED: borrower_debts,
+            PAYED: lender_debts,
             TOTAL: get_debts_total_balance(lender_debts, borrower_debts),
         }
     return group_debts
