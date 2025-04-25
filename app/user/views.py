@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
-from sqlalchemy import func
 from app.model.user import User
 from app.user import get_user_balances
 from app.user.forms import AddFriendForm
@@ -101,3 +100,41 @@ def user_dashboard():
         overall_group_balance=overall_group_balance,
         expenses=current_user.expenses,
     )
+
+
+@bp.route("/users/<int:user_id>", methods=["GET"])
+@login_required
+def user_profile(user_id):
+    # Check if the user_id corresponds to the current_user's ID
+    if user_id == current_user.id:
+        return redirect(url_for("user.user_dashboard"))
+
+    # Check if the user_id belongs to one of the current_user's friends
+    friend = next(
+        (friend for friend in current_user.friends if friend.id == user_id), None
+    )
+    if friend:
+        # Get all debts between the current_user and the friend
+        debt_with_friend = next(
+            debt
+            for debt in current_user.lender_debts + current_user.borrower_debts
+            if debt.lender_id == friend.id or debt.borrower_id == friend.id
+        )
+
+        # Get all the current user's expenses involving the friend
+        expenses_with_friend = [
+            expense
+            for expense in current_user.expenses
+            if friend in [balance.user for balance in expense.balances]
+        ]
+
+        # Render a profile page for the friend
+        return render_template(
+            "user/friend.html",
+            friend=friend,
+            debts=debt_with_friend,
+            expenses=expenses_with_friend,
+        )
+
+    # If not the current_user or a friend, return 403 Forbidden
+    return jsonify({"error": "Access denied or user not found"}), 403
