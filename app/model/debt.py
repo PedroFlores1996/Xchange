@@ -23,7 +23,6 @@ class Debt(db.Model):  # type: ignore
         foreign_keys=[lender_id], back_populates="lender_debts"
     )
     amount: Mapped[float] = db.mapped_column(nullable=False)
-    description: Mapped[str] = db.mapped_column(nullable=True)
     group_id: Mapped[int] = db.mapped_column(
         db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
     )
@@ -53,7 +52,6 @@ class Debt(db.Model):  # type: ignore
         lender_id: int,
         amount: float,
         group_id: int | None = None,
-        description: str | None = None,
     ) -> None:
         if existing_debt := cls.find(borrower_id, lender_id, group_id):
             existing_debt.amount += amount
@@ -79,7 +77,6 @@ class Debt(db.Model):  # type: ignore
             lender_id=lender_id,
             amount=amount,
             group_id=group_id,
-            description=description,
         )
         db.session.add(new_debt)
         db.session.flush()
