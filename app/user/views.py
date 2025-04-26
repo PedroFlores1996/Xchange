@@ -64,9 +64,16 @@ def expenses():
 @login_required
 def balance():
     group_balances, overall_balance = get_user_balances(current_user)
+
+    # Sort group_balances by absolute balance amount in descending order
+    sorted_group_balances = dict(
+        sorted(group_balances.items(), key=lambda item: abs(item[1]), reverse=True)
+    )
+
     return render_template(
         "user/balances.html",
-        group_balances=group_balances,
+        groups=current_user.groups,
+        group_balances=sorted_group_balances,
         overall_balance=overall_balance,
     )
 

@@ -16,7 +16,7 @@ def update_expenses_in_users(expenses: list[Expense]) -> None:
         update_expense_in_users(expense)
 
 
-def get_user_balances(user: User):
+def get_user_balances(user: User) -> tuple[dict[int, float], float]:
     group_balances = dict.fromkeys([group.id for group in user.groups], 0)
     group_balances[NO_GROUP] = 0
     overall_balance = 0
