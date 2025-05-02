@@ -23,17 +23,17 @@
             <div class="text-center">
                 <h5>See all group:</h5>
                 <div class="d-flex justify-content-center gap-2">
-                    <a href="/groups/{{ group.id }}/debts" class="btn btn-info">Debts</a>
-                    <a href="/groups/{{ group.id }}/expenses" class="btn btn-info">Expenses</a>
-                    <a href="/groups/{{ group.id }}/users" class="btn btn-info">Users</a>
+                    <a href="/groups/{{ group.id }}/debts" class="btn btn-primary">Debts</a>
+                    <a href="/groups/{{ group.id }}/expenses" class="btn btn-primary">Expenses</a>
+                    <a href="/groups/{{ group.id }}/users" class="btn btn-primary">Users</a>
                 </div>
             </div>
         </div>
 
-        <div class="row">
+        <div class="row justify-content-center">
             <!-- Debts Column -->
-            <div class="col-md-6">
-                <div class="card shadow-sm">
+            <div class="col-md-5">
+                <div class="card shadow-sm" style="max-width: 600px; margin: 0 auto;">
                     <div class="card-header bg-secondary text-white">
                         <h2 class="h5 mb-0">Your Debts</h2>
                     </div>
@@ -41,13 +41,22 @@
                         <ul class="list-group">
                             {% for debt in user_group_debts %}
                                 <li class="list-group-item">
-                                    {% if debt.amount < 0 %}
-                                        You owe <span class="fw-bold text-danger">{{ debt.amount | abs }}</span> to 
-                                        <a href="/users/{{ debt.lender.id }}" class="fw-bold text-primary">{{ debt.lender.username }}</a>
-                                    {% else %}
-                                        <a href="/users/{{ debt.borrower.id }}" class="fw-bold text-primary">{{ debt.borrower.username }}</a> owes you 
-                                        <span class="fw-bold text-success">{{ debt.amount }}</span>
-                                    {% endif %}
+                                    <div class="d-flex">
+                                        <!-- Borrower/Lender (Left-aligned) -->
+                                        <div class="col text-start">
+                                            <a href="/users/{{ debt.borrower.id }}" class="text-primary">
+                                                {{ debt.borrower.username }}
+                                            </a>
+                                        </div>
+                                        <!-- Amount (Center-left-aligned) -->
+                                        <div class="col text-end">
+                                            {% if debt.amount < 0 %}
+                                                is owed <span class="text-danger">{{ debt.amount | abs }}</span>
+                                            {% else %}
+                                                owes you <span class="text-success">{{ debt.amount }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -59,22 +68,35 @@
             </div>
 
             <!-- Recent Expenses Column -->
-            <div class="col-md-6">
-                <div class="card shadow-sm">
+            <div class="col-md-5 mt-4 mt-md-0">
+                <div class="card shadow-sm" style="max-width: 600px; margin: 0 auto;">
                     <div class="card-header bg-secondary text-white">
                         <h2 class="h5 mb-0">Recent Expenses</h2>
                     </div>
                     <div class="card-body">
                         <ul class="list-group">
                             {% for expense in recent_expenses %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <a href="/expenses/{{ expense.id }}" class="text-primary">
-                                            <span class="fw-bold">{{ expense.description }}</span>
-                                        </a> - 
-                                        <span class="text-muted">{{ expense.amount }}</span>
+                                <li class="list-group-item">
+                                    <div class="d-flex">
+                                        <!-- Description (Left-aligned) -->
+                                        <div class="col text-start">
+                                            <a href="/expenses/{{ expense.id }}" class="text-primary">
+                                                <span class="fw-bold">{{ expense.description }}</span>
+                                            </a>
+                                        </div>
+                                        <div class="col text-end">
+                                            {{ expense.amount | abs }}
+                                        </div>
+                                        <!-- Created By (Right-aligned) -->
+                                        <div class="col text-end">
+                                            <small class="text-muted">
+                                                Created by 
+                                                <a href="/users/{{ expense.creator.id }}" class="fw-bold text-primary">
+                                                    {{ expense.creator.username }}
+                                                </a>
+                                            </small>
+                                        </div>
                                     </div>
-                                    <small class="text-muted">Created by <span class="fw-bold">{{ expense.creator.username }}</span></small>
                                 </li>
                             {% endfor %}
                         </ul>

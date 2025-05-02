@@ -15,102 +15,121 @@
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container-fluid mt-5">
         <h1 class="text-center">Welcome, {{ current_user.username }}</h1>
         <div class="row mt-4">
             <!-- 1st Column: No Group Debts -->
             <div class="col-md-4">
-                <h3>Friends</h3>
-                <h5>Total Balance: 
-                    {% if no_group_balance < 0 %}   
-                        <span class="text-red">{{ no_group_balance }}</span>
-                    {% elif no_group_balance > 0 %}
-                        <span class="text-green">{{ no_group_balance }}</span>
-                    {% else %}
-                        {{ no_group_balance }}
-                    {% endif %}
-                </h5>
-                <ul class="list-group">
-                    {% for debt in no_group_debts %}
-                        <li class="list-group-item">
-                            {% if debt.borrower.id == current_user.id %}
-                                You owe 
-                                <a href="/users/{{ debt.lender.id }}" class="text-primary">
-                                    <span>{{ debt.lender.username }}</span>
-                                </a> 
-                                <span class="text-red">{{ debt.amount | round(2) }}</span>
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3>
+                            <a href="/user/friends">Friends</a>
+                        </h3>
+                        <h5>Total Balance: 
+                            {% if no_group_balance < 0 %}   
+                                <span class="text-red">{{ no_group_balance }}</span>
+                            {% elif no_group_balance > 0 %}
+                                <span class="text-green">{{ no_group_balance }}</span>
                             {% else %}
-                                <a href="/users/{{ debt.borrower.id }}" class="text-primary">
-                                    <span>{{ debt.borrower.username }}</span>
-                                </a> owes you
-                                <span class="text-green">{{ debt.amount | round(2) }}</span>
+                                {{ no_group_balance }}
                             {% endif %}
-                        </li>
-                    {% else %}
-                        <li class="list-group-item">No debts outside a group.</li>
-                    {% endfor %}
-                </ul>
+                        </h5>
+                        <ul class="list-group">
+                            {% for debt in no_group_debts %}
+                                <li class="list-group-item">
+                                    {% if debt.borrower.id == current_user.id %} 
+                                        <a href="/users/{{ debt.lender.id }}" class="text-primary">
+                                            <span>{{ debt.lender.username }}</span>
+                                        </a> is owed 
+                                        <span class="text-red">{{ debt.amount | round(2) }}</span>
+                                    {% else %}
+                                        <a href="/users/{{ debt.borrower.id }}" class="text-primary">
+                                            <span>{{ debt.borrower.username }}</span>
+                                        </a> owes you
+                                        <span class="text-green">{{ debt.amount | round(2) }}</span>
+                                    {% endif %}
+                                </li>
+                            {% else %}
+                                <li class="list-group-item">No debts outside a group.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <!-- 2nd Column: Groups -->
             <div class="col-md-4">
-                <h3>Groups</h3>
-                <h5>Total Balance: 
-                    {% if overall_group_balance < 0 %}   
-                        <span class="text-red">{{ overall_group_balance }}</span>
-                    {% elif overall_group_balance > 0 %}
-                        <span class="text-green">{{ overall_group_balance }}</span>
-                    {% else %}
-                        {{ overall_group_balance }}
-                    {% endif %}
-                </h5>
-                <ul class="list-group">
-                    {% for group in groups %}
-                        <li class="list-group-item">
-                            <a href="/groups/{{ group.id }}" class="text-primary">
-                                <span>{{ group.name }}</span>
-                            </a>: 
-                            {% if group_balances[group.id] < 0 %}
-                                <span class="text-red">{{ group_balances[group.id] }}</span>
-                            {% elif group_balances[group.id] > 0 %}
-                                <span class="text-green">{{ group_balances[group.id] }}</span>
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3>
+                            <a href="/user/groups">Groups</a>
+                        </h3>
+                        <h5>Total Balance: 
+                            {% if overall_group_balance < 0 %}   
+                                <span class="text-red">{{ overall_group_balance }}</span>
+                            {% elif overall_group_balance > 0 %}
+                                <span class="text-green">{{ overall_group_balance }}</span>
                             {% else %}
-                                {{ group_balances[group.id] }}
+                                {{ overall_group_balance }}
                             {% endif %}
-                        </li>
-                    {% else %}
-                        <li class="list-group-item">No groups found.</li>
-                    {% endfor %}
-                </ul>
+                        </h5>
+                        <ul class="list-group">
+                            {% for group in groups %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <!-- Group Name -->
+                                    <a href="/groups/{{ group.id }}" class="text-primary">
+                                        <span>{{ group.name }}</span>
+                                    </a>
+                                    <!-- Group Balance -->
+                                    {% if group_balances[group.id] < 0 %}
+                                        <span class="text-red">{{ group_balances[group.id] }}</span>
+                                    {% elif group_balances[group.id] > 0 %}
+                                        <span class="text-green">{{ group_balances[group.id] }}</span>
+                                    {% else %}
+                                        {{ group_balances[group.id] }}
+                                    {% endif %}
+                                </li>
+                            {% else %}
+                                <li class="list-group-item text-center text-muted">No groups found.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <!-- 3rd Column: Recent Expenses -->
             <div class="col-md-4">
-                <h3>Recent Expenses</h3>
-                <h5>From most recent</h5>
-                <ul class="list-group">
-                    {% for expense in expenses|reverse %}
-                        <li class="list-group-item d-flex align-items-center">
-                            <!-- Description and Amount -->
-                            <div class="d-flex flex-grow-1 justify-content-between">
-                                <div>
-                                    <a href="/expenses/{{ expense.id }}" class="text-primary">
-                                        <span>{{ expense.description }}</span>
-                                    </a>
-                                </div>
-                                <div class="text-right">
-                                    {{ expense.amount | round(2) }}
-                                </div>
-                            </div>
-                            <!-- Date -->
-                             <div class="ml-3">
-                                 <span class="text-muted">{{ expense.created_at.strftime('%Y-%m-%d') }}</span>
-                             </div>
-                        </li>
-                    {% else %}
-                        <li class="list-group-item">No recent expenses.</li>
-                    {% endfor %}
-                </ul>
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3>
+                            <a href="/user/expenses">Expenses</a>
+                        </h3>
+                        <h5>From most recent</h5>
+                        <ul class="list-group">
+                            {% for expense in expenses|reverse %}
+                                <li class="list-group-item d-flex align-items-center">
+                                    <!-- Description and Amount -->
+                                    <div class="d-flex flex-grow-1 justify-content-between">
+                                        <div>
+                                            <a href="/expenses/{{ expense.id }}" class="text-primary">
+                                                <span>{{ expense.description }}</span>
+                                            </a>
+                                        </div>
+                                        <div class="text-right">
+                                            {{ expense.amount | round(2) }}
+                                        </div>
+                                    </div>
+                                    <!-- Date -->
+                                    <div class="ml-3">
+                                        <span class="text-muted">{{ expense.created_at.strftime('%Y-%m-%d') }}</span>
+                                    </div>
+                                </li>
+                            {% else %}
+                                <li class="list-group-item">No recent expenses.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
