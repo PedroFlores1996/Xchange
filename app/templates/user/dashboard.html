@@ -3,135 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Dashboard</title>
+    <!-- Include Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        .text-red {
-            color: red;
+        /* General font styling */
+        body {
+            font-family: 'Poppins', sans-serif; /* Apply the prettier font */
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa; /* Light background for better contrast */
         }
-        .text-green {
-            color: green;
+
+        /* General container styling */
+        .container {
+            margin-top: 10px; /* Reduced margin to use more space at the top */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Row styling for Friends and Groups */
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 10px; /* Fine margin between cards */
+            width: 100%;
+        }
+
+        /* Card styling */
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            width: 25%; /* Reduced width for smaller cards */
+            background-color: #ffffff; /* White background for cards */
+        }
+
+        /* Card header styling */
+        .card-header {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px;
+            font-size: 1rem; /* Slightly smaller font size */
+            text-align: center;
+            font-weight: 600; /* Bold header text */
+        }
+
+        /* Card body styling with fixed height for 3 rows */
+        .card-body {
+            padding: 10px; /* Reduced padding */
+            max-height: 180px; /* Fixed height for 3 rows */
+            min-height: 180px; /* Ensure minimum height */
+            overflow-y: auto; /* Enable scrolling when content exceeds height */
+        }
+
+        /* Specific styling for the Expenses card */
+        .card-body.expenses {
+            max-height: 300px; /* Increased height for the Expenses card */
+            min-height: 250px; /* Ensure minimum height */
+        }
+
+        /* List styling to look like table rows */
+        ul {
+            list-style-type: none; /* Remove bullet points */
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd; /* Add border to each item */
+            border-radius: 4px; /* Optional: Add rounded corners */
+            margin-bottom: 5px; /* Add spacing between rows */
+            background-color: #f9f9f9; /* Light background for rows */
+        }
+
+        li:last-child {
+            margin-bottom: 0; /* Remove margin for the last item */
+        }
+
+        /* Center the expense-amount within its container */
+        .expense-amount {
+            display: flex; /* Use flexbox for alignment */
+            justify-content: center; /* Horizontally center the content */
+            align-items: center; /* Vertically center the content */
+            text-align: center; /* Ensure text is centered */
+            flex: 0 0 100px; /* Fixed width for the amount column */
+        }
+
+        /* Footer styling */
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid mt-5">
-        <h1 class="text-center">Welcome, {{ current_user.username }}</h1>
-        <div class="row mt-4">
-            <!-- 1st Column: No Group Debts -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h3>
-                            <a href="/user/friends">Friends</a>
-                        </h3>
-                        <h5>Total Balance: 
-                            {% if no_group_balance < 0 %}   
-                                <span class="text-red">{{ no_group_balance }}</span>
-                            {% elif no_group_balance > 0 %}
-                                <span class="text-green">{{ no_group_balance }}</span>
-                            {% else %}
-                                {{ no_group_balance }}
-                            {% endif %}
-                        </h5>
-                        <ul class="list-group">
-                            {% for debt in no_group_debts %}
-                                <li class="list-group-item">
-                                    {% if debt.borrower.id == current_user.id %} 
-                                        <a href="/users/{{ debt.lender.id }}" class="text-primary">
-                                            <span>{{ debt.lender.username }}</span>
-                                        </a> is owed 
-                                        <span class="text-red">{{ debt.amount | round(2) }}</span>
-                                    {% else %}
-                                        <a href="/users/{{ debt.borrower.id }}" class="text-primary">
-                                            <span>{{ debt.borrower.username }}</span>
-                                        </a> owes you
-                                        <span class="text-green">{{ debt.amount | round(2) }}</span>
-                                    {% endif %}
-                                </li>
-                            {% else %}
-                                <li class="list-group-item">No debts outside a group.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+    <div class="container">
+        <h1 class="text-center mb-4">{{ current_user.username }}</h1>
+
+        <!-- Row for Friends and Group Debts -->
+        <div class="row">
+            <!-- Friends Card -->
+            <div class="card">
+                <div class="card-header">
+                    Friends
+                </div>
+                <div class="card-body">
+                    Total Balance:
+                    {% if no_group_balance < 0 %}
+                        <span style="color: green;">{{ no_group_balance }}</span>
+                    {% elif no_group_balance > 0 %}
+                        <span style="color: red;">{{ no_group_balance }}</span>
+                    {% else %}
+                        {{ no_group_balance }}
+                    {% endif %}
+                    <ul>
+                        {% for debt in no_group_debts %}
+                            <li>
+                                {% if debt.lender.username == current_user.username %}
+                                    <div>
+                                        <strong>{{ debt.borrower.username }}</strong>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <small>owes you</small>
+                                        <span style="color: green;">{{ debt.amount | abs }}</span>
+                                    </div>
+                                {% else %}
+                                    <div>
+                                        <strong>{{ debt.lender.username }}</strong>
+                                    </div>
+                                    <div>
+                                        <small>is owed</small>
+                                        <span style="color: red;">{{ debt.amount | abs }}</span>
+                                    </div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% if no_group_debts|length == 0 %}
+                        <p>No debts to show.</p>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- 2nd Column: Groups -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h3>
-                            <a href="/user/groups">Groups</a>
-                        </h3>
-                        <h5>Total Balance: 
-                            {% if overall_group_balance < 0 %}   
-                                <span class="text-red">{{ overall_group_balance }}</span>
-                            {% elif overall_group_balance > 0 %}
-                                <span class="text-green">{{ overall_group_balance }}</span>
-                            {% else %}
-                                {{ overall_group_balance }}
-                            {% endif %}
-                        </h5>
-                        <ul class="list-group">
-                            {% for group in groups %}
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <!-- Group Name -->
-                                    <a href="/groups/{{ group.id }}" class="text-primary">
-                                        <span>{{ group.name }}</span>
-                                    </a>
-                                    <!-- Group Balance -->
-                                    {% if group_balances[group.id] < 0 %}
-                                        <span class="text-red">{{ group_balances[group.id] }}</span>
-                                    {% elif group_balances[group.id] > 0 %}
-                                        <span class="text-green">{{ group_balances[group.id] }}</span>
-                                    {% else %}
-                                        {{ group_balances[group.id] }}
-                                    {% endif %}
-                                </li>
-                            {% else %}
-                                <li class="list-group-item text-center text-muted">No groups found.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+            <!-- Group Debts Card -->
+            <div class="card">
+                <div class="card-header">
+                    Group Debts
+                </div>
+                <div class="card-body">
+                    Total Balance:
+                    {% if overall_group_balance < 0 %}
+                        <span style="color: red;">{{ overall_group_balance }}</span>
+                    {% elif overall_group_balance > 0 %}
+                        <span style="color: green;">{{ overall_group_balance }}</span>
+                    {% else %}
+                        {{ overall_group_balance }}
+                    {% endif %}
+                    <ul>
+                        {% for group in groups %}
+                            <li>
+                                <strong>{{ group.name }}</strong>
+                                {% if group_balances[group.id] < 0 %}
+                                    <div>
+                                        <small>you owe</small>
+                                        <span style="color: red;">{{ group_balances[group.id] }}</span>
+                                    </div>
+                                {% elif group_balances[group.id] > 0 %}
+                                    <div>
+                                        <small>you're owed</small>
+                                        <span style="color: green;">{{ group_balances[group.id] }}</span>
+                                    </div>
+                                {% else %}
+                                    Balanced
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% if groups|length == 0 %}
+                        <p>No groups found.</p>
+                    {% endif %}
                 </div>
             </div>
+        </div>
 
-            <!-- 3rd Column: Recent Expenses -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h3>
-                            <a href="/user/expenses">Expenses</a>
-                        </h3>
-                        <h5>From most recent</h5>
-                        <ul class="list-group">
-                            {% for expense in expenses|reverse %}
-                                <li class="list-group-item d-flex align-items-center">
-                                    <!-- Description and Amount -->
-                                    <div class="d-flex flex-grow-1 justify-content-between">
-                                        <div>
-                                            <a href="/expenses/{{ expense.id }}" class="text-primary">
-                                                <span>{{ expense.description }}</span>
-                                            </a>
-                                        </div>
-                                        <div class="text-right">
-                                            {{ expense.amount | round(2) }}
-                                        </div>
-                                    </div>
-                                    <!-- Date -->
-                                    <div class="ml-3">
-                                        <span class="text-muted">{{ expense.created_at.strftime('%Y-%m-%d') }}</span>
-                                    </div>
-                                </li>
-                            {% else %}
-                                <li class="list-group-item">No recent expenses.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+        <!-- Row for Expenses -->
+        <div class="row" style="margin-top: 20px; width: 51%;">
+            <div class="card" style="width: 100%;">
+                <div class="card-header">
+                    Expenses
+                </div>
+                <div class="card-body expenses">
+                    From most recent:<p></p>
+                    <ul>
+                        {% for expense in expenses %}
+                            <li>
+                                <div style="flex: 1;">
+                                    <strong>{{ expense.description }}</strong>
+                                </div>
+                                <div class="expense-amount">
+                                    <span>{{ expense.amount }}</span>
+                                </div>
+                                <div class="expense-creator">
+                                    <small>Created by {{ expense.creator.username }}</small>
+                                </div>
+                            </li>
+                        {% endfor %}
+                        <li>
+                            <div style="flex: 1;">
+                                <strong>Test</strong>
+                            </div>
+                            <div class="expense-amount">
+                                <span>100</span>
+                            </div>
+                            <div class="expense-creator">
+                                <small>Created by test</small>
+                            </div>
+                        </li>
+                    </ul>
+                    {% if expenses|length == 0 %}
+                        <p>No recent expenses to show.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Xchange. All rights reserved.</p>
+    </footer>
 </body>
 </html>
