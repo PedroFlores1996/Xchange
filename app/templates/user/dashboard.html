@@ -5,8 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <!-- Include Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        /* Center the Total Balance div */
+        .total-balance {
+            text-align: center; /* Horizontally center the content */
+            margin-bottom: 10px; /* Optional: Add spacing below the balance */
+        }
+
         /* General font styling */
         body {
             font-family: 'Poppins', sans-serif; /* Apply the prettier font */
@@ -43,7 +48,7 @@
 
         /* Card header styling */
         .card-header {
-            background-color: #6c757d;
+            background-color: #76a456;
             color: white;
             padding: 10px;
             font-size: 1rem; /* Slightly smaller font size */
@@ -54,7 +59,7 @@
         /* Card body styling with fixed height for 3 rows */
         .card-body {
             padding: 10px; /* Reduced padding */
-            max-height: 180px; /* Fixed height for 3 rows */
+            max-height: 190px; /* Fixed height for 3 rows */
             min-height: 180px; /* Ensure minimum height */
             overflow-y: auto; /* Enable scrolling when content exceeds height */
         }
@@ -90,10 +95,19 @@
         /* Center the expense-amount within its container */
         .expense-amount {
             display: flex; /* Use flexbox for alignment */
-            justify-content: center; /* Horizontally center the content */
-            align-items: center; /* Vertically center the content */
-            text-align: center; /* Ensure text is centered */
-            flex: 0 0 100px; /* Fixed width for the amount column */
+            justify-content: right; /* Horizontally center the content */
+            align-items: right; /* Vertically center the content */
+            text-align: right; /* Ensure text is centered */
+            flex: 0 0 200px; /* Fixed width for the amount column */
+        }
+
+        /* Justify right the expense-creator within its container */
+        .expense-creator {
+            display: flex; /* Use flexbox for alignment */
+            justify-content: right; /* Horizontally center the content */
+            align-items: right; /* Vertically center the content */
+            text-align: right; /* Ensure text is centered */
+            flex: 0 0 250px; /* Fixed width for the amount column */
         }
 
         /* Footer styling */
@@ -107,7 +121,7 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-4">{{ current_user.username }}</h1>
+        <h1 class="text-center">{{ current_user.username }}</h1>
 
         <!-- Row for Friends and Group Debts -->
         <div class="row">
@@ -117,20 +131,26 @@
                     Friends
                 </div>
                 <div class="card-body">
-                    Total Balance:
-                    {% if no_group_balance < 0 %}
-                        <span style="color: green;">{{ no_group_balance }}</span>
-                    {% elif no_group_balance > 0 %}
-                        <span style="color: red;">{{ no_group_balance }}</span>
-                    {% else %}
-                        {{ no_group_balance }}
-                    {% endif %}
+                    <div class="total-balance">
+                        Total Balance:
+                        {% if no_group_balance < 0 %}
+                            <span style="color: green;">{{ no_group_balance }}</span>
+                        {% elif no_group_balance > 0 %}
+                            <span style="color: red;">{{ no_group_balance }}</span>
+                        {% else %}
+                            {{ no_group_balance }}
+                        {% endif %}
+                    </div>
                     <ul>
                         {% for debt in no_group_debts %}
                             <li>
                                 {% if debt.lender.username == current_user.username %}
                                     <div>
-                                        <strong>{{ debt.borrower.username }}</strong>
+                                        <strong>
+                                            <a href="/users/{{ debt.borrower.id }}">
+                                                {{ debt.borrower.username }}
+                                            </a>
+                                        </strong>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 5px;">
                                         <small>owes you</small>
@@ -138,7 +158,11 @@
                                     </div>
                                 {% else %}
                                     <div>
-                                        <strong>{{ debt.lender.username }}</strong>
+                                        <strong>
+                                            <a href="/users/{{ debt.lender.id }}">
+                                                {{ debt.lender.username }}
+                                            </a>
+                                        </strong>
                                     </div>
                                     <div>
                                         <small>is owed</small>
@@ -160,18 +184,24 @@
                     Group Debts
                 </div>
                 <div class="card-body">
-                    Total Balance:
-                    {% if overall_group_balance < 0 %}
-                        <span style="color: red;">{{ overall_group_balance }}</span>
-                    {% elif overall_group_balance > 0 %}
-                        <span style="color: green;">{{ overall_group_balance }}</span>
-                    {% else %}
-                        {{ overall_group_balance }}
-                    {% endif %}
+                    <div class="total-balance">
+                        Total Balance:
+                        {% if overall_group_balance < 0 %}
+                            <span style="color: red;">{{ overall_group_balance }}</span>
+                        {% elif overall_group_balance > 0 %}
+                            <span style="color: green;">{{ overall_group_balance }}</span>
+                        {% else %}
+                            {{ overall_group_balance }}
+                        {% endif %}
+                    </div>
                     <ul>
                         {% for group in groups %}
                             <li>
-                                <strong>{{ group.name }}</strong>
+                                <strong>
+                                    <a href="/groups/{{ group.id }}">
+                                        {{ group.name }}
+                                    </a>
+                                </strong>
                                 {% if group_balances[group.id] < 0 %}
                                     <div>
                                         <small>you owe</small>
@@ -207,13 +237,22 @@
                         {% for expense in expenses %}
                             <li>
                                 <div style="flex: 1;">
-                                    <strong>{{ expense.description }}</strong>
+                                    <strong>
+                                        <a href="/expenses/{{ expense.id }}">
+                                            {{ expense.description }}
+                                        </a>
+                                    </strong>
                                 </div>
                                 <div class="expense-amount">
                                     <span>{{ expense.amount }}</span>
                                 </div>
                                 <div class="expense-creator">
-                                    <small>Created by {{ expense.creator.username }}</small>
+                                    <small>
+                                        Created by 
+                                        <a href="/users/{{ expense.creator.id }}">
+                                            {{ expense.creator.username }}
+                                        </a>
+                                    </small>
                                 </div>
                             </li>
                         {% endfor %}
