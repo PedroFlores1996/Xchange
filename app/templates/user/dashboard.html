@@ -20,9 +20,17 @@
             background-color: #f8f9fa; /* Light background for better contrast */
         }
 
+        /* Ensure the body and html take up the full height of the viewport */
+        html, body {
+            height: 100%; /* Full height of the viewport */
+            margin: 0; /* Remove default margin */
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack elements vertically */
+        }
+
         /* General container styling */
         .container {
-            margin-top: 10px; /* Reduced margin to use more space at the top */
+            flex: 1; /* Allow the container to grow and take up available space */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,11 +38,12 @@
 
         /* Row styling for Friends and Groups */
         .row {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 10px; /* Fine margin between cards */
-            width: 100%;
+            display: flex; /* Use flexbox for side-by-side layout */
+            flex-direction: row; /* Align cards horizontally */
+            gap: 20px; /* Add spacing between the cards */
+            justify-content: center; /* Center the cards horizontally */
+            align-items: flex-start; /* Align cards to the top */
+            width: 100%; /* Ensure full width */
         }
 
         /* Card styling */
@@ -42,7 +51,8 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
-            width: 25%; /* Reduced width for smaller cards */
+            width: 100%; /* Full width of the container */
+            max-width: 400px; /* Set the same maximum width for all cards */
             background-color: #ffffff; /* White background for cards */
         }
 
@@ -59,15 +69,10 @@
         /* Card body styling with fixed height for 3 rows */
         .card-body {
             padding: 10px; /* Reduced padding */
-            max-height: 190px; /* Fixed height for 3 rows */
+            max-height: 500px; /* Fixed height for 3 rows */
             min-height: 180px; /* Ensure minimum height */
+            min-width: 300px; /* Ensure minimum width */
             overflow-y: auto; /* Enable scrolling when content exceeds height */
-        }
-
-        /* Specific styling for the Expenses card */
-        .card-body.expenses {
-            max-height: 300px; /* Increased height for the Expenses card */
-            min-height: 250px; /* Ensure minimum height */
         }
 
         /* List styling to look like table rows */
@@ -110,12 +115,20 @@
             flex: 0 0 250px; /* Fixed width for the amount column */
         }
 
+        .created-by {
+            font-size: 0.85rem; /* Smaller font size */
+            color: #6c757d; /* Muted color */
+            margin-top: 5px; /* Add vertical spacing */
+        }
+
         /* Footer styling */
         footer {
-            margin-top: 50px;
+            margin-top: auto; /* Push the footer to the bottom */
             text-align: center;
             color: #6c757d;
             font-size: 0.9rem;
+            padding: 10px 0; /* Add padding for better spacing */
+            background-color: #f8f9fa; /* Optional: Add a light background color */
         }
     </style>
 </head>
@@ -151,9 +164,11 @@
                                                 {{ debt.borrower.username }}
                                             </a>
                                         </strong>
+                                        <div class="created-by">
+                                            owes you
+                                        </div>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 5px;">
-                                        <small>owes you</small>
                                         <span style="color: green;">{{ debt.amount | abs }}</span>
                                     </div>
                                 {% else %}
@@ -163,9 +178,11 @@
                                                 {{ debt.lender.username }}
                                             </a>
                                         </strong>
+                                        <div class="created-by">
+                                            is owed
+                                        </div>
                                     </div>
                                     <div>
-                                        <small>is owed</small>
                                         <span style="color: red;">{{ debt.amount | abs }}</span>
                                     </div>
                                 {% endif %}
@@ -197,23 +214,36 @@
                     <ul>
                         {% for group in groups %}
                             <li>
-                                <strong>
-                                    <a href="/groups/{{ group.id }}">
-                                        {{ group.name }}
-                                    </a>
-                                </strong>
                                 {% if group_balances[group.id] < 0 %}
                                     <div>
-                                        <small>you owe</small>
+                                        <strong>
+                                            <a href="/groups/{{ group.id }}">
+                                                {{ group.name }}
+                                            </a>
+                                        </strong>
+                                        <div class="created-by">
+                                            you owe
+                                        </div>
+                                    </div>
+                                    <div>
                                         <span style="color: red;">{{ group_balances[group.id] }}</span>
                                     </div>
                                 {% elif group_balances[group.id] > 0 %}
                                     <div>
-                                        <small>you're owed</small>
+                                        <strong>
+                                            <a href="/groups/{{ group.id }}">
+                                                {{ group.name }}
+                                            </a>
+                                        </strong>
+                                        <div class="created-by">
+                                            you're owed
+                                        </div>
+                                    </div>
+                                    <div>
                                         <span style="color: green;">{{ group_balances[group.id] }}</span>
                                     </div>
                                 {% else %}
-                                    Balanced
+                                    All settled
                                 {% endif %}
                             </li>
                         {% endfor %}
@@ -223,16 +253,16 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
 
-        <!-- Row for Expenses -->
-        <div class="row" style="margin-top: 20px; width: 51%;">
-            <div class="card" style="width: 100%;">
+            <!-- Expenses Card -->
+            <div class="card">
                 <div class="card-header">
                     Expenses
                 </div>
-                <div class="card-body expenses">
-                    From most recent:<p></p>
+                <div class="card-body">
+                    <div class="total-balance">
+                        From most recent:
+                    </div>
                     <ul>
                         {% for expense in expenses %}
                             <li>
@@ -242,31 +272,18 @@
                                             {{ expense.description }}
                                         </a>
                                     </strong>
-                                </div>
-                                <div class="expense-amount">
-                                    <span>{{ expense.amount }}</span>
-                                </div>
-                                <div class="expense-creator">
-                                    <small>
+                                    <div class="created-by">
                                         Created by 
                                         <a href="/users/{{ expense.creator.id }}">
                                             {{ expense.creator.username }}
                                         </a>
-                                    </small>
+                                    </div>
+                                </div>
+                                <div class="expense-amount">
+                                    <span>{{ expense.amount }}</span>
                                 </div>
                             </li>
                         {% endfor %}
-                        <li>
-                            <div style="flex: 1;">
-                                <strong>Test</strong>
-                            </div>
-                            <div class="expense-amount">
-                                <span>100</span>
-                            </div>
-                            <div class="expense-creator">
-                                <small>Created by test</small>
-                            </div>
-                        </li>
                     </ul>
                     {% if expenses|length == 0 %}
                         <p>No recent expenses to show.</p>

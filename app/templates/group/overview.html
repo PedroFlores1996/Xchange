@@ -19,9 +19,18 @@
             background-color: #f8f9fa; /* Light background for better contrast */
         }
 
+        /* Ensure the body and html take up the full height of the viewport */
+        html, body {
+            height: 100%; /* Full height of the viewport */
+            margin: 0; /* Remove default margin */
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack elements vertically */
+        }
+
         /* General container styling */
         .container {
             margin-top: 10px; /* Reduced margin to use more space at the top */
+            flex: 1; /* Allow the container to grow and take up available space */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -42,7 +51,7 @@
             border-radius: 8px;
             overflow: hidden;
             width: 100%; /* Full width of the container */
-            max-width: 51%; /* Optional: Limit the maximum width */
+            max-width: 400px; /* Set the same maximum width for all cards */
             background-color: #ffffff; /* White background for cards */
         }
 
@@ -62,12 +71,6 @@
             max-height: 190px; /* Fixed height for 3 rows */
             min-height: 180px; /* Ensure minimum height */
             overflow-y: auto; /* Enable scrolling when content exceeds height */
-        }
-
-        /* Specific styling for the Expenses card */
-        .card-body.expenses {
-            max-height: 300px; /* Increased height for the Expenses card */
-            min-height: 250px; /* Ensure minimum height */
         }
 
         /* List styling to look like table rows */
@@ -99,6 +102,7 @@
             align-items: right; /* Vertically center the content */
             text-align: right; /* Ensure text is centered */
             flex: 0 0 200px; /* Fixed width for the amount column */
+            font-weight: bold; /* Make the text bold */
         }
 
         /* Justify right the expense-creator within its container */
@@ -112,23 +116,34 @@
 
         /* Footer styling */
         footer {
-            margin-top: 50px;
+            margin-top: auto; /* Push the footer to the bottom */
             text-align: center;
             color: #6c757d;
             font-size: 0.9rem;
+            padding: 10px 0; /* Add padding for better spacing */
+            background-color: #f8f9fa; /* Optional: Add a light background color */
         }
 
         /* Stacked cards styling */
         .stacked-cards {
-            display: flex;
-            flex-direction: column; /* Stack cards vertically */
+            display: flex; /* Use flexbox for side-by-side layout */
+            flex-direction: row; /* Align cards horizontally */
             gap: 20px; /* Add spacing between the cards */
+            justify-content: center; /* Center the cards horizontally */
+            align-items: flex-start; /* Align cards to the top */
             width: 100%; /* Ensure full width */
-            align-items: center; /* Center the cards horizontally */
         }
 
-        .stacked-cards .card:first-child {
-            max-width: 400px; /* Limit the width of the first card (Your Debts) */
+        .card {
+            width: 100%; /* Full width of the container */
+            max-width: 400px; /* Set the same maximum width for all cards */
+            background-color: #ffffff; /* White background for cards */
+        }
+
+        .created-by {
+            font-size: 0.85rem; /* Smaller font size */
+            color: #6c757d; /* Muted color */
+            margin-top: 5px; /* Add vertical spacing */
         }
     </style>
 </head>
@@ -161,9 +176,11 @@
                                                 {{ debt.borrower.username }}
                                             </a>
                                         </strong>
+                                        <div class="created-by">
+                                            owes you
+                                        </div>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 5px;">
-                                        <small>owes you</small>
                                         <span style="color: green;">{{ debt.amount | abs }}</span>
                                     </div>
                                 {% else %}
@@ -175,7 +192,7 @@
                                         </strong>
                                     </div>
                                     <div>
-                                        <small>is owed</small>
+                                        is owed
                                         <span style="color: red;">{{ debt.amount | abs }}</span>
                                     </div>
                                 {% endif %}
@@ -194,27 +211,29 @@
                     Expenses
                 </div>
                 <div class="card-body expenses">
-                    From most recent:<p></p>
+                    <div class="total-balance">
+                        From most recent:
+                    </div>
                     <ul>
                         {% for expense in recent_expenses %}
                             <li>
-                                <div style="flex: 1;">
+                                <!-- Left Section: Expense Name and Creator -->
+                                <div>
                                     <strong>
                                         <a href="/expenses/{{ expense.id }}" class="text-primary">
                                             {{ expense.description }}
                                         </a>
                                     </strong>
-                                </div>
-                                <div class="expense-amount">
-                                    <span>{{ expense.amount }}</span>
-                                </div>
-                                <div class="expense-creator">
-                                    <small>
+                                    <div class="created-by">
                                         Created by 
                                         <a href="/users/{{ expense.creator.id }}" class="text-primary">
                                             {{ expense.creator.username }}
                                         </a>
-                                    </small>
+                                    </div>
+                                </div>
+                                <!-- Right Section: Expense Amount -->
+                                <div class="expense-amount">
+                                    <span>{{ expense.amount }}</span>
                                 </div>
                             </li>
                         {% endfor %}
