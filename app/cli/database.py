@@ -101,7 +101,7 @@ def test_data() -> None:
     )
 
     balances = {
-        users[5].id: {TOTAL: 200.0, PAYED: 200.0, OWED: 0.0},  # Payer
+        users[8].id: {TOTAL: 200.0, PAYED: 200.0, OWED: 0.0},  # Payer
         users[6].id: {TOTAL: -100.0, PAYED: 0.0, OWED: 100.0},  # Ower
         users[7].id: {TOTAL: -100.0, PAYED: 0.0, OWED: 100.0},  # Ower
     }
@@ -132,7 +132,7 @@ def test_data() -> None:
     )
 
     balances = {
-        users[4].id: {TOTAL: 50.0, PAYED: 50.0, OWED: 0.0},  # Payer
+        users[6].id: {TOTAL: 50.0, PAYED: 50.0, OWED: 0.0},  # Payer
         users[8].id: {TOTAL: -25.0, PAYED: 0.0, OWED: 25.0},  # Ower
         users[9].id: {TOTAL: -25.0, PAYED: 0.0, OWED: 25.0},  # Ower
     }
@@ -170,14 +170,14 @@ def test_data() -> None:
         users[3].id: {TOTAL: 50.0, PAYED: 50.0, OWED: 0.0},  # Payer
         users[4].id: {TOTAL: 50.0, PAYED: 50.0, OWED: 0.0},  # Payer
         users[5].id: {TOTAL: -30.0, PAYED: 0.0, OWED: 30.0},  # Ower (30%)
-        users[6].id: {TOTAL: -70.0, PAYED: 0.0, OWED: 70.0},  # Ower (70%)
+        users[1].id: {TOTAL: -70.0, PAYED: 0.0, OWED: 70.0},  # Ower (70%)
     }
-    update_debts(balances, group2.id)
+    update_debts(balances, group1.id)
     expense6 = Expense.create(
         description="Office Supplies",
         amount=100.0,
         creator_id=users[3].id,
-        group_id=group2.id,
+        group_id=group1.id,
         payers_split=SplitType.EQUALLY,
         owers_split=SplitType.PERCENTAGE,
         balances=map_balances_to_model(balances),
@@ -188,7 +188,7 @@ def test_data() -> None:
         users[7].id: {TOTAL: 120.0, PAYED: 120.0, OWED: 0.0},  # Payer (60%)
         users[8].id: {TOTAL: 80.0, PAYED: 80.0, OWED: 0.0},  # Payer (40%)
         users[9].id: {TOTAL: -100.0, PAYED: 0.0, OWED: 100.0},  # Ower
-        users[0].id: {TOTAL: -100.0, PAYED: 0.0, OWED: 100.0},  # Ower
+        users[6].id: {TOTAL: -100.0, PAYED: 0.0, OWED: 100.0},  # Ower
     }
     update_debts(balances, None)
     expense7 = Expense.create(
