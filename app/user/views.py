@@ -12,7 +12,7 @@ bp = Blueprint("user", __name__)
 
 @bp.route("/user/debts", methods=["GET"])
 @login_required
-def user_debts():
+def debts():
     debts = current_user.lender_debts + current_user.borrower_debts
     balance = get_debts_total_balance(
         current_user.lender_debts, current_user.borrower_debts
@@ -22,7 +22,7 @@ def user_debts():
 
 @bp.route("/user/groups", methods=["GET"])
 @login_required
-def user_groups():
+def groups():
     groups = current_user.groups
     return render_template("user/groups.html", groups=groups)
 

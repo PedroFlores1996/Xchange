@@ -87,7 +87,7 @@
             padding: 10px;
             border: 1px solid #ddd; /* Add border to each item */
             border-radius: 4px; /* Optional: Add rounded corners */
-            margin-bottom: 5px; /* Add spacing between rows */
+            margin-bottom: 10px; /* Add spacing between rows */
             background-color: #f9f9f9; /* Light background for rows */
         }
 
@@ -103,6 +103,7 @@
             text-align: right; /* Ensure text is centered */
             flex: 0 0 200px; /* Fixed width for the amount column */
             font-weight: bold; /* Make the text bold */
+            font-size: 1.1em;
         }
 
         /* Justify right the expense-creator within its container */
@@ -112,16 +113,6 @@
             align-items: right; /* Vertically center the content */
             text-align: right; /* Ensure text is centered */
             flex: 0 0 250px; /* Fixed width for the amount column */
-        }
-
-        /* Footer styling */
-        footer {
-            margin-top: auto; /* Push the footer to the bottom */
-            text-align: center;
-            color: #6c757d;
-            font-size: 0.9rem;
-            padding: 10px 0; /* Add padding for better spacing */
-            background-color: #f8f9fa; /* Optional: Add a light background color */
         }
 
         /* Stacked cards styling */
@@ -160,10 +151,27 @@
             text-decoration: none;
             transition: background 0.2s;
         }
+
         .card-link-btn:hover, .card-link-btn:focus {
             background-color: #83cc4f;
             color: #fff;
             text-decoration: none;
+        }
+
+        .card-link-btn.secondary {
+            background-color: #6c757d; /* Lighter grey */
+        }
+
+        .card-link-btn.secondary:hover, .card-link-btn.secondary:focus {
+            background-color: #cccccc; /* Slightly darker on hover */
+            color: #333;
+        }
+
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 24px;
+            width: 100%;
+            z-index: 1000; /* Optional: ensures it stays on top */
         }
     </style>
 </head>
@@ -190,11 +198,11 @@
             <!-- Debts Column -->
             <div class="card">
                 <div class="card-header">
-                    Your Debts
+                    Related Debts
                 </div>
                 <div class="card-body">
                     <div class="total-balance">
-                        Your Balance:
+                        Total Balance:
                         {% if user_group_balance < 0 %}
                             <span style="color: red;">{{ user_group_balance }}</span>
                         {% else %}
@@ -243,7 +251,7 @@
             <!-- Expenses Column -->
             <div class="card">
                 <div class="card-header">
-                    Your Expenses
+                    Related Expenses
                 </div>
                 <div class="card-body">
                     <div class="total-balance">
@@ -280,10 +288,13 @@
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2025 Xchange. All rights reserved.</p>
-    </footer>
+    <!-- Add margin-bottom to create vertical space below the debts card -->
+    <div class="row">
+        <div class="card fixed-bottom-card">
+            <a href="{{ url_for('user.user_dashboard') }}" class="card-link-btn secondary">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
 </body>
 </html>

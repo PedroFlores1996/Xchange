@@ -30,6 +30,7 @@
 
         /* General container styling */
         .container {
+            margin-top: 10px; /* Add some top margin */
             flex: 1; /* Allow the container to grow and take up available space */
             display: flex;
             flex-direction: column;
@@ -73,6 +74,37 @@
             min-height: 180px; /* Ensure minimum height */
             min-width: 300px; /* Ensure minimum width */
             overflow-y: auto; /* Enable scrolling when content exceeds height */
+        }
+
+        .card-link-btn {
+            display: block;
+            width: 100%;
+            background-color: #76a456;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+            max-width: 400px; /* Match the card width */
+        }
+
+        .card-link-btn:hover, .card-link-btn:focus {
+            background-color: #83cc4f;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .card-link-btn.secondary {
+            background-color: #dc3545; /* Lighter grey */
+        }
+
+        .card-link-btn.secondary:hover, .card-link-btn.secondary:focus {
+            background-color: #f94254; /* Slightly darker on hover */
+            color: #fff;
         }
 
         /* List styling to look like table rows */
@@ -121,35 +153,86 @@
             margin-top: 5px; /* Add vertical spacing */
         }
 
-        /* Footer styling */
-        footer {
-            margin-top: auto; /* Push the footer to the bottom */
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 24px;
+            width: 100%;
+            background: none;
+            box-shadow: none;
+            border: none;
+            display: flex;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .logout-fixed-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            background: none;
+            box-shadow: none;
+            border: none;
+        }
+
+        .logout-fixed-btn a {
+            display: block;
+            width: 100px;
+            padding: 10px;
+            background-color: #dc3545;
+            color: white;
             text-align: center;
-            color: #6c757d;
-            font-size: 0.9rem;
-            padding: 10px 0; /* Add padding for better spacing */
-            background-color: #f8f9fa; /* Optional: Add a light background color */
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .logout-fixed-btn a:hover, .logout-fixed-btn a:focus {
+            background-color: #c82333;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">{{ current_user.username }}</h1>
+        <h1>{{ current_user.username }}</h1>
+
+        <!-- Row of three buttons -->
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="card">
+                <a href="{{ url_for('user.friends') }}" class="card-link-btn">
+                    All Friends
+                </a>
+            </div>
+            <div class="card">
+                <a href="{{ url_for('user.groups') }}" class="card-link-btn">
+                    All Groups
+                </a>
+            </div>
+            <div class="card">
+                <a href="{{ url_for('user.expenses') }}" class="card-link-btn">
+                    All Expenses
+                </a>
+            </div>
+        </div>
 
         <!-- Row for Friends and Group Debts -->
         <div class="row">
             <!-- Friends Card -->
             <div class="card">
                 <div class="card-header">
-                    Friends
+                    Friends Debts
                 </div>
                 <div class="card-body">
                     <div class="total-balance">
                         Total Balance:
                         {% if no_group_balance < 0 %}
-                            <span style="color: green;">{{ no_group_balance }}</span>
-                        {% elif no_group_balance > 0 %}
                             <span style="color: red;">{{ no_group_balance }}</span>
+                        {% elif no_group_balance > 0 %}
+                            <span style="color: green;">{{ no_group_balance }}</span>
                         {% else %}
                             {{ no_group_balance }}
                         {% endif %}
@@ -292,10 +375,10 @@
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2025 Xchange. All rights reserved.</p>
-    </footer>
+    <div class="logout-fixed-btn">
+        <a href="{{ url_for('auth.logout') }}">
+            Logout
+        </a>
+    </div>
 </body>
 </html>

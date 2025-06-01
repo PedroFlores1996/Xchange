@@ -4,44 +4,215 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Expenses</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Center the Total Balance div */
+        .total-balance {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            margin-top: 10px; /* Reduced margin to use more space at the top */
+            flex: 1; /* Allow the container to grow and take up available space */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px; /* Match the gap with .stacked-cards */
+            width: 100%;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            background-color: #ffffff;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            background-color: #76a456;
+            color: white;
+            padding: 10px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Card body styling with fixed height for 3 rows */
+        .card-body {
+            padding: 10px; /* Reduced padding */
+            max-height: 485px; /* Fixed height for 3 rows */
+            min-height: 225px; /* Ensure minimum height */
+            overflow-y: auto; /* Enable scrolling when content exceeds height */
+        }
+
+
+        /* List styling to look like table rows */
+        ul {
+            list-style-type: none; /* Remove bullet points */
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Expenses list styling */
+        .expenses-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .created-by {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .card-link-btn {
+            display: block;
+            width: 100%;
+            background-color: #83cc4f;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .card-link-btn:hover, .card-link-btn:focus {
+            background-color: #76a456;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .card-link-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-link-btn.secondary {
+            background-color: #6c757d; /* Lighter grey */
+        }
+
+        .card-link-btn.secondary:hover, .card-link-btn.secondary:focus {
+            background-color: #cccccc; /* Slightly darker on hover */
+            color: #333;
+        }
+
+        .text-muted {
+            color: #6c757d;
+        }
+
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .expense-list-item {
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 10px;
+            padding: 16px;
+        }
+
+        .text-muted-label {
+            color: #6c757d;
+        }
+
+        .expense-details {
+            font-size: 0.92em;
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container">
         <h1 class="text-center">{{ group.name }}</h1>
-        <h2 class="text-center">Expenses:</h2>
-        <table class="table table-striped mt-4">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Description</th>
-                    <th>Amount</th>
-                    <th>Category</th>
-                    <th>Created By</th>
-                    <th>Created At</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for expense in group.expenses %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('expense.expense_summary', expense_id=expense.id) }}">
-                                {{ expense.description }}
-                            </a>
-                        </td>
-                        <td>${{ "%.2f"|format(expense.amount) }}</td>
-                        <td>{{ expense.category }}</td>
-                        <td>{{ expense.creator.username }}</td>
-                        <td>{{ expense.created_at }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% if not group.expenses %}
-            <p class="text-center text-muted">No expenses found for this group.</p>
-        {% endif %}
-        <div class="text-center mt-4">
-            <a href="{{ url_for('groups.get_group_users', group_id=group.id) }}" class="btn btn-primary">View Group Users</a>
-            <a href="{{ url_for('groups.get_group_users', group_id=group.id) }}" class="btn btn-secondary">Back to Groups</a>
+        <div class="row">
+            <div class="card">
+                <a href="{{ url_for('groups.get_group_debts', group_id=group.id) }}" class="card-link-btn">
+                    All Debts
+                </a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                Expenses
+            </div>
+            <div class="card-body">
+                {% if group.expenses %}
+                <ul>
+                    {% for expense in group.expenses %}
+                    <li class="expense-list-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <!-- Left: Description and meta info stacked -->
+                            <div style="display: flex; flex-direction: column;">
+                                <a href="{{ url_for('expense.expense_summary', expense_id=expense.id) }}" style="color: #76a456; font-weight: 600; font-size: 1.1em; text-decoration: none;">
+                                    {{ expense.description }}
+                                </a>
+                                <div class="expense-details">
+                                    <div>
+                                        <span class="text-muted-label">Category:</span>
+                                        {{ expense.category }}
+                                    </div>
+                                    <div>
+                                        <span class="text-muted-label">Created by:</span>
+                                        {{ expense.creator.username }}
+                                    </div>
+                                    <div>
+                                        <span class="text-muted-label">Created at:</span>
+                                        {{ expense.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Right: Amount, vertically centered -->
+                            <div style="font-weight: 600; font-size: 1.1em; margin-left: 24px;">
+                                {{ "%.2f"|format(expense.amount) }}
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                    <p class="text-center text-muted">No expenses found for this group.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="card fixed-bottom-card">
+                <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="card-link-btn secondary">
+                    Back to Overview
+                </a>
+            </div>
         </div>
     </div>
 </body>

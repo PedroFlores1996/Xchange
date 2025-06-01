@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Debts</title>
     <style>
-        /* Center the Total Balance div */
-        .total-balance {
-            text-align: center; /* Horizontally center the content */
-            margin-bottom: 10px; /* Optional: Add spacing below the balance */
-        }
-
         /* General font styling */
         body {
             font-family: 'Poppins', sans-serif; /* Apply the prettier font */
@@ -53,6 +47,7 @@
             width: 100%; /* Full width of the container */
             max-width: 800px; /* Set the same maximum width for all cards */
             background-color: #ffffff; /* White background for cards */
+            margin-bottom: 24px;
         }
 
         /* Card header styling */
@@ -149,9 +144,113 @@
         .card-link-btn.secondary {
             background-color: #6c757d; /* Lighter grey */
         }
+
         .card-link-btn.secondary:hover, .card-link-btn.secondary:focus {
             background-color: #cccccc; /* Slightly darker on hover */
             color: #333;
+        }
+
+        .text-muted {
+            color: #6c757d;
+        }
+
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .debt-list-item {
+            display: flex;
+            gap: 0;
+            align-items: stretch;
+            padding: 0;
+            border: none;
+            background: none;
+            margin-bottom: 10px;
+        }
+
+        .debt-balance-col {
+            flex: 1;
+            min-width: 160px;
+            border-radius: 8px 0 0 8px;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
+            justify-content: center; /* Center vertically */
+        }
+
+        .debt-lended-col {
+            flex: 1.2;
+            min-width: 160px;
+            padding: 16px;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .debt-borrowed-col {
+            flex: 1.2;
+            min-width: 160px;
+            padding: 16px;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            border-right: 1px solid #e0e0e0;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .no-debts-center {
+            text-align: center;
+            color: #aaa;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .debt-header-row {
+            font-weight: 600;
+            background: none;
+            border: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px 8px 8px 8px;
+        }
+
+        .debt-header-row > div {
+            padding: 0 16px;
+        }
+
+        .debt-header-row > .debt-header-col-balance {
+            border-right: 1px solid #e0e0e0;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .debt-header-row > .debt-header-col-debts {
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .debt-header-row > .debt-header-col-debts:last-child {
+            border-right: none;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .debt-header-col-balance {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            padding: 0 16px;
+        }
+
+        .debt-header-col-debts {
+            flex: 1.2;
+            text-align: center;
+            font-weight: 600;
+            padding: 0 16px;
         }
     </style>
 </head>
@@ -159,7 +258,7 @@
     <div class="container">
         <h1>{{ group.name }}</h1>
                 <!-- New row of two header-only cards with button links -->
-        <div class="row" style="margin-bottom: 30px;">
+        <div class="row">
             <div class="card">
                 <a href="/groups/{{ group.id }}/expenses" class="card-link-btn">
                     All Expenses
@@ -172,52 +271,65 @@
             </div>
             <div class="card-body">
                 <ul>
+                    <div class="debt-list-item debt-header-row">
+                        <div class="debt-header-col-balance">User Balance</div>
+                        <div class="debt-header-col-debts">Lender Debts</div>
+                        <div class="debt-header-col-debts">Borrower Debts</div>
+                    </div>
                     {% for user in group.users %}
-                        <li style="display: flex; gap: 0; align-items: stretch; padding: 0; border: none; background: none; margin-bottom: 16px;">
+                        <li class="debt-list-item">
                             <!-- Total Balance Column -->
-                            <div style="flex: 1; min-width: 140px; background: #f6f6f6; border-radius: 8px 0 0 8px; padding: 16px; border: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
-                                {% if user_debts[user.id]["total"] < 0 %}
-                                    <div>
-                                        <strong>
-                                            <a href="/users/{{ user.id }}">
-                                                {{ user.username }}
-                                            </a>
-                                        </strong>
-                                        <div class="created-by">
-                                            owes
-                                        </div>
-                                    </div>
-                                    <div style="display: flex; align-items: center; gap: 5px;">
-                                        <span style="color: red;">{{ user_debts[user.id]["total"] | abs }}</span>
-                                    </div>
-                                {% else %}
-                                    <div>
-                                        <strong>
-                                            <a href="/users/{{ user.id }}">
-                                                {{ user.username }}
-                                            </a>
-                                        </strong>
-                                        <div class="created-by">
-                                            is owed
-                                        </div>
-                                    </div>
-                                    <div style="display: flex; align-items: center; gap: 5px;">
-                                        <span style="color: green;">{{ user_debts[user.id]["total"] | abs }}</span>
-                                    </div>
-                                {% endif %}
+                            <div class="debt-balance-col">
+                                <ul>
+                                    <li>
+                                        {% if user_debts[user.id]["total"] < 0 %}
+                                            <div>
+                                                <strong>
+                                                    <a href="/users/{{ user.id }}">
+                                                        {{ user.username }}
+                                                    </a>
+                                                </strong>
+                                                <div class="created-by">
+                                                    owes
+                                                </div>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 5px;">
+                                                <span style="color: red;">{{ user_debts[user.id]["total"] | abs }}</span>
+                                            </div>
+                                        {% else %}
+                                            <div>
+                                                <strong>
+                                                    <a href="/users/{{ user.id }}">
+                                                        {{ user.username }}
+                                                    </a>
+                                                </strong>
+                                                <div class="created-by">
+                                                    is owed
+                                                </div>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 5px;">
+                                                <span style="color: green;">{{ user_debts[user.id]["total"] | abs }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                </ul>
                             </div>
                             <!-- Lended Debts Column -->
-                            <div style="flex: 1.2; min-width: 160px; background: #f9f9f9; padding: 16px; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-left: none; display: flex; flex-direction: column;">
-                                <div style="font-weight: 500; margin-bottom: 6px;">Lended</div>
+                            <div class="debt-lended-col">
                                 {% if user_debts[user.id]["payed"] %}
                                     <ul style="padding-left: 0; margin: 0;">
                                         {% for debt in user_debts[user.id]["payed"] %}
                                             <li>
-                                                <strong>
-                                                    <a href="/users/{{ debt.borrower.id }}">
-                                                        {{ debt.borrower.username }}
-                                                    </a>
-                                                </strong>
+                                                <div>
+                                                    <strong>
+                                                        <a href="/users/{{ debt.borrower.id }}">
+                                                            {{ debt.borrower.username }}
+                                                        </a>
+                                                    </strong>
+                                                    <div class="created-by">
+                                                        owes
+                                                    </div>
+                                                </div>
                                                 <div style="color: green; display: flex; align-items: center; gap: 5px;">
                                                     <span>{{ debt.amount | abs }}</span>
                                                 </div>
@@ -225,21 +337,25 @@
                                         {% endfor %}
                                     </ul>
                                 {% else %}
-                                    <div class="created-by" style="color: #aaa;">None</div>
+                                    <div class="created-by no-debts-center">No lender debts</div>
                                 {% endif %}
                             </div>
                             <!-- Borrowed Debts Column -->
-                            <div style="flex: 1.2; min-width: 160px; background: #f9f9f9; padding: 16px; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-radius: 0 8px 8px 0; display: flex; flex-direction: column;">
-                                <div style="font-weight: 500; margin-bottom: 6px;">Borrowed</div>
+                            <div class="debt-borrowed-col">
                                 {% if user_debts[user.id]["owed"] %}
                                     <ul style="padding-left: 0; margin: 0;">
                                         {% for debt in user_debts[user.id]["owed"] %}
                                             <li>
-                                                <strong>
-                                                    <a href="/users/{{ debt.borrower.id }}">
-                                                        {{ debt.borrower.username }}
-                                                    </a>
-                                                </strong>
+                                                <div>
+                                                    <strong>
+                                                        <a href="/users/{{ debt.borrower.id }}">
+                                                            {{ debt.lender.username }}
+                                                        </a>
+                                                    </strong>
+                                                    <div class="created-by">
+                                                        is owed
+                                                    </div>
+                                                </div>
                                                 <div style="color: red; display: flex; align-items: center; gap: 5px;">
                                                     <span>{{ debt.amount | abs }}</span>
                                                 </div>
@@ -247,7 +363,7 @@
                                         {% endfor %}
                                     </ul>
                                 {% else %}
-                                    <div class="created-by" style="color: #aaa;">None</div>
+                                    <div class="created-by no-debts-center">No borrower debts</div>
                                 {% endif %}
                             </div>
                         </li>
@@ -259,9 +375,8 @@
             </div>
         </div>
         <!-- Add margin-bottom to create vertical space below the debts card -->
-        <div style="height: 32px;"></div>
         <div class="row">
-            <div class="card">
+            <div class="card fixed-bottom-card">
                 <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="card-link-btn secondary">
                     Back to Overview
                 </a>
