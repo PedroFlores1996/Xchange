@@ -1,7 +1,7 @@
 from werkzeug import Response
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.expense import ExpenseData
+from app.expense import ExpenseData, get_allowed_expense
 from app.expense.forms import ExpenseForm
 from app.expense.mapper import map_form_to_expense_data
 from app.expense.submit import submit_expense
@@ -27,7 +27,7 @@ def expenses() -> str | Response:
 @login_required
 def expense_summary(expense_id):
     # Fetch the expense by ID
-    expense = next((e for e in current_user.expenses if e.id == expense_id), None)
+    expense = get_allowed_expense(expense_id)
 
     # If the expense does not exist or does not belong to the current user, show a 404 error
     if not expense:
