@@ -41,7 +41,7 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            gap: 10px; /* Fine margin between cards */
+            gap: 20px; /* Match the gap with .stacked-cards */
             width: 100%;
         }
 
@@ -57,7 +57,7 @@
 
         /* Card header styling */
         .card-header {
-            background-color: #76a456;
+            background-color: #83cc4f;
             color: white;
             padding: 10px;
             font-size: 1rem; /* Slightly smaller font size */
@@ -145,11 +145,46 @@
             color: #6c757d; /* Muted color */
             margin-top: 5px; /* Add vertical spacing */
         }
+
+        .card-link-btn {
+            display: block;
+            width: 100%;
+            background-color: #76a456;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .card-link-btn:hover, .card-link-btn:focus {
+            background-color: #83cc4f;
+            color: #fff;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>{{ group.name }}</h1>
+
+        <!-- New row of two header-only cards with button links -->
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="card">
+                <a href="/groups/{{ group.id }}/debts" class="card-link-btn">
+                    All Debts
+                </a>
+            </div>
+            <div class="card">
+                <a href="/groups/{{ group.id }}/expenses" class="card-link-btn">
+                    All Expenses
+                </a>
+            </div>
+        </div>
+
         <!-- Stack Debts and Expenses -->
         <div class="stacked-cards">
             <!-- Debts Column -->
@@ -208,9 +243,9 @@
             <!-- Expenses Column -->
             <div class="card">
                 <div class="card-header">
-                    Expenses
+                    Your Expenses
                 </div>
-                <div class="card-body expenses">
+                <div class="card-body">
                     <div class="total-balance">
                         From most recent:
                     </div>

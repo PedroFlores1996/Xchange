@@ -1,6 +1,5 @@
-from app.model import Debt, User
-from app.model.constants import NO_GROUP
-from app.split.constants import OWED, PAYED, TOTAL
+from app.model import Debt
+from app.split.constants import TOTAL
 
 
 def simplify_debts(balances: dict[int, float]) -> list[tuple[int, int, float]]:
@@ -63,27 +62,3 @@ def get_debts_total_balance(
     return sum(debt.amount for debt in lender_debts) - sum(
         debt.amount for debt in borrower_debts
     )
-
-
-def get_group_user_debts(
-    users: list[User],
-    group_id: int | None = NO_GROUP,
-) -> dict[int, dict[str, list[Debt] | float]]:
-    group_debts = {}
-    for user in users:
-        lender_debts = [debt for debt in user.lender_debts if debt.group_id == group_id]
-        borrower_debts = [
-            debt for debt in user.borrower_debts if debt.group_id == group_id
-        ]
-        group_debts[user.id] = {
-            OWED: borrower_debts,
-            PAYED: lender_debts,
-            TOTAL: get_debts_total_balance(lender_debts, borrower_debts),
-        }
-    return group_debts
-
-
-def get_no_group_debts(user: User):
-    return [debt for debt in user.lender_debts if debt.group_id == NO_GROUP] + [
-        debt for debt in user.borrower_debts if debt.group_id == NO_GROUP
-    ]

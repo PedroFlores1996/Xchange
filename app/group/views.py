@@ -1,8 +1,11 @@
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required, current_user
 
-from app.group import get_authorized_group
-from app.debt import get_group_user_debts
+from app.group import (
+    get_authorized_group,
+    get_group_user_expenses,
+    get_group_user_debts,
+)
 from app.split.constants import OWED, PAYED, TOTAL
 
 
@@ -19,13 +22,13 @@ def get_group_overview(group_id):
         # Get the current user's total balance in the group
 
         # Get the current user's debts in the group
-        user_debts = get_group_user_debts([current_user], group.id)[current_user.id]
+        user_debts = get_group_user_debts(group)[current_user.id]
         user_debts_ordered_by_amount = sorted(
             user_debts[OWED] + user_debts[PAYED], key=lambda x: x.amount, reverse=True
         )
 
         # Get the 10 most recent expenses in the group
-        recent_expenses = group.expenses[:10]
+        recent_expenses = get_group_user_expenses(current_user, group.id)
 
         return render_template(
             "group/overview.html",
@@ -73,7 +76,7 @@ def get_group_debts(group_id):
     Returns HTML or JSON based on the Accept header.
     """
     if group := get_authorized_group(group_id):
-        user_debts = get_group_user_debts(group.users, group.id)
+        user_debts = get_group_user_debts(group)
         return render_template("group/debts.html", group=group, user_debts=user_debts)
 
     else:

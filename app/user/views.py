@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
+from app.group import get_no_group_debts
 from app.model.user import User
 from app.user import get_user_balances
 from app.user.forms import AddFriendForm
-from app.debt import get_debts_total_balance, get_no_group_debts
+from app.debt import get_debts_total_balance
 from app.model.constants import NO_GROUP
 
 bp = Blueprint("user", __name__)

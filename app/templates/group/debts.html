@@ -4,46 +4,268 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Debts</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Center the Total Balance div */
+        .total-balance {
+            text-align: center; /* Horizontally center the content */
+            margin-bottom: 10px; /* Optional: Add spacing below the balance */
+        }
+
+        /* General font styling */
+        body {
+            font-family: 'Poppins', sans-serif; /* Apply the prettier font */
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa; /* Light background for better contrast */
+        }
+
+        /* Ensure the body and html take up the full height of the viewport */
+        html, body {
+            height: 100%; /* Full height of the viewport */
+            margin: 0; /* Remove default margin */
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack elements vertically */
+        }
+
+        /* General container styling */
+        .container {
+            margin-top: 10px; /* Reduced margin to use more space at the top */
+            flex: 1; /* Allow the container to grow and take up available space */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Row styling for Friends and Groups */
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px; /* Match the gap with .stacked-cards */
+            width: 100%;
+        }
+
+        /* Card styling */
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100%; /* Full width of the container */
+            max-width: 800px; /* Set the same maximum width for all cards */
+            background-color: #ffffff; /* White background for cards */
+        }
+
+        /* Card header styling */
+        .card-header {
+            background-color: #76a456;
+            color: white;
+            padding: 10px;
+            font-size: 1rem; /* Slightly smaller font size */
+            text-align: center;
+            font-weight: 600; /* Bold header text */
+        }
+
+        /* Card body styling with fixed height for 3 rows */
+        .card-body {
+            padding: 10px; /* Reduced padding */
+            max-height: 485px; /* Fixed height for 3 rows */
+            min-height: 225px; /* Ensure minimum height */
+            overflow-y: auto; /* Enable scrolling when content exceeds height */
+        }
+
+        /* List styling to look like table rows */
+        ul {
+            list-style-type: none; /* Remove bullet points */
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd; /* Add border to each item */
+            border-radius: 4px; /* Optional: Add rounded corners */
+            margin-bottom: 5px; /* Add spacing between rows */
+            background-color: #f9f9f9; /* Light background for rows */
+        }
+
+        li:last-child {
+            margin-bottom: 0; /* Remove margin for the last item */
+        }
+
+        /* Footer styling */
+        footer {
+            margin-top: auto; /* Push the footer to the bottom */
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+            padding: 10px 0; /* Add padding for better spacing */
+            background-color: #f8f9fa; /* Optional: Add a light background color */
+        }
+
+        /* Stacked cards styling */
+        .stacked-cards {
+            display: flex; /* Use flexbox for side-by-side layout */
+            flex-direction: row; /* Align cards horizontally */
+            gap: 20px; /* Add spacing between the cards */
+            justify-content: center; /* Center the cards horizontally */
+            align-items: flex-start; /* Align cards to the top */
+            width: 100%; /* Ensure full width */
+        }
+
+        .created-by {
+            font-size: 0.85rem; /* Smaller font size */
+            color: #6c757d; /* Muted color */
+            margin-top: 5px; /* Add vertical spacing */
+        }
+
+        .card-link-btn {
+            display: block;
+            width: 100%;
+            background-color: #83cc4f;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .card-link-btn:hover, .card-link-btn:focus {
+            background-color: #76a456;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .card-link-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-link-btn.secondary {
+            background-color: #6c757d; /* Lighter grey */
+        }
+        .card-link-btn.secondary:hover, .card-link-btn.secondary:focus {
+            background-color: #cccccc; /* Slightly darker on hover */
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">{{ group.name }}</h1>
-        <h2 class="text-center">Debts:</h2>
-        <table class="table table-striped mt-4">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Username</th>
-                    <th>Balance</th>
-                    <th>Lended</th>
-                    <th>Borrowed</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in group.users %}
-                    <tr>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user_debts[user.id]["total"] }}</td>
-                        <td>
-                        {% for debt in user_debts[user.id]["payed"] %}
-                            Is owed {{ debt.amount }} form {{ debt.borrower.username }} <br>
-                        {% endfor %}
-                        </td>
-                        <td>
-                        {% for debt in user_debts[user.id]["owed"] %}
-                            Owes {{ debt.amount }} to {{ debt.lender.username }} <br>
-                        {% endfor %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% if not group.users %}
-            <p class="text-center text-muted">No debts found in this group.</p>
-        {% endif %}
-        <div class="text-center mt-4">
-            <a href="{{ url_for('groups.get_group_expenses', group_id=group.id) }}" class="btn btn-primary">View Group Expenses</a>
-            <a href="{{ url_for('groups.get_group_users', group_id=group.id) }}" class="btn btn-secondary">Back to Groups</a>
+    <div class="container">
+        <h1>{{ group.name }}</h1>
+                <!-- New row of two header-only cards with button links -->
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="card">
+                <a href="/groups/{{ group.id }}/expenses" class="card-link-btn">
+                    All Expenses
+                </a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                Debts
+            </div>
+            <div class="card-body">
+                <ul>
+                    {% for user in group.users %}
+                        <li style="display: flex; gap: 0; align-items: stretch; padding: 0; border: none; background: none; margin-bottom: 16px;">
+                            <!-- Total Balance Column -->
+                            <div style="flex: 1; min-width: 140px; background: #f6f6f6; border-radius: 8px 0 0 8px; padding: 16px; border: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+                                {% if user_debts[user.id]["total"] < 0 %}
+                                    <div>
+                                        <strong>
+                                            <a href="/users/{{ user.id }}">
+                                                {{ user.username }}
+                                            </a>
+                                        </strong>
+                                        <div class="created-by">
+                                            owes
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <span style="color: red;">{{ user_debts[user.id]["total"] | abs }}</span>
+                                    </div>
+                                {% else %}
+                                    <div>
+                                        <strong>
+                                            <a href="/users/{{ user.id }}">
+                                                {{ user.username }}
+                                            </a>
+                                        </strong>
+                                        <div class="created-by">
+                                            is owed
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <span style="color: green;">{{ user_debts[user.id]["total"] | abs }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <!-- Lended Debts Column -->
+                            <div style="flex: 1.2; min-width: 160px; background: #f9f9f9; padding: 16px; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-left: none; display: flex; flex-direction: column;">
+                                <div style="font-weight: 500; margin-bottom: 6px;">Lended</div>
+                                {% if user_debts[user.id]["payed"] %}
+                                    <ul style="padding-left: 0; margin: 0;">
+                                        {% for debt in user_debts[user.id]["payed"] %}
+                                            <li>
+                                                <strong>
+                                                    <a href="/users/{{ debt.borrower.id }}">
+                                                        {{ debt.borrower.username }}
+                                                    </a>
+                                                </strong>
+                                                <div style="color: green; display: flex; align-items: center; gap: 5px;">
+                                                    <span>{{ debt.amount | abs }}</span>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <div class="created-by" style="color: #aaa;">None</div>
+                                {% endif %}
+                            </div>
+                            <!-- Borrowed Debts Column -->
+                            <div style="flex: 1.2; min-width: 160px; background: #f9f9f9; padding: 16px; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-radius: 0 8px 8px 0; display: flex; flex-direction: column;">
+                                <div style="font-weight: 500; margin-bottom: 6px;">Borrowed</div>
+                                {% if user_debts[user.id]["owed"] %}
+                                    <ul style="padding-left: 0; margin: 0;">
+                                        {% for debt in user_debts[user.id]["owed"] %}
+                                            <li>
+                                                <strong>
+                                                    <a href="/users/{{ debt.borrower.id }}">
+                                                        {{ debt.borrower.username }}
+                                                    </a>
+                                                </strong>
+                                                <div style="color: red; display: flex; align-items: center; gap: 5px;">
+                                                    <span>{{ debt.amount | abs }}</span>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <div class="created-by" style="color: #aaa;">None</div>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% if not group.users %}
+                    <p class="text-center text-muted">No debts found in this group.</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Add margin-bottom to create vertical space below the debts card -->
+        <div style="height: 32px;"></div>
+        <div class="row">
+            <div class="card">
+                <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="card-link-btn secondary">
+                    Back to Overview
+                </a>
+            </div>
         </div>
     </div>
 </body>

@@ -1,5 +1,9 @@
 from flask_login import current_user
+from app.debt import get_debts_total_balance
+from app.model import Debt, User, Expense
+from app.model.constants import NO_GROUP
 from app.model.group import Group
+from app.split.constants import OWED, PAYED, TOTAL
 
 
 def get_authorized_group(group_id: int) -> Group | None:
@@ -11,3 +15,51 @@ def get_authorized_group(group_id: int) -> Group | None:
     :return: The list of members in the group, or None if the group is not found
     """
     return next((g for g in current_user.groups if g.id == group_id), None)
+
+
+def get_group_user_debts(
+    group: Group | None,
+) -> dict[int, dict[str, list[Debt] | float]]:
+    group_debts = {}
+    # Iterate through all debts in the group
+    for debt in group.debts:
+        # Lender
+        lender_id = debt.lender_id
+        if lender_id in group_debts:
+            group_debts[lender_id][PAYED].append(debt)
+            group_debts[lender_id][TOTAL] += float(debt.amount)
+        else:
+            group_debts[lender_id] = {
+                OWED: [],
+                PAYED: [debt],
+                TOTAL: float(debt.amount),
+            }
+        # Borrower
+        borrower_id = debt.borrower_id
+        if borrower_id in group_debts:
+            group_debts[borrower_id][OWED].append(debt)
+            group_debts[borrower_id][TOTAL] -= float(debt.amount)
+        else:
+            group_debts[borrower_id] = {
+                OWED: [debt],
+                PAYED: [],
+                TOTAL: -float(debt.amount),
+            }
+    return group_debts
+
+
+def get_no_group_debts(user: User):
+    return [debt for debt in user.lender_debts if debt.group_id == NO_GROUP] + [
+        debt for debt in user.borrower_debts if debt.group_id == NO_GROUP
+    ]
+
+
+def get_group_user_expenses(
+    user: User,
+    group_id: int,
+) -> list[Expense]:
+    return sorted(
+        [expense for expense in user.expenses if (expense.group_id == group_id)],
+        key=lambda e: e.created_at,
+        reverse=True,
+    )[:10]
