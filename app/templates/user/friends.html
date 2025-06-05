@@ -4,62 +4,212 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Friends</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #f8f9fa; /* Light gray background */
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
         }
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for cards */
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
-        .list-group-item {
+        html, body {
+            height: 100%;
+            margin: 0;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+        }
+        .container {
+            margin-top: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             align-items: center;
         }
-        .friend-actions a {
-            margin-left: 10px;
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 32px 0 16px 0;
+            color: #333;
+            letter-spacing: 0.5px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 18px;
+            color: #333;
+        }
+        .card {
+            width: 600px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .card-header {
+            background-color: #83cc4f;
+            color: white;
+            padding: 10px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* Card body styling with fixed height for 3 rows */
+        .card-body {
+            padding: 10px;
+            max-height: 500px;
+            min-height: 180px;
+            min-width: 300px;
+            overflow-y: auto;
+        }
+        /* Add this for the Friends List card only */
+        .friends-card .card-body {
+            max-height: 420px; /* Smaller height for friends list */
+            min-height: 0;
+            overflow-y: auto;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            box-sizing: border-box;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #76a456;
+            color: #fff;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn:hover, .btn:focus {
+            background-color: #83cc4f;
+            color: #fff;
+        }
+        .btn.secondary {
+            background-color: #6c757d;
+        }
+        .btn.secondary:hover, .btn.secondary:focus {
+            background-color: #cccccc;
+            color: #333;
+        }
+        .friends-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .friend-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+        }
+        .friend-link {
+            color: #2d7be5;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .friend-link:hover, .friend-link:focus {
+            color: #155fa0;
+            text-decoration: underline;
+        }
+        .no-friends {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px 0;
+        }
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 24px;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .fixed-bottom-card .btn.secondary {
+            width: 90%;
+            max-width: 400px;
+            pointer-events: auto;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .alert {
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 1rem;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .alert .close {
+            float: right;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            background: none;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container">
         <!-- Add Friend Section -->
-        <div class="card p-4 mb-4 mx-auto" style="max-width: 800px;">
-            <h2 class="text-center mb-4">Add a Friend</h2>
+        <div class="card">
+            <h2>Add a Friend</h2>
             <form action="{{ url_for('user.friends') }}" method="post">
-                <div class="form-group mb-3">
-                    <label for="email" class="form-label">Email:</label>
-                    <input type="email" name="email" class="form-control" id="email" placeholder="Enter friend's email" required>
-                </div>
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Add Friend</button>
+                <input type="email" name="email" class="form-control" id="email" placeholder="Enter friend's email" required>
+                <div style="text-align:center;">
+                    <button type="submit" class="btn">Add</button>
                 </div>
             </form>
-        </div>
-
-        <!-- Return to Dashboard Button -->
-        <div class="text-center mb-4">
-            <a href="{{ url_for('user.user_dashboard') }}" class="btn btn-outline-primary">Return to Dashboard</a>
         </div>
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="mt-4 mx-auto" style="max-width: 800px;">
+                <div style="width:100%;max-width:400px;">
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <div class="alert alert-{{ category }}">
                             {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
                         </div>
                     {% endfor %}
                 </div>
@@ -67,26 +217,29 @@
         {% endwith %}
 
         <!-- Friends List Section -->
-        <div class="card p-4 mx-auto" style="max-width: 800px;">
-            <h1 class="text-center mb-4">Your Friends</h1>
-            {% if friends %}
-                <ul class="list-group">
-                    {% for friend in friends %}
-                        <li class="list-group-item">
-                            <!-- Friend Name and Email as a Link -->
-                            <a href="/users/{{ friend.id }}" class="text-primary">
-                                <strong>{{ friend.username }}</strong> ({{ friend.email }})
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-center text-muted">You have no friends added yet.</p>
-            {% endif %}
+        <div class="card friends-card">
+            <div class="card-header">Your Friends</div>
+            <div class="card-body">
+                {% if friends %}
+                    <ul class="friends-list">
+                        {% for friend in friends %}
+                            <li class="friend-item">
+                                <a href="/users/{{ friend.id }}" class="friend-link">
+                                    <strong>{{ friend.username }}</strong> ({{ friend.email }})
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="no-friends">You have no friends added yet.</div>
+                {% endif %}
+            </div>
         </div>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="fixed-bottom-card">
+        <a href="{{ url_for('user.user_dashboard') }}" class="btn secondary">
+            Back to Dashboard
+        </a>
+    </div>
 </body>
 </html>

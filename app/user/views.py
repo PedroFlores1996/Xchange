@@ -24,7 +24,7 @@ def debts():
 @login_required
 def groups():
     groups = current_user.groups
-    return render_template("user/groups.html", groups=groups)
+    return render_template("user/groups.html", current_user=current_user, groups=groups)
 
 
 @bp.route("/user/friends", methods=["GET", "POST"])

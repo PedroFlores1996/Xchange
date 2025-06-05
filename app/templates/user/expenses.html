@@ -4,43 +4,275 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Expenses</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Center the Total Balance div */
+        .total-balance {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            margin-top: 10px; /* Reduced margin to use more space at the top */
+            flex: 1; /* Allow the container to grow and take up available space */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px; /* Match the gap with .stacked-cards */
+            width: 100%;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            background-color: #ffffff;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            background-color: #76a456;
+            color: white;
+            padding: 10px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Card body styling with fixed height for 3 rows */
+        .card-body {
+            padding: 10px; /* Reduced padding */
+            max-height: 485px; /* Fixed height for 3 rows */
+            min-height: 225px; /* Ensure minimum height */
+            overflow-y: auto; /* Enable scrolling when content exceeds height */
+        }
+
+
+        /* List styling to look like table rows */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Expenses list styling */
+        .expenses-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .expense-item {
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 14px;
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.2s;
+        }
+
+        .expense-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .expense-main-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        .expense-description {
+            font-weight: 600;
+            color: #76a456;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .expense-description:hover, .expense-description:focus {
+            color: #155fa0;
+            text-decoration: underline;
+        }
+
+        .expense-amount {
+            color: #222;
+            font-weight: 700;
+            font-size: 1.1rem;
+            min-width: 90px;
+            text-align: right;
+        }
+
+        .expense-details-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.92rem;
+            color: #555;
+        }
+
+        .expense-detail-label {
+            color: #b0b0b0;
+            font-weight: 500;
+            margin-right: 2px;
+        }
+
+        .expense-detail-value {
+            color: #222;
+            font-weight: 500;
+        }
+
+        .expense-group {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .expense-creator {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .expense-date {
+            color: #999;
+            font-size: 0.93rem;
+        }
+
+        .no-expenses {
+            text-align: center;
+            color: #6c757d;
+            padding: 30px 0;
+            font-size: 1.1rem;
+        }
+
+        .card-link-btn {
+            display: block;
+            width: 100%;
+            background-color: #83cc4f;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .card-link-btn:hover, .card-link-btn:focus {
+            background-color: #76a456;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .card-link-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-link-btn.secondary {
+            background-color: #6c757d; /* Lighter grey */
+        }
+
+        .card-link-btn.secondary:hover, .card-link-btn.secondary:focus {
+            background-color: #cccccc; /* Slightly darker on hover */
+            color: #333;
+        }
+
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 24px; /* Add margin from the bottom */
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background: none;
+            box-shadow: none;
+            border: none;
+            z-index: 1000;
+        }
+
+        .fixed-bottom-card .card-link-btn {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 8px; /* Fully rounded corners */
+            margin: 0;
+        }
+
+        .expenses-header {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 24px;
+            color: #333;
+            margin-top: 19px; /* Add margin from the top */
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">Your Expenses</h1>
-        {% if expenses %}
-            <table class="table table-striped mt-4">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Description</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Group</th>
-                        <th>Created By</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for expense in expenses %}
-                        <tr>
-                            <td>
-                                <a href="{{ url_for('expense.expense_summary', expense_id=expense.id) }}">
-                                    {{ expense.description }}
-                                </a>
-                            </td>
-                            <td>{{ expense.category }}</td>
-                            <td>${{ "%.2f"|format(expense.amount) }}</td>
-                            <td>{{ expense.group.name if expense.group else 'No Group' }}</td>
-                            <td>{{ expense.creator.username }}</td>
-                            <td>{{ expense.created_at.strftime('%Y-%m-%d') }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class="text-center mt-4">You have no expenses to display.</p>
-        {% endif %}
+    <div class="container">
+        <div class="expenses-header">Your Expenses</div>
+        <div class="card">
+            <div class="card-header">Expenses List</div>
+            <div class="card-body">
+                {% if expenses %}
+                    <ul class="expenses-list">
+                        {% for expense in expenses %}
+                            <li class="expense-item">
+                                <div class="expense-main-row">
+                                    <a href="{{ url_for('expense.expense_summary', expense_id=expense.id) }}" class="expense-description">
+                                        {{ expense.description }}
+                                    </a>
+                                    <span class="expense-amount">{{ "%.2f"|format(expense.amount) }}</span>
+                                </div>
+                                <div class="expense-details-row">
+                                    <div>
+                                        <span class="expense-detail-label">Group:</span>
+                                        <span class="expense-detail-value">{{ expense.group.name if expense.group else 'No Group' }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="expense-detail-label">Created By:</span>
+                                        <span class="expense-detail-value">{{ expense.creator.username }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="expense-detail-label">Created At:</span>
+                                        <span class="expense-detail-value">{{ expense.created_at.strftime('%Y-%m-%d') }}</span>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="no-expenses">You have no expenses to display.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="fixed-bottom-card">
+        <a href="{{ url_for('user.user_dashboard') }}" class="card-link-btn secondary">
+            Back to Overview
+        </a>
     </div>
 </body>
 </html>

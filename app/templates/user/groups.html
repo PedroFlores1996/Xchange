@@ -3,17 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Groups</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Your Groups</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            margin-top: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 32px 0 16px 0;
+            color: #333;
+            letter-spacing: 0.5px;
+        }
+        .main-card {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 0 auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .card-header {
+            background-color: #83cc4f;
+            color: white;
+            padding: 10px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+        }
+        .card-body {
+            padding: 10px;
+            max-height: 490px;
+            min-height: 225px;
+            overflow-y: auto;
+        }
+        ul.groups-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .group-name {
+            font-weight: 500;
+        }
+        .view-btn {
+            background-color: #76a456;
+            color: #fff;
+            padding: 6px 16px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .view-btn:hover, .view-btn:focus {
+            background-color: #83cc4f;
+            color: #fff;
+        }
+        .no-groups {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px 0;
+            background: none;
+            border: none;
+        }
+        .card-link-btn {
+            display: block;
+            width: 100%;
+            background-color: #76a456;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .card-link-btn:hover, .card-link-btn:focus {
+            background-color: #83cc4f;
+            color: #fff;
+            text-decoration: none;
+        }
+        .card-link-btn.secondary {
+            background-color: #6c757d;
+        }
+        .card-link-btn.secondary:hover, .card-link-btn.secondary:focus {
+            background-color: #cccccc;
+            color: #333;
+        }
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 24px;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .fixed-bottom-card .card-link-btn.secondary {
+            width: 90%;
+            max-width: 400px;
+            pointer-events: auto;
+            border-radius: 8px;
+        }
+        .back-btn-row {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">User Groups</h1>
-        <ul class="list-group">
-            {% for group in groups %}
-                <li class="list-group-item">{{ group.name }}</li>
-            {% endfor %}
-        </ul>
+    <div class="container">
+        <h1>{{ current_user.username }}</h1>
+        <div class="main-card">
+            <div class="card-header">
+                Your Groups
+            </div>
+            <div class="card-body">
+                <ul class="groups-list">
+                    {% for group in groups %}
+                        <li class="group-item">
+                            <span class="group-name">{{ group.name }}</span>
+                            <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="view-btn">View</a>
+                        </li>
+                    {% else %}
+                        <li class="no-groups">No groups found.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="fixed-bottom-card">
+        <a href="{{ url_for('user.user_dashboard') }}" class="card-link-btn secondary">
+            Back to Dashboard
+        </a>
     </div>
 </body>
 </html>
