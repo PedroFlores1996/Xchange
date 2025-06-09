@@ -33,14 +33,6 @@
             align-items: center;
         }
 
-        .row {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 20px; /* Match the gap with .stacked-cards */
-            width: 100%;
-        }
-
         .card {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -67,7 +59,6 @@
             min-height: 225px; /* Ensure minimum height */
             overflow-y: auto; /* Enable scrolling when content exceeds height */
         }
-
 
         /* List styling to look like table rows */
         ul {
@@ -143,21 +134,6 @@
         .expense-detail-value {
             color: #222;
             font-weight: 500;
-        }
-
-        .expense-group {
-            color: #6c757d;
-            font-size: 0.95rem;
-        }
-
-        .expense-creator {
-            color: #6c757d;
-            font-size: 0.95rem;
-        }
-
-        .expense-date {
-            color: #999;
-            font-size: 0.93rem;
         }
 
         .no-expenses {

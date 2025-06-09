@@ -153,7 +153,7 @@ def user_profile(user_id):
         return render_template(
             "user/friend.html",
             friend=friend,
-            debts=debt_with_friend,
+            debt=debt_with_friend,
             expenses=expenses_with_friend,
         )
 
