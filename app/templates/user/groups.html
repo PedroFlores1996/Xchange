@@ -160,6 +160,18 @@
             color: #155fa0;
             text-decoration: underline;
         }
+        .balance-positive {
+            color: #198754;
+            font-weight: 600;
+        }
+        .balance-negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .balance-zero {
+            color: #222;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -170,12 +182,34 @@
                 Your Groups
             </div>
             <div class="card-body">
+                <div style="margin-bottom: 18px; text-align: center;">
+                    <span>Total Balance:</span>
+                    {% if overall_balance > 0 %}
+                        <span class="balance-positive">{{ "%.2f"|format(overall_balance) }}</span>
+                    {% elif overall_balance < 0 %}
+                        <span class="balance-negative">{{ "%.2f"|format(overall_balance) }}</span>
+                    {% else %}
+                        <span class="balance-zero">{{ "%.2f"|format(overall_balance) }}</span>
+                    {% endif %}
+                </div>
                 <ul class="groups-list">
                     {% for group in groups %}
                         <li class="group-item">
                             <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="group-name">
                                 {{ group.name }}
                             </a>
+                            {% if group_balances[group.id] == 0 %}
+                                <div>All settled</div>
+                            {% else %}
+                                <div>
+                                    <span style="justify-content: end; margin-left: 12px; color: #555; font-size: 0.98rem;">Balance: </span>
+                                    {% if group_balances[group.id] > 0 %}
+                                        <span class="balance-positive">{{ "%.2f"|format(group_balances[group.id]) }}</span>
+                                    {% elif group_balances[group.id] < 0 %}
+                                        <span class="balance-negative">{{ "%.2f"|format(group_balances[group.id]) }}</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
                         </li>
                     {% else %}
                         <li class="no-groups">No groups found.</li>

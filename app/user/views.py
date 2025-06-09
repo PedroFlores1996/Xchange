@@ -23,8 +23,21 @@ def debts():
 @bp.route("/user/groups", methods=["GET"])
 @login_required
 def groups():
-    groups = current_user.groups
-    return render_template("user/groups.html", current_user=current_user, groups=groups)
+    group_balances, overall_balance = get_user_balances(current_user)
+    groups_sorted = sorted(
+        [group for group in current_user.groups if group.id != NO_GROUP],
+        key=lambda group: group_balances[group.id],
+        reverse=True,
+    )
+    no_group_balance = group_balances.pop(NO_GROUP)
+    overall_group_balance = overall_balance - no_group_balance
+    return render_template(
+        "user/groups.html",
+        current_user=current_user,
+        groups=groups_sorted,
+        group_balances=group_balances,
+        overall_balance=overall_group_balance,
+    )
 
 
 @bp.route("/user/friends", methods=["GET", "POST"])
