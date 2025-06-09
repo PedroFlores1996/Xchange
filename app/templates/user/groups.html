@@ -34,7 +34,7 @@
         }
         .main-card {
             width: 100%;
-            max-width: 400px;
+            max-width: 600px;
             margin: 0 auto 0 auto;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -71,7 +71,16 @@
             background-color: #f9f9f9;
         }
         .group-name {
-            font-weight: 500;
+            font-weight: 600;
+            color: #76a456;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .group-name:hover, .group-name:focus {
+            color: #155fa0;
+            text-decoration: underline;
         }
         .view-btn {
             background-color: #76a456;
@@ -139,6 +148,18 @@
         .back-btn-row {
             display: none;
         }
+        .group-description {
+            font-weight: 600;
+            color: #76a456;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .group-description:hover, .group-description:focus {
+            color: #155fa0;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -152,8 +173,9 @@
                 <ul class="groups-list">
                     {% for group in groups %}
                         <li class="group-item">
-                            <span class="group-name">{{ group.name }}</span>
-                            <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="view-btn">View</a>
+                            <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="group-name">
+                                {{ group.name }}
+                            </a>
                         </li>
                     {% else %}
                         <li class="no-groups">No groups found.</li>
