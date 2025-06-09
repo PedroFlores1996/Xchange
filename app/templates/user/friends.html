@@ -40,12 +40,14 @@
             color: #333;
         }
         .card {
-            width: 600px;
+            width: 100%;
+            min-height: 100px;
+            max-width: 600px;
+            margin: 0 auto 0 auto;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             background-color: #fff;
-            padding: 10px;
-            margin-top: 20px;
+            margin-top: 24px;
         }
         .card-header {
             background-color: #83cc4f;
@@ -56,13 +58,10 @@
             font-weight: 600;
             border-radius: 8px 8px 0 0;
         }
-
-        /* Card body styling with fixed height for 3 rows */
         .card-body {
             padding: 10px;
-            max-height: 500px;
-            min-height: 180px;
-            min-width: 300px;
+            max-height: 490px;
+            min-height: 225px;
             overflow-y: auto;
         }
         /* Add this for the Friends List card only */
@@ -72,20 +71,14 @@
             overflow-y: auto;
         }
         
-        .form-label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: #333;
-        }
         .form-control {
-            width: 100%;
             padding: 8px 10px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
             margin-bottom: 14px;
             box-sizing: border-box;
+            margin-top: 10px;
         }
         .btn {
             display: inline-block;
@@ -99,17 +92,7 @@
             cursor: pointer;
             text-decoration: none;
             transition: background 0.2s;
-        }
-        .btn:hover, .btn:focus {
-            background-color: #83cc4f;
-            color: #fff;
-        }
-        .btn.secondary {
-            background-color: #6c757d;
-        }
-        .btn.secondary:hover, .btn.secondary:focus {
-            background-color: #cccccc;
-            color: #333;
+            margin-bottom: 10px;
         }
         .friends-list {
             list-style-type: none;
@@ -126,9 +109,10 @@
             align-items: center;
         }
         .friend-link {
-            color: #2d7be5;
+            font-weight: 600;
+            color: #76a456;
             text-decoration: none;
-            font-weight: 500;
+            font-size: 1.1rem;
             transition: color 0.2s;
         }
         .friend-link:hover, .friend-link:focus {
@@ -147,14 +131,32 @@
             z-index: 1000;
             display: flex;
             justify-content: center;
+            background: none;
+            box-shadow: none;
+            border: none;
             pointer-events: none;
         }
-        .fixed-bottom-card .btn.secondary {
-            width: 90%;
+        .fixed-bottom-card a {
             max-width: 400px;
-            pointer-events: auto;
+            width: 100%;
             border-radius: 8px;
+            background-color: #6c757d;
+            color: #fff;
             text-align: center;
+            padding: 12px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+            pointer-events: auto;
+            margin: 0 16px;
+            display: block;
+        }
+        .fixed-bottom-card a:hover,
+        .fixed-bottom-card a:focus {
+            background-color: #cccccc;
+            color: #333;
+            text-decoration: none;
         }
         .alert {
             padding: 12px 18px;
@@ -187,16 +189,30 @@
             border: none;
             cursor: pointer;
         }
+        .add-friend-form {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 10px; /* Match friend-item padding */
+            box-sizing: border-box;
+        }
+        .add-friend-form .form-control {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Add Friend Section -->
         <div class="card">
-            <h2>Add a Friend</h2>
-            <form action="{{ url_for('user.friends') }}" method="post">
+            <div class="card-header">Add a Friend</div>
+            <form action="{{ url_for('user.friends') }}" method="post" class="add-friend-form">
                 <input type="email" name="email" class="form-control" id="email" placeholder="Enter friend's email" required>
-                <div style="text-align:center;">
+                <div style="text-align:center; margin-top: 10px;">
                     <button type="submit" class="btn">Add</button>
                 </div>
             </form>
@@ -225,8 +241,11 @@
                         {% for friend in friends %}
                             <li class="friend-item">
                                 <a href="/users/{{ friend.id }}" class="friend-link">
-                                    <strong>{{ friend.username }}</strong> ({{ friend.email }})
+                                    {{ friend.username }}
                                 </a>
+                                <span style="margin-left: 8px; color: #555; font-size: 0.98rem;">
+                                    ({{ friend.email }})
+                                </span>
                             </li>
                         {% endfor %}
                     </ul>
@@ -237,7 +256,7 @@
         </div>
     </div>
     <div class="fixed-bottom-card">
-        <a href="{{ url_for('user.user_dashboard') }}" class="btn secondary">
+        <a href="{{ url_for('user.user_dashboard') }}">
             Back to Dashboard
         </a>
     </div>
