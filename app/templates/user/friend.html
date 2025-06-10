@@ -160,10 +160,13 @@
         }
 
         .no-expenses {
+            width: 100%; /* Add this line */
             text-align: center;
             color: #6c757d;
-            padding: 30px 0;
-            font-size: 1.1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
         }
         footer {
             text-align: center;
@@ -256,33 +259,34 @@
         <!-- Balance Card -->
         <div class="card narrow">
             <div class="card-header">Balance</div>
-            <div class="card-body">
-                <ul>
-                    <li class="balance-row">
-                        {% if debt.lender_id == current_user.id %}
-                            <div>
-                                {{ friend.username }} 
-                                <div class="created-by">owes you</div>
-                            </div>
-                            <div>
-                                <span class="balance-positive">{{ "%.2f"|format(debt.amount) }}</span>
-                            </div>
-                        {% elif debt.lender_id == friend.id %}
-                            <div>
-                                {{ friend.username }}
-                                <div class="created-by">is owed</div>
-                            </div>
-                            <div>
-                                <span class="balance-negative">{{ "%.2f"|format(debt.amount) }}</span>
-                            </div>
-                        {% else %}
-                            <div>
-                                No balance information available.
-                            </div>
-                        {% endif %}
-                    </li>
-                </ul>
-            </div>
+            {% if debt %}
+                <div class="card-body">
+                    <ul>
+                        <li class="balance-row">
+                            
+                                {% if debt.lender_id == current_user.id %}
+                                    <div>
+                                        {{ friend.username }} 
+                                        <div class="created-by">owes you</div>
+                                    </div>
+                                    <div>
+                                        <span class="balance-positive">{{ "%.2f"|format(debt.amount) }}</span>
+                                    </div>
+                                {% else %}
+                                    <div>
+                                        {{ friend.username }}
+                                        <div class="created-by">is owed</div>
+                                    </div>
+                                    <div>
+                                        <span class="balance-negative">{{ "%.2f"|format(debt.amount) }}</span>
+                                    </div>
+                                {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            {% else %}
+                <div class="no-expenses">No debts between you and {{ friend.username }}</div>
+            {% endif %}
         </div>
 
         <!-- Shared Expenses Card -->

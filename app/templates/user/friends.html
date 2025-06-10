@@ -239,13 +239,28 @@
                 {% if friends %}
                     <ul class="friends-list">
                         {% for friend in friends %}
-                            <li class="friend-item">
-                                <a href="/users/{{ friend.id }}" class="friend-link">
-                                    {{ friend.username }}
-                                </a>
-                                <span style="margin-left: 8px; color: #555; font-size: 0.98rem;">
-                                    ({{ friend.email }})
-                                </span>
+                            <li class="friend-item" style="justify-content: space-between;">
+                                <div>
+                                    <a href="/users/{{ friend.id }}" class="friend-link">
+                                        {{ friend.username }}
+                                    </a>
+                                    <span style="margin-left: 8px; color: #555; font-size: 0.98rem;">
+                                        ({{ friend.email }})
+                                    </span>
+                                </div>
+                                <div style="text-align: right">
+                                    {% if debts[friend.id] is defined %}
+                                        {% if debts[friend.id] > 0 %}
+                                            <span style="color: #6c757d;">owes you</span>
+                                            <span style="color: #198754;">+{{ '%.2f'|format(debts[friend.id]|abs) }}</span>
+                                        {% else %}
+                                            <span style="color: #6c757d;">is owed</span>
+                                            <span style="color: #dc3545;">{{ '%.2f'|format(debts[friend.id]|abs) }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color: #6c757d; font-weight: 400;">No debt</span>
+                                    {% endif %}
+                                </div>
                             </li>
                         {% endfor %}
                     </ul>

@@ -18,7 +18,7 @@ def get_authorized_group(group_id: int) -> Group | None:
 
 
 def get_group_user_debts(
-    group: Group | None,
+    group: Group,
 ) -> dict[int, dict[str, list[Debt] | float]]:
     group_debts = {}
     # Iterate through all debts in the group
@@ -52,6 +52,19 @@ def get_no_group_debts(user: User):
     return [debt for debt in user.lender_debts if debt.group_id == NO_GROUP] + [
         debt for debt in user.borrower_debts if debt.group_id == NO_GROUP
     ]
+
+
+def get_no_group_user_debts(
+    user: User,
+) -> dict[str, list[Debt] | float]:
+    no_group_debts = get_no_group_debts(user)
+    user_debts = {}
+    for debt in no_group_debts:
+        if user.id == debt.lender_id:
+            user_debts[debt.borrower_id] = debt.amount
+        else:
+            user_debts[debt.lender_id] = -debt.amount
+    return user_debts
 
 
 def get_group_user_expenses(
