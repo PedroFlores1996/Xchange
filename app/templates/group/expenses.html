@@ -181,7 +181,9 @@
                                     </div>
                                     <div>
                                         <span class="text-muted-label">Created by:</span>
-                                        {{ expense.creator.username }}
+                                        <a href="{{ url_for('user.user_profile', user_id=expense.creator.id) }}" style="color: #76a456; text-decoration: none;">
+                                            {{ expense.creator.username }}
+                                        </a>
                                     </div>
                                     <div>
                                         <span class="text-muted-label">Created at:</span>

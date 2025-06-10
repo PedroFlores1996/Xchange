@@ -202,7 +202,7 @@
                                 <div>All settled</div>
                             {% else %}
                                 <div>
-                                    <span style="justify-content: end; margin-left: 12px; color: #555; font-size: 0.98rem;">Balance: </span>
+                                    <span style="justify-content: end; margin-left: 12px; color: #6c757d; font-size: 0.98rem;">Balance: </span>
                                     {% if group_balances[group.id] > 0 %}
                                         <span class="balance-positive">{{ "%.2f"|format(group_balances[group.id]) }}</span>
                                     {% elif group_balances[group.id] < 0 %}

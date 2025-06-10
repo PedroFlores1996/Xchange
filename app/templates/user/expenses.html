@@ -133,7 +133,11 @@
 
         .expense-detail-value {
             color: #222;
-            font-weight: 500;
+        }
+        
+        .expense-detail-value[href] {
+            color: #76a456;
+            text-decoration: none;
         }
 
         .no-expenses {
@@ -225,11 +229,19 @@
                                 <div class="expense-details-row">
                                     <div>
                                         <span class="expense-detail-label">Group:</span>
-                                        <span class="expense-detail-value">{{ expense.group.name if expense.group else 'No Group' }}</span>
+                                        {% if expense.group %}
+                                            <a href="{{ url_for('groups.get_group_overview', group_id=expense.group.id) }}" class="expense-detail-value" style="color: #76a456;">
+                                                {{ expense.group.name }}
+                                            </a>
+                                        {% else %}
+                                            <span class="expense-detail-value">No Group</span>
+                                        {% endif %}
                                     </div>
                                     <div>
                                         <span class="expense-detail-label">Created By:</span>
-                                        <span class="expense-detail-value">{{ expense.creator.username }}</span>
+                                        <a href="{{ url_for('user.user_profile', user_id=expense.creator.id) }}" class="expense-detail-value" style="color: #76a456;">
+                                            {{ expense.creator.username }}
+                                        </a>
                                     </div>
                                     <div>
                                         <span class="expense-detail-label">Created At:</span>
