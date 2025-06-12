@@ -10,10 +10,7 @@
             margin: 0;
             padding: 0;
             background-color: #f8f9fa;
-        }
-        html, body {
             height: 100%;
-            margin: 0;
             display: flex;
             flex-direction: column;
         }
@@ -24,34 +21,33 @@
             flex-direction: column;
             align-items: center;
         }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
         h1 {
             font-size: 2rem;
             font-weight: 700;
-            text-align: center;
             margin: 32px 0 16px 0;
-            color: #333;
             letter-spacing: 0.5px;
         }
         h2 {
             font-size: 1.3rem;
             font-weight: 600;
-            text-align: center;
             margin-bottom: 18px;
-            color: #333;
         }
         .card {
             width: 100%;
-            min-height: 100px;
             max-width: 600px;
-            margin: 0 auto 0 auto;
+            margin: 24px auto 0 auto;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             background-color: #fff;
-            margin-top: 24px;
+            min-height: 100px;
         }
         .card-header {
             background-color: #83cc4f;
-            color: white;
+            color: #fff;
             padding: 10px;
             font-size: 1rem;
             text-align: center;
@@ -60,8 +56,8 @@
         }
         .card-body {
             padding: 10px;
-            max-height: 490px;
-            min-height: 225px;
+            max-height: 420px;
+            min-height: 0;
             overflow-y: auto;
         }
         /* Add this for the Friends List card only */
@@ -94,6 +90,9 @@
             transition: background 0.2s;
             margin-bottom: 10px;
         }
+        .btn:hover, .btn:focus {
+            background-color: #83cc4f;
+        }
         .friends-list {
             list-style-type: none;
             padding: 0;
@@ -107,6 +106,7 @@
             background-color: #f9f9f9;
             display: flex;
             align-items: center;
+            justify-content: space-between;
         }
         .friend-link {
             font-weight: 600;
@@ -196,12 +196,16 @@
             display: flex;
             flex-direction: column;
             align-items: stretch;
-            padding: 10px; /* Match friend-item padding */
+            padding: 10px;
             box-sizing: border-box;
         }
         .add-friend-form .form-control {
             margin-top: 0;
             margin-bottom: 0;
+        }
+        .friend-item span[style*="color: #198754"],
+        .friend-item span[style*="color: #dc3545"] {
+            font-weight: 600;
         }
     </style>
 </head>

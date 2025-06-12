@@ -16,18 +16,18 @@
             margin: 0;
             padding: 0;
             background-color: #f8f9fa;
-        }
-
-        html, body {
             height: 100%;
-            margin: 0;
             display: flex;
             flex-direction: column;
         }
 
+        html, body {
+            height: 100%;
+        }
+
         .container {
-            margin-top: 10px; /* Reduced margin to use more space at the top */
-            flex: 1; /* Allow the container to grow and take up available space */
+            margin-top: 10px;
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -39,13 +39,13 @@
             overflow: hidden;
             width: 100%;
             max-width: 800px;
-            background-color: #ffffff;
+            background-color: #fff;
             margin-bottom: 24px;
         }
 
         .card-header {
             background-color: #76a456;
-            color: white;
+            color: #fff;
             padding: 10px;
             font-size: 1rem;
             text-align: center;
@@ -54,10 +54,10 @@
 
         /* Card body styling with fixed height for 3 rows */
         .card-body {
-            padding: 10px; /* Reduced padding */
-            max-height: 485px; /* Fixed height for 3 rows */
-            min-height: 225px; /* Ensure minimum height */
-            overflow-y: auto; /* Enable scrolling when content exceeds height */
+            padding: 10px;
+            max-height: 485px;
+            min-height: 225px;
+            overflow-y: auto;
         }
 
         /* List styling to look like table rows */
@@ -70,7 +70,6 @@
         /* Expenses list styling */
         .expenses-list {
             width: 100%;
-            border-collapse: collapse;
         }
 
         .expense-item {
@@ -92,19 +91,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            width: 100%;
             margin-bottom: 6px;
         }
 
-        .expense-description {
-            font-weight: 600;
+        .expense-description[href],
+        .expense-detail-value[href] {
             color: #76a456;
             text-decoration: none;
-            font-size: 1.1rem;
             transition: color 0.2s;
         }
+        .expense-description[href] {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
 
-        .expense-description:hover, .expense-description:focus {
+        .expense-description:hover,
+        .expense-description:focus,
+        .expense-detail-value[href]:hover,
+        .expense-detail-value[href]:focus {
             color: #155fa0;
             text-decoration: underline;
         }
@@ -134,11 +139,6 @@
         .expense-detail-value {
             color: #222;
         }
-        
-        .expense-detail-value[href] {
-            color: #76a456;
-            text-decoration: none;
-        }
 
         .no-expenses {
             text-align: center;
@@ -147,7 +147,9 @@
             font-size: 1.1rem;
         }
 
-        .card-link-btn {
+        .card-link-btn,
+        .card-link-btn:visited,
+        .card-link-btn:active {
             display: block;
             width: 100%;
             background-color: #83cc4f;
@@ -168,22 +170,20 @@
             text-decoration: none;
         }
 
-        .card-link-btn:last-child {
-            margin-bottom: 0;
-        }
-
-        .card-link-btn.secondary {
-            background-color: #6c757d; /* Lighter grey */
+        .card-link-btn.secondary,
+        .card-link-btn.secondary:visited,
+        .card-link-btn.secondary:active {
+            background-color: #6c757d;
         }
 
         .card-link-btn.secondary:hover, .card-link-btn.secondary:focus {
-            background-color: #cccccc; /* Slightly darker on hover */
+            background-color: #cccccc;
             color: #333;
         }
 
         .fixed-bottom-card {
             position: fixed;
-            bottom: 24px; /* Add margin from the bottom */
+            bottom: 24px;
             width: 100%;
             display: flex;
             justify-content: center;
@@ -196,7 +196,7 @@
         .fixed-bottom-card .card-link-btn {
             max-width: 400px;
             width: 100%;
-            border-radius: 8px; /* Fully rounded corners */
+            border-radius: 8px;
             margin: 0;
         }
 
@@ -206,7 +206,7 @@
             text-align: center;
             margin-bottom: 24px;
             color: #333;
-            margin-top: 19px; /* Add margin from the top */
+            margin-top: 19px;
         }
     </style>
 </head>

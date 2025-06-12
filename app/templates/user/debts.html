@@ -6,14 +6,15 @@
     <title>User Debts</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        .balance-positive {
-            color: green;
-        }
-        .balance-negative {
-            color: red;
-        }
-        .balance-zero {
-            color: black;
+        .balance-positive { color: green; }
+        .balance-negative { color: red; }
+        .balance-zero { color: black; }
+        /* Make all amounts bold for clarity */
+        .balance-positive,
+        .balance-negative,
+        .balance-zero,
+        td:nth-child(3) {
+            font-weight: 600;
         }
     </style>
 </head>

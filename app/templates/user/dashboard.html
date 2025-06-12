@@ -6,26 +6,20 @@
     <title>Dashboard</title>
     <!-- Include Google Fonts -->
     <style>
+        body, html {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
         /* Center the Total Balance div */
         .total-balance {
             text-align: center; /* Horizontally center the content */
             margin-bottom: 10px; /* Optional: Add spacing below the balance */
-        }
-
-        /* General font styling */
-        body {
-            font-family: 'Poppins', sans-serif; /* Apply the prettier font */
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa; /* Light background for better contrast */
-        }
-
-        /* Ensure the body and html take up the full height of the viewport */
-        html, body {
-            height: 100%; /* Full height of the viewport */
-            margin: 0; /* Remove default margin */
-            display: flex; /* Use flexbox for layout */
-            flex-direction: column; /* Stack elements vertically */
         }
 
         /* General container styling */
@@ -40,7 +34,6 @@
         /* Row styling for Friends and Groups */
         .row {
             display: flex; /* Use flexbox for side-by-side layout */
-            flex-direction: row; /* Align cards horizontally */
             gap: 20px; /* Add spacing between the cards */
             justify-content: center; /* Center the cards horizontally */
             align-items: flex-start; /* Align cards to the top */
@@ -76,7 +69,9 @@
             overflow-y: auto; /* Enable scrolling when content exceeds height */
         }
 
-        .card-link-btn {
+        .card-link-btn,
+        .card-link-btn:visited,
+        .card-link-btn:active {
             display: block;
             width: 100%;
             background-color: #76a456;
@@ -98,7 +93,9 @@
             text-decoration: none;
         }
 
-        .card-link-btn.secondary {
+        .card-link-btn.secondary,
+        .card-link-btn.secondary:visited,
+        .card-link-btn.secondary:active {
             background-color: #dc3545; /* Lighter grey */
         }
 
@@ -153,22 +150,10 @@
             margin-top: 5px; /* Add vertical spacing */
         }
 
-        .fixed-bottom-card {
-            position: fixed;
-            bottom: 24px;
-            width: 100%;
-            background: none;
-            box-shadow: none;
-            border: none;
-            display: flex;
-            justify-content: center;
-            z-index: 1000;
-        }
-
+        .fixed-bottom-card,
         .logout-fixed-btn {
             position: fixed;
             bottom: 24px;
-            left: 0;
             width: 100%;
             z-index: 1000;
             display: flex;
@@ -177,7 +162,9 @@
             box-shadow: none;
             border: none;
         }
-
+        .logout-fixed-btn {
+            left: 0;
+        }
         .logout-fixed-btn a {
             display: block;
             width: 100px;
@@ -189,7 +176,6 @@
             text-decoration: none;
             transition: background 0.2s;
         }
-
         .logout-fixed-btn a:hover, .logout-fixed-btn a:focus {
             background-color: #c82333;
             color: white;
@@ -206,10 +192,7 @@
 
         .total-balance span,
         li span[style*="color: red"],
-        li span[style*="color: green"] {
-            font-weight: 600 !important;
-        }
-
+        li span[style*="color: green"],
         .expense-amount span {
             font-weight: 600 !important;
         }

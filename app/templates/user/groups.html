@@ -10,10 +10,7 @@
             margin: 0;
             padding: 0;
             background-color: #f8f9fa;
-        }
-        html, body {
             height: 100%;
-            margin: 0;
             display: flex;
             flex-direction: column;
         }
@@ -35,14 +32,14 @@
         .main-card {
             width: 100%;
             max-width: 600px;
-            margin: 0 auto 0 auto;
+            margin: 0 auto;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             background-color: #fff;
         }
         .card-header {
             background-color: #83cc4f;
-            color: white;
+            color: #fff;
             padding: 10px;
             font-size: 1rem;
             text-align: center;
@@ -55,7 +52,7 @@
             min-height: 225px;
             overflow-y: auto;
         }
-        ul.groups-list {
+        .groups-list {
             list-style-type: none;
             padding: 0;
             margin: 0;
@@ -77,12 +74,11 @@
             font-size: 1.1rem;
             transition: color 0.2s;
         }
-
         .group-name:hover, .group-name:focus {
             color: #155fa0;
             text-decoration: underline;
         }
-        .view-btn {
+        .view-btn, .card-link-btn, .card-link-btn.secondary {
             background-color: #76a456;
             color: #fff;
             padding: 6px 16px;
@@ -92,10 +88,23 @@
             font-weight: 600;
             transition: background 0.2s;
             cursor: pointer;
+            display: inline-block;
+            font-size: 1rem;
         }
-        .view-btn:hover, .view-btn:focus {
+        .view-btn:hover, .view-btn:focus,
+        .card-link-btn:hover, .card-link-btn:focus {
             background-color: #83cc4f;
             color: #fff;
+        }
+        .card-link-btn.secondary,
+        .fixed-bottom-card .card-link-btn.secondary {
+            background-color: #6c757d;
+        }
+        .card-link-btn.secondary:hover, .card-link-btn.secondary:focus,
+        .fixed-bottom-card .card-link-btn.secondary:hover,
+        .fixed-bottom-card .card-link-btn.secondary:focus {
+            background-color: #cccccc;
+            color: #333;
         }
         .no-groups {
             text-align: center;
@@ -104,32 +113,6 @@
             background: none;
             border: none;
         }
-        .card-link-btn {
-            display: block;
-            width: 100%;
-            background-color: #76a456;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background 0.2s;
-        }
-        .card-link-btn:hover, .card-link-btn:focus {
-            background-color: #83cc4f;
-            color: #fff;
-            text-decoration: none;
-        }
-        .card-link-btn.secondary {
-            background-color: #6c757d;
-        }
-        .card-link-btn.secondary:hover, .card-link-btn.secondary:focus {
-            background-color: #cccccc;
-            color: #333;
-        }
         .fixed-bottom-card {
             position: fixed;
             bottom: 24px;
@@ -137,28 +120,32 @@
             z-index: 1000;
             display: flex;
             justify-content: center;
+            background: none;
+            box-shadow: none;
+            border: none;
             pointer-events: none;
         }
-        .fixed-bottom-card .card-link-btn.secondary {
-            width: 90%;
+        .fixed-bottom-card a {
             max-width: 400px;
-            pointer-events: auto;
+            width: 100%;
             border-radius: 8px;
-        }
-        .back-btn-row {
-            display: none;
-        }
-        .group-description {
+            background-color: #6c757d;
+            color: #fff;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1rem;
             font-weight: 600;
-            color: #76a456;
             text-decoration: none;
-            font-size: 1.1rem;
-            transition: color 0.2s;
+            transition: background 0.2s;
+            pointer-events: auto;
+            margin: 0 16px;
+            display: block;
         }
-
-        .group-description:hover, .group-description:focus {
-            color: #155fa0;
-            text-decoration: underline;
+        .fixed-bottom-card a:hover,
+        .fixed-bottom-card a:focus {
+            background-color: #cccccc;
+            color: #333;
+            text-decoration: none;
         }
         .balance-positive {
             color: #198754;
@@ -219,7 +206,7 @@
         </div>
     </div>
     <div class="fixed-bottom-card">
-        <a href="{{ url_for('user.user_dashboard') }}" class="card-link-btn secondary">
+        <a href="{{ url_for('user.user_dashboard') }}">
             Back to Dashboard
         </a>
     </div>
