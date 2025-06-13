@@ -51,7 +51,12 @@ class Expense(db.Model):  # type: ignore
         db.ForeignKey("group.id"), nullable=True, default=NO_GROUP
     )
     group: Mapped[Group] = relationship(back_populates="expenses")
-    users: Mapped[list[User]] = relationship(secondary="expense_users")
+    users: Mapped[list[User]] = relationship(
+        "User",
+        secondary="expense_users",
+        back_populates="expenses",
+        overlaps="expenses",
+    )
     creator_id: Mapped[int] = db.mapped_column(db.ForeignKey("user.id"), nullable=False)
     creator: Mapped[User] = relationship(foreign_keys=[creator_id])
     created_at: Mapped[datetime] = db.mapped_column(default=datetime.now())

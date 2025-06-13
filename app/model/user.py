@@ -42,7 +42,9 @@ class User(db.Model, UserMixin):  # type: ignore
     borrower_debts: Mapped[List[Debt]] = relationship(
         foreign_keys="Debt.borrower_id", back_populates="borrower"
     )
-    expenses: Mapped[List[Expense]] = relationship(secondary="expense_users")
+    expenses: Mapped[List["Expense"]] = relationship(
+        secondary="expense_users", back_populates="users"
+    )
 
     @classmethod
     def create(cls, username: str, email: str, password: str) -> Self:

@@ -1,10 +1,11 @@
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template
 from flask_login import login_required, current_user
 
 from app.group import (
     get_authorized_group,
     get_group_user_expenses,
     get_group_user_debts,
+    get_group_user_balances,
 )
 from app.split.constants import OWED, PAYED, TOTAL
 
@@ -23,21 +24,8 @@ def get_group_overview(group_id):
 
         group_user_debts = get_group_user_debts(group)
 
-        # Build a mapping from user_id to User object for quick lookup
-        user_id_to_user = {user.id: user for user in group.users}
-
         # Get all users balances in the group as a dictionary {User: total_balance}, sorted by absolute value descending, and filter out zeros
-        group_user_balances = dict(
-            sorted(
-                (
-                    (user_id_to_user[user_id], data[TOTAL])
-                    for user_id, data in group_user_debts.items()
-                    if data[TOTAL] != 0
-                ),
-                key=lambda item: abs(item[1]),
-                reverse=True,
-            )
-        )
+        group_user_balances = get_group_user_balances(group)
 
         # Get the current user's debts in the group
         current_user_debts = group_user_debts[current_user.id]
@@ -111,39 +99,27 @@ def get_group_balances(group_id):
     Displays the current user's total balance, debts, and recent expenses in the group.
     """
     if group := get_authorized_group(group_id):
-        # Get the current user's total balance in the group
 
-        group_user_debts = get_group_user_debts(group)
-
-        # Build a mapping from user_id to User object for quick lookup
-        user_id_to_user = {user.id: user for user in group.users}
-
-        # Get all users balances in the group as a dictionary {User: total_balance}, sorted by absolute value descending
-        balances_by_abs_amount = dict(
-            sorted(
-                (
-                    (user_id_to_user[user_id], data[TOTAL])
-                    for user_id, data in group_user_debts.items()
-                ),
-                key=lambda item: abs(item[1]),
-                reverse=True,
-            )
-        )
-
-        # Get all users balances in the group as a dictionary {User: total_balance}, sorted from most positive to most negative
-        balances_by_amount_reversed = dict(
-            sorted(
-                balances_by_abs_amount.items(),
-                key=lambda item: item[1],
-                reverse=True,
-            )
-        )
+        # Get group balances for all users in the group
+        group_balances = get_group_user_balances(group)
 
         # Get all users balances in the group as a dictionary {User: total_balance}, sorted from most negative to most positive
         balances_by_amount = dict(
             sorted(
-                balances_by_abs_amount.items(),
+                group_balances.items(),
                 key=lambda item: item[1],
+            )
+        )
+
+        # Get all users balances in the group as a dictionary {User: total_balance}, sorted from most positive to most negative
+        balances_by_amount_reversed = dict(reversed(balances_by_amount.items()))
+
+        # Get all users balances in the group as a dictionary {User: total_balance}, sorted by absolute value descending
+        balances_by_abs_amount = dict(
+            sorted(
+                group_balances.items(),
+                key=lambda item: abs(item[1]),
+                reverse=True,
             )
         )
 

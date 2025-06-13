@@ -54,7 +54,7 @@ def get_no_group_debts(user: User):
     ]
 
 
-def get_no_group_user_debts(
+def get_no_group_user_balances(
     user: User,
 ) -> dict[str, list[Debt] | float]:
     no_group_debts = get_no_group_debts(user)
@@ -76,3 +76,19 @@ def get_group_user_expenses(
         key=lambda e: e.created_at,
         reverse=True,
     )
+
+
+def get_group_user_balances(group: Group) -> dict[User, float]:
+    """
+    Returns a dictionary of users and their balances in the group.
+    The balance is calculated as the total amount paid minus the total amount owed.
+    """
+    user_balances: dict[User, float] = {}
+    for debt in group.debts:
+        user_balances[debt.lender] = user_balances.get(debt.lender, 0.0) + float(
+            debt.amount
+        )
+        user_balances[debt.borrower] = user_balances.get(debt.borrower, 0.0) - float(
+            debt.amount
+        )
+    return user_balances

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
-from app.group import get_no_group_debts, get_no_group_user_debts
+from app.group import get_no_group_debts, get_no_group_user_balances
 from app.model.user import User
 from app.user import get_user_balances
 from app.user.forms import AddFriendForm
@@ -94,7 +94,7 @@ def friends():
 
         return redirect(url_for("user.friends"))
 
-    friends_debts = get_no_group_user_debts(current_user)
+    friends_debts = get_no_group_user_balances(current_user)
     friends = sorted(
         current_user.friends,
         key=lambda friend: abs(friends_debts.get(friend.id, 0)),
