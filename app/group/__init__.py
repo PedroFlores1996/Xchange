@@ -75,4 +75,4 @@ def get_group_user_expenses(
         [expense for expense in user.expenses if (expense.group_id == group_id)],
         key=lambda e: e.created_at,
         reverse=True,
-    )[:10]
+    )

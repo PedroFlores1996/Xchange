@@ -195,8 +195,13 @@
     <div class="container">
         <h1>{{ group.name }}</h1>
 
-        <!-- New row of two header-only cards with button links -->
+        <!-- New row of three header-only cards with button links -->
         <div class="row" style="margin-bottom: 30px;">
+            <div class="card">
+                <a href="/groups/{{ group.id }}/balances" class="card-link-btn">
+                    All Balances
+                </a>
+            </div>
             <div class="card">
                 <a href="/groups/{{ group.id }}/debts" class="card-link-btn">
                     All Debts
@@ -209,8 +214,58 @@
             </div>
         </div>
 
-        <!-- Stack Debts and Expenses -->
+        <!-- Stack Balances, Debts and Expenses -->
         <div class="stacked-cards">
+            <!-- Balances Column -->
+            <div class="card">
+                <div class="card-header">
+                    Relevant Balances
+                </div>
+                <div class="card-body">
+                    <div class="total-balance">
+                        By Total Amount:
+                    </div>
+                    <ul>
+                        {% for user, total_balance in balances.items() %}
+                            <li>
+                                {% if total_balance > 0 %}
+                                    <div>
+                                        <strong>
+                                            <a href="/users/{{ user.id }}">
+                                                {{ user.username }}
+                                            </a>
+                                        </strong>
+                                        <div class="created-by">
+                                            is owed
+                                        </div>
+                                    </div>
+                                    <div class="expense-amount">
+                                        <span style="color: green;">{{ total_balance }}</span>
+                                    </div>
+                                {% else %}
+                                    <div>
+                                        <strong>
+                                            <a href="/users/{{ user.id }}">
+                                                {{ user.username }}
+                                            </a>
+                                        </strong>
+                                        <div class="created-by">
+                                            owes
+                                        </div>
+                                    </div>
+                                    <div class="expense-amount">
+                                        <span style="color: red;">{{ total_balance | abs }}</span>
+                                    </div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% if balances|length == 0 %}
+                        <p>No balances to show.</p>
+                    {% endif %}
+                </div>
+            </div>
+
             <!-- Debts Column -->
             <div class="card">
                 <div class="card-header">
@@ -239,7 +294,7 @@
                                             owes you
                                         </div>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                    <div class="expense-amount">
                                         <span style="color: green;">{{ debt.amount | abs }}</span>
                                     </div>
                                 {% else %}
@@ -249,9 +304,11 @@
                                                 {{ debt.lender.username }}
                                             </a>
                                         </strong>
+                                        <div class="created-by">
+                                            you owe
+                                        </div>
                                     </div>
-                                    <div>
-                                        is owed
+                                    <div class="expense-amount">
                                         <span style="color: red;">{{ debt.amount | abs }}</span>
                                     </div>
                                 {% endif %}
@@ -303,13 +360,13 @@
                 </div>
             </div>
         </div>
-    </div>
-    <!-- Add margin-bottom to create vertical space below the debts card -->
-    <div class="row">
-        <div class="card fixed-bottom-card">
-            <a href="{{ url_for('user.user_dashboard') }}" class="card-link-btn secondary">
-                Back to Dashboard
-            </a>
+        <!-- Add margin-bottom to create vertical space below the debts card -->
+        <div class="row">
+            <div class="card fixed-bottom-card">
+                <a href="{{ url_for('user.user_dashboard') }}" class="card-link-btn secondary">
+                    Back to Dashboard
+                </a>
+            </div>
         </div>
     </div>
 </body>

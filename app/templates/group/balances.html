@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ group.name }} - All Balances</title>
+    <style>
+        .total-balance {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            margin-top: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+        }
+        .card-row .card {
+            width: 100%;
+            max-width: 600px;
+            box-shadow: none;
+            border-radius: 8px;
+            background: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-row .card-link-btn {
+            width: 100%;
+            border-radius: 8px;
+            margin: 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background-color: #76a456;
+            color: #fff;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 10px 0;
+            transition: background 0.2s;
+            display: block;
+        }
+        .card-row .card-link-btn.active,
+        .card-row .card-link-btn:active {
+            background-color: #83cc4f !important;
+            color: #fff !important;
+        }
+        .card-row .card-link-btn:hover,
+        .card-row .card-link-btn:focus {
+            background-color: #83cc4f;
+            color: #fff;
+            text-decoration: none;
+        }
+        .card-link-btn.secondary {
+            background-color: #6c757d; /* Lighter grey */
+            margin-bottom: 24px;
+            max-width: 400px;
+        }
+        .card-link-btn.secondary,
+        .card-link-btn.secondary:active {
+            background-color: #6c757d !important;
+            color: #fff !important;
+        }
+        .card-link-btn.secondary:hover, 
+        .card-link-btn.secondary:focus {
+            background-color: #cccccc !important;
+            color: #333 !important;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 600px;
+            background-color: #ffffff;
+        }
+        .card-header {
+            background-color: #83cc4f;
+            color: white;
+            padding: 10px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .card-body {
+            padding: 10px;
+            max-height: 490px;
+            min-height: 225px;
+            overflow-y: auto;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        li:last-child {
+            margin-bottom: 0;
+        }
+        .user-link {
+            color: #76a456;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .user-link:hover, .user-link:focus {
+            color: #155fa0;
+            text-decoration: underline;
+        }
+        .balance-label {
+            color: #6c757d;
+            font-size: 0.98rem;
+            margin-right: 4px;
+            font-weight: normal;
+        }
+        .balance-positive {
+            color: #198754;
+            font-weight: 600;
+        }
+        .balance-negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .balance-zero {
+            color: #222;
+            font-weight: 600;
+        }
+        .expense-amount {
+            display: flex;
+            justify-content: right;
+            align-items: right;
+            text-align: right;
+            flex: 0 0 200px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .created-by {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .fixed-bottom-card {
+            max-width: 400px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ group.name }}</h1>
+        <div class="card-row">
+            <div class="card">
+                <a href="#" id="btn-relevance" class="card-link-btn active" onclick="showBalances('abs'); return false;">
+                    By Relevance
+                </a>
+            </div>
+            <div class="card">
+                <a href="#" id="btn-positive" class="card-link-btn" onclick="showBalances('positive'); return false;">
+                    From Most Positive
+                </a>
+            </div>
+            <div class="card">
+                <a href="#" id="btn-negative" class="card-link-btn" onclick="showBalances('negative'); return false;">
+                    From Most Negative
+                </a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="balances-header">By Relevance:</div>
+            <div class="card-body">
+                <ul id="balances-list">
+                    {% for user, total_balance in balances_abs.items() %}
+                        <li>
+                            <div>
+                                <a href="{{ url_for('user.user_profile', user_id=user.id) }}" class="user-link">
+                                    {{ user.username }}
+                                </a>
+                                <div class="created-by">
+                                    {% if total_balance > 0 %}
+                                        is owed
+                                    {% elif total_balance < 0 %}
+                                        owes
+                                    {% else %}
+                                        settled
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="expense-amount">
+                                <span class="balance-label">Balance:</span>
+                                {% if total_balance > 0 %}
+                                    <span class="balance-positive">{{ '%.2f'|format(total_balance) }}</span>
+                                {% elif total_balance < 0 %}
+                                    <span class="balance-negative">{{ '%.2f'|format(total_balance) }}</span>
+                                {% else %}
+                                    <span class="balance-zero">0.00</span>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% if balances_abs|length == 0 %}
+                    <div style="text-align:center; color:#6c757d; margin-top:16px;">No balances to show.</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-row">
+            <div class="card fixed-bottom-card">
+                <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="card-link-btn secondary">
+                    Back to Overview
+                </a>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Prepare the balances data as JS objects
+        const balancesData = {
+            abs: [
+                {% for user, total_balance in balances_abs.items() %}
+                {
+                    id: {{ user.id }},
+                    username: "{{ user.username|e }}",
+                    balance: {{ '%.2f'|format(total_balance) }},
+                    url: "{{ url_for('user.user_profile', user_id=user.id) }}"
+                },
+                {% endfor %}
+            ],
+            positive: [
+                {% for user, total_balance in balances_reversed.items() %}
+                {
+                    id: {{ user.id }},
+                    username: "{{ user.username|e }}",
+                    balance: {{ '%.2f'|format(total_balance) }},
+                    url: "{{ url_for('user.user_profile', user_id=user.id) }}"
+                },
+                {% endfor %}
+            ],
+            negative: [
+                {% for user, total_balance in balances.items() %}
+                {
+                    id: {{ user.id }},
+                    username: "{{ user.username|e }}",
+                    balance: {{ '%.2f'|format(total_balance) }},
+                    url: "{{ url_for('user.user_profile', user_id=user.id) }}"
+                },
+                {% endfor %}
+            ]
+        };
+
+        const headers = {
+            abs: "By Relevance:",
+            positive: "From Most Positive:",
+            negative: "From Most Negative:"
+        };
+
+        function showBalances(type) {
+            // Set active button
+            document.getElementById('btn-relevance').classList.remove('active');
+            document.getElementById('btn-positive').classList.remove('active');
+            document.getElementById('btn-negative').classList.remove('active');
+            if (type === 'abs') document.getElementById('btn-relevance').classList.add('active');
+            if (type === 'positive') document.getElementById('btn-positive').classList.add('active');
+            if (type === 'negative') document.getElementById('btn-negative').classList.add('active');
+
+            // Update header
+            document.getElementById('balances-header').textContent = headers[type];
+
+            // Update list
+            const list = document.getElementById('balances-list');
+            list.innerHTML = '';
+            const data = balancesData[type];
+            if (data.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:#6c757d; margin-top:16px;">No balances to show.</div>';
+                return;
+            }
+            for (const entry of data) {
+                let balanceClass = "balance-zero";
+                let createdBy = "settled";
+                if (entry.balance > 0) {
+                    balanceClass = "balance-positive";
+                    createdBy = "is owed";
+                } else if (entry.balance < 0) {
+                    balanceClass = "balance-negative";
+                    createdBy = "owes";
+                }
+                let balanceLabel = "Balance:";
+                list.innerHTML += `
+                    <li>
+                        <div>
+                            <a href="${entry.url}" class="user-link">${entry.username}</a>
+                            <div class="created-by">${createdBy}</div>
+                        </div>
+                        <div class="expense-amount">
+                            <span class="balance-label">${balanceLabel}</span>
+                            <span class="${balanceClass}">${parseFloat(entry.balance).toFixed(2)}</span>
+                        </div>
+                    </li>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
