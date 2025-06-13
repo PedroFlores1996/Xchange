@@ -169,7 +169,7 @@ def test_data() -> None:
     balances = {
         users[3].id: {TOTAL: 50.0, PAYED: 50.0, OWED: 0.0},  # Payer
         users[4].id: {TOTAL: 50.0, PAYED: 50.0, OWED: 0.0},  # Payer
-        users[5].id: {TOTAL: -30.0, PAYED: 0.0, OWED: 30.0},  # Ower (30%)
+        users[2].id: {TOTAL: -30.0, PAYED: 0.0, OWED: 30.0},  # Ower (30%)
         users[1].id: {TOTAL: -70.0, PAYED: 0.0, OWED: 70.0},  # Ower (70%)
     }
     update_debts(balances, group1.id)
