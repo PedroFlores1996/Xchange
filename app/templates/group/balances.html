@@ -185,7 +185,7 @@
         <div class="card-row">
             <div class="card">
                 <a href="#" id="btn-relevance" class="card-link-btn active" onclick="showBalances('abs'); return false;">
-                    By Relevance
+                    By Total Amount
                 </a>
             </div>
             <div class="card">
@@ -200,7 +200,7 @@
             </div>
         </div>
         <div class="card">
-            <div class="card-header" id="balances-header">By Relevance:</div>
+            <div class="card-header">All Balances</div>
             <div class="card-body">
                 <ul id="balances-list">
                     {% for user, total_balance in balances_abs.items() %}
@@ -280,12 +280,6 @@
             ]
         };
 
-        const headers = {
-            abs: "By Relevance:",
-            positive: "From Most Positive:",
-            negative: "From Most Negative:"
-        };
-
         function showBalances(type) {
             // Set active button
             document.getElementById('btn-relevance').classList.remove('active');
@@ -294,9 +288,6 @@
             if (type === 'abs') document.getElementById('btn-relevance').classList.add('active');
             if (type === 'positive') document.getElementById('btn-positive').classList.add('active');
             if (type === 'negative') document.getElementById('btn-negative').classList.add('active');
-
-            // Update header
-            document.getElementById('balances-header').textContent = headers[type];
 
             // Update list
             const list = document.getElementById('balances-list');
