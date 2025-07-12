@@ -62,7 +62,7 @@
         }
         /* Add this for the Friends List card only */
         .friends-card .card-body {
-            max-height: 420px; /* Smaller height for friends list */
+            max-height: 600px; /* Smaller height for friends list */
             min-height: 0;
             overflow-y: auto;
         }
@@ -71,16 +71,6 @@
         .friends-debts {
             text-align: center; /* Horizontally center the content */
             margin-bottom: 10px; /* Optional: Add spacing below the balance */
-        }
-        
-        .form-control {
-            padding: 8px 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            margin-bottom: 14px;
-            box-sizing: border-box;
-            margin-top: 10px;
         }
         .btn {
             display: inline-block;
@@ -164,51 +154,6 @@
             color: #333;
             text-decoration: none;
         }
-        .alert {
-            padding: 12px 18px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 1rem;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .alert-warning {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
-        .alert .close {
-            float: right;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-        .add-friend-form {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        .add-friend-form .form-control {
-            margin-top: 0;
-            margin-bottom: 0;
-        }
         .friend-item span[style*="color: #198754"],
         .friend-item span[style*="color: #dc3545"] {
             font-weight: 600;
@@ -217,31 +162,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Add Friend Section -->
-        <div class="card">
-            <div class="card-header">Add a Friend</div>
-            <form action="{{ url_for('user.friends') }}" method="post" class="add-friend-form">
-                <input type="email" name="email" class="form-control" id="email" placeholder="Enter friend's email" required>
-                <div style="text-align:center; margin-top: 10px;">
-                    <button type="submit" class="btn">Add</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div style="width:100%;max-width:400px;">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">
-                            {{ message }}
-                            <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
         <!-- Friends List Section -->
         <div class="card friends-card">
             <div class="card-header">Your Friends</div>
