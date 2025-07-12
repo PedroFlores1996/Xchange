@@ -107,7 +107,9 @@ def friends():
 @login_required
 def expenses():
     expenses = current_user.expenses
-    return render_template("user/expenses.html", expenses=expenses)
+    return render_template(
+        "user/expenses.html", current_user=current_user, expenses=expenses
+    )
 
 
 @bp.route("/user/balances", methods=["GET"])

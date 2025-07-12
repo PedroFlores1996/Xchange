@@ -66,6 +66,12 @@
             min-height: 0;
             overflow-y: auto;
         }
+
+        /* Center with bottom margin */
+        .friends-debts {
+            text-align: center; /* Horizontally center the content */
+            margin-bottom: 10px; /* Optional: Add spacing below the balance */
+        }
         
         .form-control {
             padding: 8px 10px;
@@ -240,6 +246,9 @@
         <div class="card friends-card">
             <div class="card-header">Your Friends</div>
             <div class="card-body">
+                <!-- <div class="friends-debts">
+                    With Respective Debts Outside Any Group
+                </div> -->
                 {% if friends %}
                     <ul class="friends-list">
                         {% for friend in friends %}
@@ -256,7 +265,7 @@
                                     {% if debts[friend.id] is defined %}
                                         {% if debts[friend.id] > 0 %}
                                             <span style="color: #6c757d;">owes you</span>
-                                            <span style="color: #198754;">+{{ '%.2f'|format(debts[friend.id]|abs) }}</span>
+                                            <span style="color: #198754;">{{ '%.2f'|format(debts[friend.id]|abs) }}</span>
                                         {% else %}
                                             <span style="color: #6c757d;">is owed</span>
                                             <span style="color: #dc3545;">{{ '%.2f'|format(debts[friend.id]|abs) }}</span>
