@@ -103,6 +103,13 @@ def friends():
     return render_template("user/friends.html", friends=friends, debts=friends_debts)
 
 
+@bp.route("/user/friend-form", methods=["GET"])
+@login_required
+def add_friend_form():
+    form = AddFriendForm()
+    return render_template("user/add_friend_form.html", form=form)
+
+
 @bp.route("/user/expenses", methods=["GET"])
 @login_required
 def expenses():

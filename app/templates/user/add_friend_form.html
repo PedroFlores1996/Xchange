@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a Friend</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .card-header {
+            background-color: #83cc4f;
+            color: #fff;
+            padding: 10px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+        }
+        .add-friend-form {
+            width: 100%;
+            padding: 16px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .form-control {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background-color: #76a456;
+            color: #fff;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            margin-bottom: 10px;
+        }
+        .btn:hover, .btn:focus {
+            background-color: #83cc4f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">Add a Friend</div>
+            <form action="{{ url_for('user.friends') }}" method="post" class="add-friend-form">
+                <input type="email" name="email" class="form-control" id="email" placeholder="Enter friend's email" required>
+                <div style="text-align:center; margin-top: 10px;">
+                    <button type="submit" class="btn">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
