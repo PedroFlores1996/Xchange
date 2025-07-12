@@ -202,6 +202,25 @@
     <div class="container">
         <h1>{{ current_user.username }}</h1>
 
+                <!-- Row of three buttons -->
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="card">
+                <a href="{{ url_for('user.add_friend_form') }}" class="card-link-btn">
+                    Add Friend
+                </a>
+            </div>
+            <div class="card">
+                <a href="{{ url_for('user.groups') }}" class="card-link-btn">
+                    Add Group
+                </a>
+            </div>
+            <div class="card">
+                <a href="{{ url_for('expense.expenses') }}" class="card-link-btn">
+                    Add Expense
+                </a>
+            </div>
+        </div>
+
         <!-- Row of three buttons -->
         <div class="row" style="margin-bottom: 30px;">
             <div class="card">
