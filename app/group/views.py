@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template
+from flask import Blueprint, jsonify, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from app.group import (
@@ -8,9 +8,66 @@ from app.group import (
     get_group_user_balances,
 )
 from app.split.constants import OWED, PAYED, TOTAL
+from app.group.forms import GroupForm
+from app.model.group import Group
+from app.model.user import User
 
 
 bp = Blueprint("groups", __name__)
+
+
+@bp.route("/groups", methods=["POST"])
+@login_required
+def create_group():
+    """
+    Creates a new group for the current user using GroupForm.
+    Returns a redirect to the group overview or re-renders the form with errors.
+    """
+    form = GroupForm()
+
+    if form.validate_on_submit():
+        # Start with current user
+        user_ids = [current_user.id]
+        
+        # Add friend IDs if provided
+        if form.friend_ids.data:
+            friend_ids = [int(id.strip()) for id in form.friend_ids.data.split(',') if id.strip()]
+            user_ids.extend(friend_ids)
+        
+        # Fallback to old users field for backwards compatibility
+        if form.users.data:
+            old_user_ids = [id for id in form.users.data if id]
+            user_ids.extend(old_user_ids)
+
+        # Remove duplicates just in case
+        user_ids = list(set(user_ids))
+
+        # Query User objects
+        users = User.query.filter(User.id.in_(user_ids)).all()
+
+        # Create group using the model's create method
+        group = Group.create(
+            name=form.name.data,
+            users=users,
+            description=form.description.data,
+        )
+        flash("Group created successfully!", "success")
+        return redirect(url_for("groups.get_group_overview", group_id=group.id))
+    else:
+        # If not valid, re-render the form with errors
+        return render_template("group/create_group.html", form=form), 400
+
+
+@bp.route("/groups/create_group_form", methods=["GET"])
+@login_required
+def create_group_form():
+    """
+    Renders the form to create a new group.
+    """
+    form = GroupForm()
+    # Convert friends to JSON-serializable format
+    friends_data = [{"id": friend.id, "username": friend.username} for friend in current_user.friends]
+    return render_template("group/create_group_form.html", form=form, friends_data=friends_data)
 
 
 @bp.route("/groups/<int:group_id>", methods=["GET"])
@@ -127,8 +184,9 @@ def get_group_balances(group_id):
             "group/balances.html",
             group=group,
             balances_abs=balances_by_abs_amount,
-            balances_reversed=balances_by_amount_reversed,
             balances=balances_by_amount,
+            balances_reversed=balances_by_amount_reversed,
         )
     else:
+
         return jsonify({"error": "Group not found or access denied"}), 404

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Group</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .card-header {
+            background-color: #83cc4f;
+            color: #fff;
+            padding: 10px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+        }
+        .create-group-form {
+            width: 100%;
+            padding: 16px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .form-control {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            box-sizing: border-box;
+            background: #f9f9f9;
+            color: #222;
+        }
+        .form-label {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-bottom: 6px;
+            font-weight: 500;
+            display: block;
+        }
+        .btn {
+            background-color: #76a456;
+            color: #fff;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            margin-bottom: 10px;
+        }
+        .btn:hover, .btn:focus {
+            background-color: #83cc4f;
+        }
+        .error {
+            color: #dc3545;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+        .friend-selector {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        .friend-input {
+            position: relative;
+            width: 100%;
+        }
+        #friend-search {
+            width: 100%;
+        }
+        .friend-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .friend-option {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .friend-option:hover, .friend-option.highlighted {
+            background-color: #f8f9fa;
+        }
+        .friend-option:last-child {
+            border-bottom: none;
+        }
+        .selected-friends {
+            margin-bottom: 14px;
+        }
+        .selected-friend {
+            display: inline-flex;
+            align-items: center;
+            background-color: #e9ecef;
+            border-radius: 16px;
+            padding: 4px 8px 4px 12px;
+            margin: 2px 4px 2px 0;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        .remove-friend {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-left: 6px;
+            padding: 0;
+            line-height: 1;
+        }
+        .remove-friend:hover {
+            color: #dc3545;
+        }
+        .hidden-input {
+            display: none;
+        }
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 24px;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            background: none;
+            box-shadow: none;
+            border: none;
+            pointer-events: none;
+        }
+        .fixed-bottom-card a {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 8px;
+            background-color: #6c757d;
+            color: #fff;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+            pointer-events: auto;
+            margin: 0 16px;
+            display: block;
+        }
+        .fixed-bottom-card a:hover,
+        .fixed-bottom-card a:focus {
+            background-color: #cccccc;
+            color: #333;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">Create a New Group</div>
+            <form action="{{ url_for('groups.create_group') }}" method="post" class="create-group-form">
+                {{ form.hidden_tag() }}
+                {{ form.name(class="form-control") }}
+                {% for error in form.name.errors %}
+                    <div class="error">{{ error }}</div>
+                {% endfor %}
+                {{ form.description(class="form-control") }}
+                {% for error in form.description.errors %}
+                    <div class="error">{{ error }}</div>
+                {% endfor %}
+                <label class="form-label">Add Friends (Optional):</label>
+                <div class="friend-selector">
+                    <div class="friend-input">
+                        <input type="text" id="friend-search" class="form-control" placeholder="Search and select friends..." autocomplete="off">
+                        <div id="friend-dropdown" class="friend-dropdown"></div>
+                    </div>
+                    <div id="selected-friends" class="selected-friends"></div>
+                </div>
+                <input type="hidden" id="selected-friend-ids" name="friend_ids" value="">
+                {% for error in form.users.errors %}
+                    <div class="error">{{ error }}</div>
+                {% endfor %}
+                <div style="text-align:center; margin-top: 10px;">
+                    {{ form.submit(class="btn") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="fixed-bottom-card">
+        <a href="{{ url_for('user.user_dashboard') }}">
+            Back to Dashboard
+        </a>
+    </div>
+    <script type="application/json" id="friends-data">{{ friends_data|tojson|safe }}</script>
+    <script>
+        // Friends data - loaded from JSON script tag
+        const friends = JSON.parse(document.getElementById('friends-data').textContent);
+        const selectedFriends = new Set();
+        let highlightedIndex = -1;
+        
+        const friendSearch = document.getElementById('friend-search');
+        const friendDropdown = document.getElementById('friend-dropdown');
+        const selectedFriendsContainer = document.getElementById('selected-friends');
+        const hiddenInput = document.getElementById('selected-friend-ids');
+        
+        function updateHiddenInput() {
+            hiddenInput.value = Array.from(selectedFriends).join(',');
+        }
+        
+        function renderSelectedFriends() {
+            selectedFriendsContainer.innerHTML = '';
+            selectedFriends.forEach(friendId => {
+                const friend = friends.find(f => f.id == friendId);
+                if (friend) {
+                    const friendElement = document.createElement('span');
+                    friendElement.className = 'selected-friend';
+                    friendElement.innerHTML = `
+                        ${friend.username}
+                        <button type="button" class="remove-friend" onclick="removeFriend(${friend.id})">&times;</button>
+                    `;
+                    selectedFriendsContainer.appendChild(friendElement);
+                }
+            });
+        }
+        
+        function removeFriend(friendId) {
+            selectedFriends.delete(friendId);
+            renderSelectedFriends();
+            updateHiddenInput();
+            renderDropdown(friendSearch.value);
+        }
+        
+        function addFriend(friendId) {
+            selectedFriends.add(friendId);
+            friendSearch.value = '';
+            friendDropdown.style.display = 'none';
+            renderSelectedFriends();
+            updateHiddenInput();
+        }
+        
+        function renderDropdown(searchTerm = '') {
+            const filteredFriends = friends.filter(friend => 
+                !selectedFriends.has(friend.id) && 
+                friend.username.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            if (filteredFriends.length === 0) {
+                friendDropdown.style.display = 'none';
+                return;
+            }
+            
+            friendDropdown.innerHTML = '';
+            filteredFriends.forEach((friend, index) => {
+                const option = document.createElement('div');
+                option.className = 'friend-option';
+                option.textContent = friend.username;
+                option.onclick = () => addFriend(friend.id);
+                option.setAttribute('data-index', index);
+                friendDropdown.appendChild(option);
+            });
+            
+            highlightedIndex = -1; // Reset highlight
+            friendDropdown.style.display = 'block';
+        }
+        
+        function updateHighlight() {
+            const options = friendDropdown.querySelectorAll('.friend-option');
+            options.forEach((option, index) => {
+                option.classList.toggle('highlighted', index === highlightedIndex);
+            });
+        }
+        
+        function selectHighlighted() {
+            const options = friendDropdown.querySelectorAll('.friend-option');
+            if (highlightedIndex >= 0 && highlightedIndex < options.length) {
+                options[highlightedIndex].click();
+            }
+        }
+        
+        friendSearch.addEventListener('input', (e) => {
+            renderDropdown(e.target.value);
+        });
+        
+        friendSearch.addEventListener('focus', (e) => {
+            renderDropdown(e.target.value); // Show all friends when focusing
+        });
+        
+        friendSearch.addEventListener('click', (e) => {
+            renderDropdown(e.target.value); // Show all friends when clicking
+        });
+        
+        // Handle keyboard navigation
+        friendSearch.addEventListener('keydown', (e) => {
+            const options = friendDropdown.querySelectorAll('.friend-option');
+            const maxIndex = options.length - 1;
+            
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    highlightedIndex = highlightedIndex < maxIndex ? highlightedIndex + 1 : 0;
+                    updateHighlight();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    highlightedIndex = highlightedIndex > 0 ? highlightedIndex - 1 : maxIndex;
+                    updateHighlight();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (friendDropdown.style.display === 'block' && highlightedIndex >= 0) {
+                        selectHighlighted();
+                    }
+                    break;
+                case 'Escape':
+                    friendDropdown.style.display = 'none';
+                    highlightedIndex = -1;
+                    break;
+            }
+        });
+        
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.friend-selector')) {
+                friendDropdown.style.display = 'none';
+                highlightedIndex = -1;
+            }
+        });
+    </script>
+</body>
+</html>
