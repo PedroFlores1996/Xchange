@@ -65,6 +65,40 @@
         .btn:hover, .btn:focus {
             background-color: #83cc4f;
         }
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 24px;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            background: none;
+            box-shadow: none;
+            border: none;
+            pointer-events: none;
+        }
+        .fixed-bottom-card a {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 8px;
+            background-color: #6c757d;
+            color: #fff;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+            pointer-events: auto;
+            margin: 0 16px;
+            display: block;
+        }
+        .fixed-bottom-card a:hover,
+        .fixed-bottom-card a:focus {
+            background-color: #cccccc;
+            color: #333;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +112,11 @@
                 </div>
             </form>
         </div>
+    </div>
+    <div class="fixed-bottom-card">
+        <a href="{{ url_for('user.user_dashboard') }}">
+            Back to Dashboard
+        </a>
     </div>
 </body>
 </html>
