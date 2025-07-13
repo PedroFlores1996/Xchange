@@ -4,52 +4,260 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submit Expense</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        .btn-remove {
-            height: 38px; /* Adjust the height to match input fields */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto 100px auto;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            align-items: center;
+        }
+        .card {
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 10px;
+            max-height: 70vh;
+            min-height: 70vh;
+            overflow-y: auto;
+        }
+        .card-header {
+            background-color: #83cc4f;
+            color: #fff;
+            padding: 12px 16px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-bottom: 6px;
+            font-weight: 500;
+            display: block;
+        }
+        .form-control {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: #f9f9f9;
+            color: #222;
+            width: 100%;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #83cc4f;
+            background: #fff;
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 768px) {
+            .two-column, .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .section-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #83cc4f;
+        }
+        .user-row {
+            display: flex;
+            align-items: end;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .user-row .form-group {
+            margin-bottom: 0;
+            flex: 1;
+        }
+        .user-row .amount-field {
+            flex: 0 0 120px;
+        }
+        .user-row .remove-field {
+            flex: 0 0 auto;
+        }
+        .btn {
+            background-color: #76a456;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn:hover, .btn:focus {
+            background-color: #83cc4f;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover, .btn-secondary:focus {
+            background-color: #5a6268;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+        .btn-danger:hover, .btn-danger:focus {
+            background-color: #c82333;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+        .submit-container {
+            text-align: center;
+        }
+        .submit-container .btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+        }
+        .amount-field {
+            display: none;
+        }
+        .amount-field.show {
+            display: block;
+        }
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 24px;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            background: none;
+            box-shadow: none;
+            border: none;
+            pointer-events: none;
+        }
+        .fixed-bottom-card a {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 8px;
+            background-color: #6c757d;
+            color: #fff;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+            pointer-events: auto;
+            margin: 0 16px;
+            display: block;
+        }
+        .fixed-bottom-card a:hover,
+        .fixed-bottom-card a:focus {
+            background-color: #cccccc;
+            color: #333;
+            text-decoration: none;
+        }
+        .error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">Submit Expense</h1>
-        <form action="{{ url_for('expense.expenses') }}" method="post">
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                <label for="description">Description:</label>
-                {{ form.description(class="form-control", id="description", size=50) }}
-            </div>
-            <div class="form-group">
-                <label for="category">Category:</label>
-                {{ form.category(class="form-control", id="category") }}
-            </div>
-            <div class="form-group">
-                <label for="amount">Amount:</label>
-                {{ form.amount(class="form-control", id="amount", size=20) }}
-            </div>
-            <div class="form-group">
-                <label for="group_select">Select Group:</label>
-                <select id="group_select" class="form-control" onchange="updateUsersByGroup(); updateGroupIdField();">
-                    <option value="">No Group</option>
-                    {% for group in current_user.groups %}
-                        <option value="{{ group.id }}">{{ group.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <input type="hidden" name="group_id" id="group_id" value="">
-            <div class="row">
-                <!-- Payers Section -->
-                <div class="col-md-6">
-                    <h3>Payers</h3>
-                    <div id="payers">
-                        <div class="form-group">
-                            <label for="payers_split">Payers Split:</label>
-                            {{ form.payers_split(class="form-control", id="payers_split", onchange="toggleAmount('payers')") }}
-                        </div>
-                            <div class="form-row align-items-center mb-2 d-flex">
-                                <div class="col">
-                                    <label for="payers-0-username">Username:</label>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">Expense Details</div>
+            
+            <form id="expense-form" action="{{ url_for('expense.expenses') }}" method="post">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="description" class="form-label">Description:</label>
+                        {{ form.description(class="form-control", id="description") }}
+                        {% for error in form.description.errors %}
+                            <div class="error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount" class="form-label">Amount:</label>
+                        {{ form.amount(class="form-control", id="amount") }}
+                        {% for error in form.amount.errors %}
+                            <div class="error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="group_select" class="form-label">Select Group:</label>
+                        <select id="group_select" class="form-control" onchange="updateUsersByGroup(); updateGroupIdField();">
+                            <option value="">No Group</option>
+                            {% for group in current_user.groups %}
+                                <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category" class="form-label">Category:</label>
+                        {{ form.category(class="form-control", id="category") }}
+                        {% for error in form.category.errors %}
+                            <div class="error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <input type="hidden" name="group_id" id="group_id" value="">
+                
+                <div class="two-column">
+                    <!-- Payers Section -->
+                    <div>
+                        <h3 class="section-header">Payers</h3>
+                        <div id="payers">
+                            <div class="form-group">
+                                <label for="payers_split" class="form-label">Payers Split:</label>
+                                {{ form.payers_split(class="form-control", id="payers_split", onchange="toggleAmount('payers')") }}
+                            </div>
+                            <div class="user-row">
+                                <div class="form-group">
+                                    <label for="payers-0-username" class="form-label">Username:</label>
                                     <select name="payers-0-username" class="form-control" id="payers-0-username" onchange="updateUserId('payers', 0)">
                                         <option value="{{ current_user.id }}">{{ current_user.username }}</option>
                                         {% for friend in current_user.friends %}
@@ -58,78 +266,93 @@
                                     </select>
                                     <input type="hidden" name="payers-0-user_id" id="payers-0-user_id">
                                 </div>
-                                <div class="col payers-amount" style="display: none;">
-                                    <label for="payers-0-amount">Amount:</label>
-                                    <input type="text" name="payers-0-amount" class="form-control" size="10" value="0" oninput="validateAmount(this)">
+                                <div class="form-group amount-field payers-amount">
+                                    <label for="payers-0-amount" class="form-label">Amount:</label>
+                                    <input type="text" name="payers-0-amount" class="form-control" value="0" oninput="validateAmount(this)">
                                 </div>
                             </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-small" onclick="addUserRow('payers')">Add Payer</button>
                     </div>
-                    <button type="button" class="btn btn-secondary mt-2" onclick="addUserRow('payers')">Add Payer</button>
+
+                    <!-- Owers Section -->
+                    <div>
+                        <h3 class="section-header">Owers</h3>
+                        <div id="owers">
+                            <div class="form-group">
+                                <label for="owers_split" class="form-label">Owers Split:</label>
+                                {{ form.owers_split(class="form-control", id="owers_split", onchange="toggleAmount('owers')") }}
+                            </div>
+                            <div class="user-row">
+                                <div class="form-group">
+                                    <label for="owers-0-username" class="form-label">Username:</label>
+                                    <select name="owers-0-username" class="form-control" id="owers-0-username" onchange="updateUserId('owers', 0)">
+                                        <option value="{{ current_user.id }}">{{ current_user.username }}</option>
+                                        {% for friend in current_user.friends %}
+                                            <option value="{{ friend.id }}">{{ friend.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <input type="hidden" name="owers-0-user_id" id="owers-0-user_id">
+                                </div>
+                                <div class="form-group amount-field owers-amount">
+                                    <label for="owers-0-amount" class="form-label">Amount:</label>
+                                    <input type="text" name="owers-0-amount" class="form-control" value="0" oninput="validateAmount(this)">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-small" onclick="addUserRow('owers')">Add Ower</button>
+                    </div>
                 </div>
 
-                <!-- Owers Section -->
-                <div class="col-md-6">
-                    <h3>Owers</h3>
-                    <div id="owers">
-                        <div class="form-group">
-                            <label for="owers_split">Owers Split:</label>
-                            {{ form.owers_split(class="form-control", id="owers_split", onchange="toggleAmount('owers')") }}
-                        </div>
-                        <div class="form-row align-items-center mb-2 d-flex">
-                            <div class="col">
-                                <label for="owers-0-username">Username:</label>
-                                <select name="owers-0-username" class="form-control" id="owers-0-username" onchange="updateUserId('owers', 0)">
-                                    <option value="{{ current_user.id }}">{{ current_user.username }}</option>
-                                    {% for friend in current_user.friends %}
-                                        <option value="{{ friend.id }}">{{ friend.username }}</option>
-                                    {% endfor %}
-                                </select>
-                                <input type="hidden" name="owers-0-user_id" id="owers-0-user_id">
-                            </div>
-                            <div class="col owers-amount" style="display: none;">
-                                <label for="owers-0-amount">Amount:</label>
-                                <input type="text" name="owers-0-amount" class="form-control" size="10" value="0" oninput="validateAmount(this)">
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-secondary mt-2" onclick="addUserRow('owers')">Add Ower</button>
-                </div>
-            </div>
-            <div class="mt-5"></div>
-            <div class="form-group text-center mt-4">
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </form>
+            </form>
+        </div>
+        
+        <div class="submit-container">
+            <button type="submit" form="expense-form" class="btn">Submit Expense</button>
+        </div>
     </div>
 
-    <script>
-        let userAndFriends = [
+    <div class="fixed-bottom-card">
+        <a href="{{ url_for('user.user_dashboard') }}">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <script type="application/json" id="user-friends-data">
+        [
             { 
-                id: "{{ current_user.id }}", 
-                username: "{{ current_user.username }}", 
-                groupIds: [{% for group in current_user.groups %}{{ group.id }},{% endfor %}] 
-            },
+                "id": "{{ current_user.id }}", 
+                "username": "{{ current_user.username }}", 
+                "groupIds": [{% for group in current_user.groups %}{{ group.id }}{% if not loop.last %},{% endif %}{% endfor %}] 
+            }{% if current_user.friends %},{% endif %}
             {% for friend in current_user.friends %}
                 { 
-                    id: "{{ friend.id }}", 
-                    username: "{{ friend.username }}", 
-                    groupIds: [{% for group in friend.groups %}{{ group.id }},{% endfor %}] 
-                },
+                    "id": "{{ friend.id }}", 
+                    "username": "{{ friend.username }}", 
+                    "groupIds": [{% for group in friend.groups %}{{ group.id }}{% if not loop.last %},{% endif %}{% endfor %}] 
+                }{% if not loop.last %},{% endif %}
             {% endfor %}
-        ];
-
-        let availableUsers = [...userAndFriends]; // Initialize availableUsers with userAndFriends
+        ]
+    </script>
+    <script>
+        let userAndFriends = JSON.parse(document.getElementById('user-friends-data').textContent);
+        let availableUsers = [...userAndFriends];
 
         function toggleAmount(users_label) {
             const splitType = document.getElementById(`${users_label}_split`).value;
             const amountFields = document.querySelectorAll(`.${users_label}-amount`);
 
             amountFields.forEach(field => {
-                // Show or hide the amount fields based on the split type
-                field.style.display = (splitType === 'Equally') ? 'none' : 'block';
+                if (splitType === 'Equally') {
+                    field.classList.remove('show');
+                } else {
+                    field.classList.add('show');
+                }
 
-                // Update the label text dynamically
-                field.querySelector('label').textContent = splitType;
+                const label = field.querySelector('label');
+                if (label) {
+                    label.textContent = splitType;
+                }
             });
         }
 
@@ -137,51 +360,45 @@
             const selectElement = document.getElementById(`${type}-${index}-username`);
             const userIdInput = document.getElementById(`${type}-${index}-user_id`);
             if (selectElement && userIdInput) {
-                userIdInput.value = selectElement.value; // Update the hidden user_id field with the selected user ID
+                userIdInput.value = selectElement.value;
             }
         }
 
         function addUserRow(type) {
-            const containerDiv = document.getElementById(type); // Either 'payers' or 'owers'
+            const containerDiv = document.getElementById(type);
             const newIndex = containerDiv.children.length;
             const newDiv = document.createElement('div');
-            newDiv.className = 'form-row align-items-center mb-2 d-flex';
+            newDiv.className = 'user-row';
 
-            // Generate the dropdown options dynamically from availableUsers
             const options = availableUsers.map(user => `<option value="${user.id}">${user.username}</option>`).join("");
 
-            // Generate the HTML for the new row
             newDiv.innerHTML = `
-                <div class="col">
-                    <label for="${type}-${newIndex}-username">Username:</label>
+                <div class="form-group">
+                    <label for="${type}-${newIndex}-username" class="form-label">Username:</label>
                     <select name="${type}-${newIndex}-username" class="form-control" id="${type}-${newIndex}-username" onchange="updateUserId('${type}', ${newIndex})">
                         ${options}
                     </select>
                     <input type="hidden" name="${type}-${newIndex}-user_id" id="${type}-${newIndex}-user_id">
                 </div>
-                <div class="col ${type}-amount">
-                    <label for="${type}-${newIndex}-amount">Amount:</label>
-                    <input type="text" name="${type}-${newIndex}-amount" class="form-control" size="10" value="0" oninput="validateAmount(this)">
+                <div class="form-group amount-field ${type}-amount">
+                    <label for="${type}-${newIndex}-amount" class="form-label">Amount:</label>
+                    <input type="text" name="${type}-${newIndex}-amount" class="form-control" value="0" oninput="validateAmount(this)">
                 </div>
-                <div class="col-auto d-flex align-self-end">
-                    <button type="button" class="btn btn-danger btn-sm form-control btn-remove" onclick="removeRow(this)">Remove</button>
+                <div class="form-group remove-field">
+                    <button type="button" class="btn btn-danger btn-small" onclick="removeRow(this)">Remove</button>
                 </div>
             `;
 
-            // Append the new row to the container
             containerDiv.appendChild(newDiv);
-
-            // Toggle the visibility of the amount fields
             toggleAmount(type);
         }
 
         function removeRow(button) {
-            const row = button.closest('.form-row');
+            const row = button.closest('.user-row');
             row.remove();
         }
 
         function updateDropdowns(type, users) {
-            // Select all dropdown elements for the specified type (e.g., 'payers' or 'owers')
             const selectElements = document.querySelectorAll(`[id^="${type}-"][id$="-username"]`);
             selectElements.forEach(selectElement => {
                 updateDropdownOptions(selectElement, users);
@@ -191,28 +408,22 @@
         function updateUsersByGroup() {
             const groupId = document.getElementById("group_select").value;
 
-            // Use a ternary operator to set availableUsers
             availableUsers = groupId
                 ? userAndFriends.filter(user => user.groupIds.includes(parseInt(groupId)))
                 : [...userAndFriends];
 
-            // Remove rows with users not in the selected group
             filterRowsByAvailableUsers('payers');
             filterRowsByAvailableUsers('owers');
 
-            // Update both Payers and Owers dropdowns
             updateDropdowns('payers', availableUsers);
             updateDropdowns('owers', availableUsers);
         }
 
         function updateDropdownOptions(selectElement, users) {
-            // Store the currently selected value
             const currentValue = selectElement.value;
 
-            // Clear existing options
             selectElement.innerHTML = "";
 
-            // Add new options
             users.forEach(user => {
                 const option = document.createElement("option");
                 option.value = user.id;
@@ -220,12 +431,10 @@
                 selectElement.appendChild(option);
             });
 
-            // Restore the previously selected value if it exists in the new options
             const optionToSelect = Array.from(selectElement.options).find(option => option.value == currentValue);
             if (optionToSelect) {
                 optionToSelect.selected = true;
             } else {
-                // Trigger the onchange event to update the hidden user_id field if the selected value is no longer valid
                 selectElement.dispatchEvent(new Event("change"));
             }
         }
@@ -233,12 +442,12 @@
         function updateGroupIdField() {
             const groupSelect = document.getElementById("group_select");
             const groupIdField = document.getElementById("group_id");
-            groupIdField.value = groupSelect.value; // Set the hidden field's value to the selected group's ID
+            groupIdField.value = groupSelect.value;
         }
 
         function filterRowsByAvailableUsers(type) {
-            const containerDiv = document.getElementById(type); // Either 'payers' or 'owers'
-            const rows = containerDiv.querySelectorAll('.form-row');
+            const containerDiv = document.getElementById(type);
+            const rows = containerDiv.querySelectorAll('.user-row');
 
             rows.forEach(row => {
                 const selectElement = row.querySelector(`[id^="${type}-"][id$="-username"]`);
@@ -246,7 +455,6 @@
                     const selectedUserId = selectElement.value;
                     const userExists = availableUsers.some(user => user.id == selectedUserId);
 
-                    // Remove the row if the user is not in the availableUsers list
                     if (!userExists) {
                         row.remove();
                     }
@@ -255,28 +463,24 @@
         }
 
         function validateAmount(input) {
-                        const isPercentage = input.closest('.col').querySelector('label').innerText === 'Percentage';
+            const isPercentage = input.closest('.form-group').querySelector('label').innerText === 'Percentage';
 
             if (isPercentage) {
-                // Allow only integers between 0 and 100
-                input.value = input.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                input.value = input.value.replace(/[^0-9]/g, '');
                 if (input.value !== '') {
                     const value = parseInt(input.value, 10);
                     if (value > 100) {
-                        input.value = input.value.slice(0, -1); // Remove the last digit if the value exceeds 100
+                        input.value = input.value.slice(0, -1);
                     }
                 }
             } else {
-                // Allow only numbers and a single decimal point
                 input.value = input.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
 
-                // Restrict to 2 decimal places
                 const parts = input.value.split('.');
                 if (parts[1] && parts[1].length > 2) {
                     input.value = `${parts[0]}.${parts[1].substring(0, 2)}`;
                 }
 
-                // Prevent leading decimal point (e.g., ".5" becomes "0.5")
                 if (input.value.startsWith('.')) {
                     input.value = `0${input.value}`;
                 }
@@ -284,25 +488,19 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize user_id fields for payers
             const payerSelectElements = document.querySelectorAll('[id^="payers-"][id$="-username"]');
             payerSelectElements.forEach((selectElement, index) => {
                 updateUserId('payers', index);
             });
 
-            // Initialize user_id fields for owers
             const owerSelectElements = document.querySelectorAll('[id^="owers-"][id$="-username"]');
             owerSelectElements.forEach((selectElement, index) => {
                 updateUserId('owers', index);
             });
 
-            // Initialize amount visibility
             toggleAmount('payers');
             toggleAmount('owers');
         });
     </script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
