@@ -20,31 +20,16 @@ def get_authorized_group(group_id: int) -> Group | None:
 def get_group_user_debts(
     group: Group,
 ) -> dict[int, dict[str, list[Debt] | float]]:
-    group_debts = {}
+    group_debts = {user.id: {PAYED: [], OWED: [], TOTAL: 0.0} for user in group.users}
     # Iterate through all debts in the group
     for debt in group.debts:
         # Lender
-        lender_id = debt.lender_id
-        if lender_id in group_debts:
-            group_debts[lender_id][PAYED].append(debt)
-            group_debts[lender_id][TOTAL] += float(debt.amount)
-        else:
-            group_debts[lender_id] = {
-                OWED: [],
-                PAYED: [debt],
-                TOTAL: float(debt.amount),
-            }
+        group_debts[debt.lender.id][PAYED].append(debt)
+        group_debts[debt.lender.id][TOTAL] += float(debt.amount)
+
         # Borrower
-        borrower_id = debt.borrower_id
-        if borrower_id in group_debts:
-            group_debts[borrower_id][OWED].append(debt)
-            group_debts[borrower_id][TOTAL] -= float(debt.amount)
-        else:
-            group_debts[borrower_id] = {
-                OWED: [debt],
-                PAYED: [],
-                TOTAL: -float(debt.amount),
-            }
+        group_debts[debt.borrower.id][OWED].append(debt)
+        group_debts[debt.borrower.id][TOTAL] -= float(debt.amount)
     return group_debts
 
 
