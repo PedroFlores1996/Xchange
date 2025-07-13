@@ -158,7 +158,11 @@
                     </div>
                     <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="text-muted">Category:</span>
-                        <strong class="split-type">{{ expense.category }}</strong>
+                        {% if expense.category %}
+                            <strong class="split-type">{{ expense.category }}</strong>
+                        {% else %}
+                            <span>{{ expense.category }}</span>
+                        {% endif %}
                     </div>
                     <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="text-muted">Group:</span>
@@ -178,17 +182,17 @@
                     </div>
                     <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="text-muted">Created At:</span>
-                        <strong class="split-type">
+                        <span>
                             {{ expense.created_at.strftime('%d-%m-%Y %H:%M') }}
-                        </strong>
+                        </span>
                     </div>
                     <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="text-muted">Payers Split:</span>
-                        <strong class="split-type">{{ expense.payers_split }}</strong>
+                        <span>{{ expense.payers_split }}</span>
                     </div>
                     <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="text-muted">Owers Split:</span>
-                        <strong class="split-type">{{ expense.owers_split }}</strong>
+                        <span>{{ expense.owers_split }}</span>
                     </div>
                 </div>
             </div>
@@ -229,7 +233,7 @@
                                 <!-- Total column -->
                                 <div style="flex: 1; text-align: right;">
                                     <span class="balance-label text-muted">Total:</span>
-                                    <span class="
+                                    <strong class="
                                         {% if balance.total > 0 %}
                                             payed-amount
                                         {% elif balance.total < 0 %}
@@ -237,7 +241,7 @@
                                         {% else %}
                                             default-amount
                                         {% endif %}
-                                    ">{{ balance.total }}</span>
+                                    ">{{ balance.total }}</strong>
                                 </div>
                             </li>
                         {% endfor %}
