@@ -80,17 +80,19 @@ def friends():
         if friend := User.get_user_by_email(email):
             if friend in current_user.friends:
                 flash(
-                    f"User {friend.username} with email {email} is already your friend.",
+                    f"User {friend.username} with email {email} is already your friend",
                     "info",
                 )
+                return redirect(url_for("user.add_friend_form"))
             else:
                 current_user.add_friends(friend)
                 flash(
-                    f"User {friend.username} with email {email} added as a friend.",
+                    f"User {friend.username} with email {email} added as a friend",
                     "success",
                 )
         else:
-            flash(f"No user found with email {email}.", "danger")
+            flash(f"No user found with email {email}", "danger")
+            return redirect(url_for("user.add_friend_form"))
 
         return redirect(url_for("user.friends"))
 
