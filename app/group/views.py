@@ -28,12 +28,14 @@ def create_group():
     if form.validate_on_submit():
         # Start with current user
         user_ids = [current_user.id]
-        
+
         # Add friend IDs if provided
         if form.friend_ids.data:
-            friend_ids = [int(id.strip()) for id in form.friend_ids.data.split(',') if id.strip()]
+            friend_ids = [
+                int(id.strip()) for id in form.friend_ids.data.split(",") if id.strip()
+            ]
             user_ids.extend(friend_ids)
-        
+
         # Fallback to old users field for backwards compatibility
         if form.users.data:
             old_user_ids = [id for id in form.users.data if id]
@@ -66,8 +68,13 @@ def create_group_form():
     """
     form = GroupForm()
     # Convert friends to JSON-serializable format
-    friends_data = [{"id": friend.id, "username": friend.username} for friend in current_user.friends]
-    return render_template("group/create_group_form.html", form=form, friends_data=friends_data)
+    friends_data = [
+        {"id": friend.id, "username": friend.username}
+        for friend in current_user.friends
+    ]
+    return render_template(
+        "group/create_group_form.html", form=form, friends_data=friends_data
+    )
 
 
 @bp.route("/groups/<int:group_id>", methods=["GET"])
@@ -85,7 +92,9 @@ def get_group_overview(group_id):
         group_user_balances = get_group_user_balances(group)
 
         # Get the current user's debts in the group
-        current_user_debts = group_user_debts[current_user.id]
+        current_user_debts = group_user_debts.get(
+            current_user.id, {OWED: [], PAYED: [], TOTAL: 0.0}
+        )
         user_debts_ordered_by_amount = sorted(
             current_user_debts[OWED] + current_user_debts[PAYED],
             key=lambda x: x.amount,

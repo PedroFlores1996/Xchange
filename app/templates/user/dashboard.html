@@ -347,7 +347,19 @@
                                         <span style="color: green;">{{ group_balances[group.id] }}</span>
                                     </div>
                                 {% else %}
-                                    All settled
+                                    <div>
+                                        <strong>
+                                            <a href="/groups/{{ group.id }}">
+                                                {{ group.name }}
+                                            </a>
+                                        </strong>
+                                        <div class="created-by">
+                                            all settled
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span>{{ group_balances[group.id] }}</span>
+                                    </div>
                                 {% endif %}
                             </li>
                         {% endfor %}
