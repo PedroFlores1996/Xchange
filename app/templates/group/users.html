@@ -30,7 +30,7 @@
             <p class="text-center text-muted">No users found in this group.</p>
         {% endif %}
         <div class="text-center mt-4">
-            <a href="{{ url_for('groups.get_group_expenses', group_id=group.id) }}" class="btn btn-primary">View Group Expenses</a>
+            <a href="{{ url_for('groups.group_expenses', group_id=group.id) }}" class="btn btn-primary">View Group Expenses</a>
             <a href="{{ url_for('groups.get_group_users', group_id=group.id) }}" class="btn btn-secondary">Back to Groups</a>
         </div>
     </div>

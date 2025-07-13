@@ -131,7 +131,7 @@ def get_group_users(group_id):
 
 @bp.route("/groups/<int:group_id>/expenses", methods=["GET"])
 @login_required
-def get_group_expenses(group_id):
+def group_expenses(group_id):
     """
     Retrieves the expenses for a specific group.
     Returns HTML or JSON based on the Accept header.
