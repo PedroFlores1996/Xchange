@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User to {{ group.name }}</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            align-items: center;
+        }
+        .card {
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+            padding: 20px;
+        }
+        .card-header {
+            background-color: #83cc4f;
+            color: #fff;
+            padding: 12px 16px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+            font-weight: 500;
+            display: block;
+        }
+        .friend-input {
+            position: relative;
+            width: 100%;
+        }
+        .friend-input input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: #f9f9f9;
+        }
+        .friend-input input:focus {
+            outline: none;
+            border-color: #83cc4f;
+            background: #fff;
+        }
+        .friend-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .friend-dropdown.show {
+            display: block;
+        }
+        .friend-option {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .friend-option:hover,
+        .friend-option.highlighted {
+            background-color: #f8f9fa;
+        }
+        .friend-option:last-child {
+            border-bottom: none;
+        }
+        .selected-friends {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .friend-tag {
+            background-color: #83cc4f;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .friend-tag .remove {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .friend-tag .remove:hover {
+            color: #ffcccc;
+        }
+        .btn {
+            background-color: #76a456;
+            color: #fff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn:hover, .btn:focus {
+            background-color: #83cc4f;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover, .btn-secondary:focus {
+            background-color: #5a6268;
+        }
+        .submit-container {
+            text-align: center;
+        }
+        .fixed-bottom-card {
+            position: fixed;
+            bottom: 24px;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            background: none;
+            box-shadow: none;
+            border: none;
+            pointer-events: none;
+        }
+        .fixed-bottom-card a {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 8px;
+            background-color: #6c757d;
+            color: #fff;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+            pointer-events: auto;
+            margin: 0 16px;
+            display: block;
+        }
+        .fixed-bottom-card a:hover,
+        .fixed-bottom-card a:focus {
+            background-color: #cccccc;
+            color: #333;
+            text-decoration: none;
+        }
+        .flash-messages {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .flash-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flash-message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .flash-message.danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .no-friends {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-header">Add User to {{ group.name }}</div>
+            
+            {% if friends_data %}
+                <form method="post">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-group">
+                        <label class="form-label">Select Friends to Add:</label>
+                        <div class="friend-input">
+                            <input type="text" id="friend-search" placeholder="Search friends..." autocomplete="off">
+                            <div id="friend-dropdown" class="friend-dropdown">
+                                {% for friend in friends_data %}
+                                    <div class="friend-option" data-id="{{ friend.id }}" data-username="{{ friend.username }}">
+                                        {{ friend.username }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div id="selected-friends" class="selected-friends"></div>
+                        {{ form.friend_ids }}
+                    </div>
+                    
+                    <div class="submit-container">
+                        {{ form.submit(class="btn") }}
+                    </div>
+                </form>
+            {% else %}
+                <div class="no-friends">
+                    <p>No friends available to add to this group.</p>
+                    <p>All your friends are already members of this group, or you have no friends yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="fixed-bottom-card">
+        <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}">
+            Back to Overview
+        </a>
+    </div>
+
+    <script>
+        const friendSearch = document.getElementById('friend-search');
+        const friendDropdown = document.getElementById('friend-dropdown');
+        const selectedFriendsContainer = document.getElementById('selected-friends');
+        const friendIdsInput = document.getElementById('friend_ids');
+        const friendOptions = document.querySelectorAll('.friend-option');
+        
+        let selectedFriends = [];
+        let highlightedIndex = -1;
+        
+        // Show dropdown when input is focused
+        friendSearch.addEventListener('focus', () => {
+            friendDropdown.classList.add('show');
+        });
+        
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.friend-input')) {
+                friendDropdown.classList.remove('show');
+            }
+        });
+        
+        // Filter friends as user types
+        friendSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            highlightedIndex = -1;
+            
+            friendOptions.forEach(option => {
+                const username = option.dataset.username.toLowerCase();
+                const friendId = parseInt(option.dataset.id);
+                
+                if (username.includes(searchTerm) && !selectedFriends.includes(friendId)) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        });
+        
+        // Handle keyboard navigation
+        friendSearch.addEventListener('keydown', (e) => {
+            const visibleOptions = Array.from(friendOptions).filter(option => 
+                option.style.display !== 'none'
+            );
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                highlightedIndex = Math.min(highlightedIndex + 1, visibleOptions.length - 1);
+                updateHighlight(visibleOptions);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                highlightedIndex = Math.max(highlightedIndex - 1, 0);
+                updateHighlight(visibleOptions);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (highlightedIndex >= 0 && visibleOptions[highlightedIndex]) {
+                    selectFriend(visibleOptions[highlightedIndex]);
+                }
+            } else if (e.key === 'Escape') {
+                friendDropdown.classList.remove('show');
+            }
+        });
+        
+        function updateHighlight(visibleOptions) {
+            friendOptions.forEach(option => option.classList.remove('highlighted'));
+            if (highlightedIndex >= 0 && visibleOptions[highlightedIndex]) {
+                visibleOptions[highlightedIndex].classList.add('highlighted');
+            }
+        }
+        
+        // Handle friend selection
+        friendOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                selectFriend(option);
+            });
+        });
+        
+        function selectFriend(option) {
+            const friendId = parseInt(option.dataset.id);
+            const username = option.dataset.username;
+            
+            if (!selectedFriends.includes(friendId)) {
+                selectedFriends.push(friendId);
+                addFriendTag(friendId, username);
+                option.style.display = 'none';
+                friendSearch.value = '';
+                friendDropdown.classList.remove('show');
+                updateFriendIds();
+            }
+        }
+        
+        function addFriendTag(friendId, username) {
+            const tag = document.createElement('div');
+            tag.className = 'friend-tag';
+            tag.innerHTML = `
+                ${username}
+                <span class="remove" onclick="removeFriend(${friendId})">×</span>
+            `;
+            selectedFriendsContainer.appendChild(tag);
+        }
+        
+        function removeFriend(friendId) {
+            selectedFriends = selectedFriends.filter(id => id !== friendId);
+            
+            // Remove the tag
+            selectedFriendsContainer.innerHTML = '';
+            selectedFriends.forEach(id => {
+                const option = document.querySelector(`[data-id="${id}"]`);
+                if (option) {
+                    addFriendTag(id, option.dataset.username);
+                }
+            });
+            
+            // Show the option again
+            const option = document.querySelector(`[data-id="${friendId}"]`);
+            if (option) {
+                option.style.display = 'block';
+            }
+            
+            updateFriendIds();
+        }
+        
+        function updateFriendIds() {
+            friendIdsInput.value = selectedFriends.join(',');
+        }
+    </script>
+</body>
+</html>

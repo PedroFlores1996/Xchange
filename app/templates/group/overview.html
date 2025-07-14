@@ -198,7 +198,7 @@
         <!-- First row: Action buttons -->
         <div class="row" style="margin-bottom: 20px;">
             <div class="card">
-                <a href="#" class="card-link-btn" style="background-color: #e0e0e0; color: #999;">
+                <a href="{{ url_for('groups.add_user_to_group', group_id=group.id) }}" class="card-link-btn">
                     Add User
                 </a>
             </div>

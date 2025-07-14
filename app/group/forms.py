@@ -29,3 +29,8 @@ class GroupForm(FlaskForm):
     def validate_name(self, field):
         if len(field.data) > 72:
             raise ValidationError("Group name must not exceed 72 characters.")
+
+
+class AddUserToGroupForm(FlaskForm):
+    friend_ids = HiddenField("Friend IDs")
+    submit = SubmitField("Add Selected Users")
