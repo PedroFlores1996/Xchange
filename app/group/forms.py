@@ -32,4 +32,4 @@ class GroupForm(FlaskForm):
 
 class AddUserToGroupForm(FlaskForm):
     friend_ids = HiddenField("Friend IDs")
-    submit = SubmitField("Add Selected Users")
+    submit = SubmitField("Add")
