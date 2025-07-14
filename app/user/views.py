@@ -168,12 +168,21 @@ def user_profile(user_id):
             if friend in [balance.user for balance in expense.balances]
         ]
 
+        # Get common groups between current user and friend
+        current_user_groups = set(current_user.groups)
+        friend_groups = set(friend.groups)
+        common_groups = list(current_user_groups.intersection(friend_groups))
+        
+        # Sort common groups by name
+        common_groups.sort(key=lambda group: group.name)
+
         # Render a profile page for the friend
         return render_template(
             "user/friend.html",
             friend=friend,
             debt=debt_with_friend,
             expenses=expenses_with_friend,
+            common_groups=common_groups,
         )
 
     # If not the current_user or a friend, return 403 Forbidden

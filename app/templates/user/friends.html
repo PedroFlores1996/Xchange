@@ -38,7 +38,7 @@
         }
         .card {
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
             margin: 24px auto 0 auto;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -158,6 +158,16 @@
         .friend-item span[style*="color: #dc3545"] {
             font-weight: 600;
         }
+        .friend-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .friend-email {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 400;
+        }
     </style>
 </head>
 <body>
@@ -173,13 +183,13 @@
                     <ul class="friends-list">
                         {% for friend in friends %}
                             <li class="friend-item" style="justify-content: space-between;">
-                                <div>
+                                <div class="friend-info">
                                     <a href="/users/{{ friend.id }}" class="friend-link">
                                         {{ friend.username }}
                                     </a>
-                                    <span style="margin-left: 8px; color: #555; font-size: 0.98rem;">
-                                        ({{ friend.email }})
-                                    </span>
+                                    <div class="friend-email">
+                                        {{ friend.email }}
+                                    </div>
                                 </div>
                                 <div style="text-align: right">
                                     {% if debts[friend.id] is defined %}
