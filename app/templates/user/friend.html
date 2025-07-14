@@ -12,7 +12,7 @@
             padding: 0;
         }
         .container {
-            max-width: 600px;
+            max-width: 1200px;
             margin: 40px auto 0 auto;
             padding: 0 12px;
             display: flex;
@@ -174,11 +174,6 @@
             color: #aaa;
             font-size: 0.98rem;
         }
-        .card.narrow {
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-        }
         .balance-row {
             display: flex;
             align-items: center;
@@ -246,6 +241,98 @@
             border-radius: 8px; /* Fully rounded corners */
             margin: 0;
         }
+
+        /* Common Groups styling */
+        .groups-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            transition: background-color 0.2s;
+        }
+
+        .group-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .group-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .group-info {
+            flex: 1;
+        }
+
+        .group-name {
+            font-weight: 600;
+            color: #76a456;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .group-name:hover, .group-name:focus {
+            color: #155fa0;
+            text-decoration: underline;
+        }
+
+        .group-description {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .group-members {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        /* Stacked cards styling for side-by-side layout */
+        .stacked-cards {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        /* Balance and Common Groups cards - size X */
+        .stacked-cards .card-balance,
+        .stacked-cards .card-groups {
+            flex: 1 !important;
+            max-width: 300px !important;
+        }
+
+        /* Shared Expenses card - size 2X */
+        .stacked-cards .card-expenses {
+            flex: 2 !important;
+            max-width: 600px !important;
+        }
+
+        /* Responsive: stack cards vertically on smaller screens */
+        @media (max-width: 1200px) {
+            .stacked-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .stacked-cards .card {
+                max-width: 600px;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -256,76 +343,113 @@
             <div class="friend-email">{{ friend.email }}</div>
         </div>
 
-        <!-- Balance Card -->
-        <div class="card narrow">
-            <div class="card-header">Balance</div>
-            {% if debt %}
-                <div class="card-body">
-                    <ul>
-                        <li class="balance-row">
-                            
-                                {% if debt.lender_id == current_user.id %}
-                                    <div>
-                                        {{ friend.username }} 
-                                        <div class="created-by">owes you</div>
-                                    </div>
-                                    <div>
-                                        <span class="balance-positive">{{ "%.2f"|format(debt.amount) }}</span>
-                                    </div>
-                                {% else %}
-                                    <div>
-                                        {{ friend.username }}
-                                        <div class="created-by">is owed</div>
-                                    </div>
-                                    <div>
-                                        <span class="balance-negative">{{ "%.2f"|format(debt.amount) }}</span>
-                                    </div>
-                                {% endif %}
-                        </li>
-                    </ul>
-                </div>
-            {% else %}
-                <div class="no-expenses">No debts between you and {{ friend.username }}</div>
-            {% endif %}
-        </div>
+        <!-- Three Cards Side by Side -->
+        <div class="stacked-cards">
+            <!-- Balance Card -->
+            <div class="card card-balance">
+                <div class="card-header">Balance</div>
+                {% if debt %}
+                    <div class="card-body">
+                        <ul>
+                            <li class="balance-row">
+                                
+                                    {% if debt.lender_id == current_user.id %}
+                                        <div>
+                                            {{ friend.username }} 
+                                            <div class="created-by">owes you</div>
+                                        </div>
+                                        <div>
+                                            <span class="balance-positive">{{ "%.2f"|format(debt.amount) }}</span>
+                                        </div>
+                                    {% else %}
+                                        <div>
+                                            {{ friend.username }}
+                                            <div class="created-by">is owed</div>
+                                        </div>
+                                        <div>
+                                            <span class="balance-negative">{{ "%.2f"|format(debt.amount) }}</span>
+                                        </div>
+                                    {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="no-expenses">No debts between you and {{ friend.username }}</div>
+                {% endif %}
+            </div>
 
-        <!-- Shared Expenses Card -->
-        <div class="card">
-            <div class="card-header">Shared Expenses</div>
-            {% if expenses %}
-            <div class="card-body">
-                <ul class="expenses-list">
-                    {% for expense in expenses %}
-                        <li class="expense-item">
-                                <div class="expense-main-row">
-                                    <a href="{{ url_for('expense.expense_summary', expense_id=expense.id) }}" class="expense-description">
-                                        {{ expense.description }}
+            <!-- Common Groups Card -->
+            <div class="card card-groups">
+                <div class="card-header">Common Groups</div>
+                {% if common_groups %}
+                <div class="card-body">
+                    <ul class="groups-list">
+                        {% for group in common_groups %}
+                            <li class="group-item">
+                                <div class="group-info">
+                                    <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="group-name">
+                                        {{ group.name }}
                                     </a>
-                                    <span class="expense-amount">{{ "%.2f"|format(expense.amount) }}</span>
+                                    {% if group.description %}
+                                        <div class="group-description">{{ group.description }}</div>
+                                    {% endif %}
                                 </div>
-                                <div class="expense-details-row">
-                                    <div>
-                                        <span class="expense-detail-label">Group:</span>
-                                        <span class="expense-detail-value">{{ expense.group.name if expense.group else 'No Group' }}</span>
-                                    </div>
-                                    <div>
-                                        <span class="expense-detail-label">Created By:</span>
-                                        <a href="{{ url_for('user.user_profile', user_id=expense.creator.id) }}" class="expense-detail-value" style="color: #76a456; text-decoration: none;">
-                                            {{ expense.creator.username }}
-                                        </a>
-                                    </div>
-                                    <div>
-                                        <span class="expense-detail-label">Created At:</span>
-                                        <span class="expense-detail-value">{{ expense.created_at.strftime('%Y-%m-%d') }}</span>
-                                    </div>
+                                <div class="group-members">
+                                    {{ group.users|length }} member{{ 's' if group.users|length != 1 else '' }}
                                 </div>
                             </li>
-                    {% endfor %}
-                </ul>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                    <div class="no-expenses">No common groups with {{ friend.username }}.</div>
+                {% endif %}
             </div>
-            {% else %}
-                <div class="no-expenses">No shared expenses with {{ friend.username }}.</div>
-            {% endif %}
+
+            <!-- Shared Expenses Card -->
+            <div class="card card-expenses">
+                <div class="card-header">Shared Expenses</div>
+                {% if expenses %}
+                <div class="card-body">
+                    <ul class="expenses-list">
+                        {% for expense in expenses %}
+                            <li class="expense-item">
+                                    <div class="expense-main-row">
+                                        <a href="{{ url_for('expense.expense_summary', expense_id=expense.id) }}" class="expense-description">
+                                            {{ expense.description }}
+                                        </a>
+                                        <span class="expense-amount">{{ "%.2f"|format(expense.amount) }}</span>
+                                    </div>
+                                    <div class="expense-details-row">
+                                        <div>
+                                            <span class="expense-detail-label">Group:</span>
+                                            {% if expense.group %}
+                                                <a href="{{ url_for('groups.get_group_overview', group_id=expense.group.id) }}" class="expense-detail-value" style="color: #76a456; text-decoration: none;">
+                                                    {{ expense.group.name }}
+                                                </a>
+                                            {% else %}
+                                                <span class="expense-detail-value">No Group</span>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <span class="expense-detail-label">Created By:</span>
+                                            <a href="{{ url_for('user.user_profile', user_id=expense.creator.id) }}" class="expense-detail-value" style="color: #76a456; text-decoration: none;">
+                                                {{ expense.creator.username }}
+                                            </a>
+                                        </div>
+                                        <div>
+                                            <span class="expense-detail-label">Created At:</span>
+                                            <span class="expense-detail-value">{{ expense.created_at.strftime('%Y-%m-%d') }}</span>
+                                        </div>
+                                    </div>
+                                </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                    <div class="no-expenses">No shared expenses with {{ friend.username }}.</div>
+                {% endif %}
+            </div>
         </div>
     </div>
     <div class="fixed-bottom-card">
