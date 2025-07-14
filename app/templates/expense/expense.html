@@ -313,30 +313,44 @@
     </div>
 
     <div class="fixed-bottom-card">
-        <a href="{{ url_for('user.user_dashboard') }}">
-            Back to Dashboard
-        </a>
+        {% if pre_selected_group_id %}
+            <a href="{{ url_for('groups.get_group_overview', group_id=pre_selected_group_id) }}">
+                Back to Overview
+            </a>
+        {% else %}
+            <a href="{{ url_for('user.user_dashboard') }}">
+                Back to Dashboard
+            </a>
+        {% endif %}
     </div>
-
-    <script type="application/json" id="user-friends-data">
-        [
-            { 
-                "id": "{{ current_user.id }}", 
-                "username": "{{ current_user.username }}", 
-                "groupIds": [{% for group in current_user.groups %}{{ group.id }}{% if not loop.last %},{% endif %}{% endfor %}] 
-            }{% if current_user.friends %},{% endif %}
-            {% for friend in current_user.friends %}
-                { 
-                    "id": "{{ friend.id }}", 
-                    "username": "{{ friend.username }}", 
-                    "groupIds": [{% for group in friend.groups %}{{ group.id }}{% if not loop.last %},{% endif %}{% endfor %}] 
-                }{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ]
+    
+    <!-- User friends data -->
+    <script id="user-friends-data" type="application/json">
+    [
+        {
+            "id": {{ current_user.id }},
+            "username": "{{ current_user.username }}",
+            "groupIds": {{ current_user.groups|map(attribute='id')|list|tojson }}
+        }
+        {%- for friend in current_user.friends -%}
+        ,{
+            "id": {{ friend.id }},
+            "username": "{{ friend.username }}",
+            "groupIds": {{ friend.groups|map(attribute='id')|list|tojson }}
+        }
+        {%- endfor -%}
+    ]
     </script>
+    
+    <!-- Pre-selected group data -->
+    <script id="pre-selected-group-data" type="application/json">
+    {% if pre_selected_group_id %}{{ pre_selected_group_id }}{% else %}null{% endif %}
+    </script>
+    
     <script>
         let userAndFriends = JSON.parse(document.getElementById('user-friends-data').textContent);
         let availableUsers = [...userAndFriends];
+        let preSelectedGroupId = JSON.parse(document.getElementById('pre-selected-group-data').textContent);
 
         function toggleAmount(users_label) {
             const splitType = document.getElementById(`${users_label}_split`).value;
@@ -500,6 +514,13 @@
 
             toggleAmount('payers');
             toggleAmount('owers');
+            
+            // If there's a pre-selected group, set it and update users and group field
+            if (preSelectedGroupId) {
+                document.getElementById('group_select').value = preSelectedGroupId;
+                updateUsersByGroup();
+                updateGroupIdField();
+            }
         });
     </script>
 </body>

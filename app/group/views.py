@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
+from werkzeug import Response
 
 from app.group import (
     get_authorized_group,
@@ -11,6 +12,7 @@ from app.split.constants import OWED, PAYED, TOTAL
 from app.group.forms import GroupForm
 from app.model.group import Group
 from app.model.user import User
+from app.expense.forms import ExpenseForm
 
 
 bp = Blueprint("groups", __name__)
@@ -199,3 +201,25 @@ def get_group_balances(group_id):
     else:
 
         return jsonify({"error": "Group not found or access denied"}), 404
+
+
+@bp.route("/groups/<int:group_id>/new-expense", methods=["GET"])
+@login_required
+def new_group_expense(group_id) -> str | Response:
+    """
+    Creates a new expense for a specific group.
+    Pre-fills the group field and filters users to group members.
+    """
+    group = get_authorized_group(group_id)
+    if not group:
+        flash("Group not found or access denied.", "danger")
+        return redirect(url_for("user.user_dashboard"))
+
+    form = ExpenseForm()
+    return render_template(
+        "expense/expense.html",
+        form=form,
+        current_user=current_user,
+        group=group,
+        pre_selected_group_id=group_id,
+    )

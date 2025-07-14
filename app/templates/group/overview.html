@@ -195,7 +195,26 @@
     <div class="container">
         <h1>{{ group.name }}</h1>
 
-        <!-- New row of three header-only cards with button links -->
+        <!-- First row: Action buttons -->
+        <div class="row" style="margin-bottom: 20px;">
+            <div class="card">
+                <a href="#" class="card-link-btn" style="background-color: #e0e0e0; color: #999;">
+                    Add User
+                </a>
+            </div>
+            <div class="card">
+                <a href="#" class="card-link-btn" style="background-color: #e0e0e0; color: #999;">
+                    Settle Debts
+                </a>
+            </div>
+            <div class="card">
+                <a href="{{ url_for('groups.new_group_expense', group_id=group.id) }}" class="card-link-btn">
+                    Add Expense
+                </a>
+            </div>
+        </div>
+
+        <!-- Second row: View buttons -->
         <div class="row" style="margin-bottom: 30px;">
             <div class="card">
                 <a href="/groups/{{ group.id }}/balances" class="card-link-btn">
