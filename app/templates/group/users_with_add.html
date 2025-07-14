@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add User to {{ group.name }}</title>
+    <title>{{ group.name }} - All Users</title>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -210,6 +210,41 @@
             font-style: italic;
             padding: 20px;
         }
+        .users-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-badge {
+            background-color: #83cc4f;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -226,14 +261,13 @@
         {% endwith %}
 
         <div class="card">
-            <div class="card-header">Add User to {{ group.name }}</div>
+            <div class="card-header">Add Users</div>
             
             {% if friends_data %}
                 <form method="post">
                     {{ form.hidden_tag() }}
                     
                     <div class="form-group">
-                        <label class="form-label">Select Friends to Add:</label>
                         <div class="friend-input">
                             <input type="text" id="friend-search" placeholder="Search friends..." autocomplete="off">
                             <div id="friend-dropdown" class="friend-dropdown">
@@ -258,6 +292,25 @@
                     <p>All your friends are already members of this group, or you have no friends yet.</p>
                 </div>
             {% endif %}
+        </div>
+
+        <!-- All Group Users Section -->
+        <div class="card">
+            <div class="card-header">All Users</div>
+            <div class="card-body">
+                <div class="users-list">
+                    {% for user in group.users %}
+                        <div class="user-item">
+                            <div class="user-info">
+                                <strong>{{ user.username }}</strong>
+                            </div>
+                            <div class="user-actions">
+                                <a href="/users/{{ user.id }}" class="btn btn-secondary btn-small">View Profile</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 

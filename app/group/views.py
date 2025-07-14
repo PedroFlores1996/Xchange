@@ -118,17 +118,60 @@ def get_group_overview(group_id):
         return jsonify({"error": "Group not found or access denied"}), 404
 
 
-@bp.route("/groups/<int:group_id>/users", methods=["GET"])
+@bp.route("/groups/<int:group_id>/users", methods=["GET", "POST"])
 @login_required
 def get_group_users(group_id):
     """
-    Retrieves the users for a specific group.
-    Returns HTML or JSON based on the Accept header.
+    Shows all users in a group with the ability to add new users.
+    Displays existing group members and form to add new ones.
     """
-    if group := get_authorized_group(group_id):
-        return render_template("group/users.html", group=group)
-    else:
-        return jsonify({"error": "Group not found or access denied"}), 404
+    group = get_authorized_group(group_id)
+    if not group:
+        flash("Group not found or access denied.", "danger")
+        return redirect(url_for("user.user_dashboard"))
+
+    form = AddUserToGroupForm()
+    
+    if form.validate_on_submit():
+        if form.friend_ids.data:
+            friend_ids = [
+                int(id.strip()) for id in form.friend_ids.data.split(",") if id.strip()
+            ]
+            
+            # Get users who are not already in the group
+            users_to_add = User.query.filter(
+                User.id.in_(friend_ids),
+                ~User.id.in_([user.id for user in group.users])
+            ).all()
+            
+            if users_to_add:
+                group.add_users(users_to_add)
+                usernames = [user.username for user in users_to_add]
+                flash(f"Successfully added {', '.join(usernames)} to {group.name}!", "success")
+            else:
+                flash("No new users to add or all selected users are already in the group.", "warning")
+        else:
+            flash("Please select at least one user to add.", "warning")
+            
+        return redirect(url_for("groups.get_group_users", group_id=group_id))
+    
+    # Get available users (friends who are not already in the group)
+    available_friends = [
+        friend for friend in current_user.friends 
+        if friend not in group.users
+    ]
+    
+    friends_data = [
+        {"id": friend.id, "username": friend.username}
+        for friend in available_friends
+    ]
+    
+    return render_template(
+        "group/users_with_add.html",
+        form=form,
+        group=group,
+        friends_data=friends_data,
+    )
 
 
 @bp.route("/groups/<int:group_id>/expenses", methods=["GET"])
@@ -225,57 +268,3 @@ def new_group_expense(group_id) -> str | Response:
     )
 
 
-@bp.route("/groups/<int:group_id>/add-user", methods=["GET", "POST"])
-@login_required
-def add_user_to_group(group_id) -> str | Response:
-    """
-    Adds users to a specific group.
-    Shows form to select users and handles the addition.
-    """
-    group = get_authorized_group(group_id)
-    if not group:
-        flash("Group not found or access denied.", "danger")
-        return redirect(url_for("user.user_dashboard"))
-
-    form = AddUserToGroupForm()
-    
-    if form.validate_on_submit():
-        if form.friend_ids.data:
-            friend_ids = [
-                int(id.strip()) for id in form.friend_ids.data.split(",") if id.strip()
-            ]
-            
-            # Get users who are not already in the group
-            users_to_add = User.query.filter(
-                User.id.in_(friend_ids),
-                ~User.id.in_([user.id for user in group.users])
-            ).all()
-            
-            if users_to_add:
-                group.add_users(users_to_add)
-                usernames = [user.username for user in users_to_add]
-                flash(f"Successfully added {', '.join(usernames)} to {group.name}!", "success")
-            else:
-                flash("No new users to add or all selected users are already in the group.", "warning")
-        else:
-            flash("Please select at least one user to add.", "warning")
-            
-        return redirect(url_for("groups.get_group_overview", group_id=group_id))
-    
-    # Get available users (friends who are not already in the group)
-    available_friends = [
-        friend for friend in current_user.friends 
-        if friend not in group.users
-    ]
-    
-    friends_data = [
-        {"id": friend.id, "username": friend.username}
-        for friend in available_friends
-    ]
-    
-    return render_template(
-        "group/add_user_form.html",
-        form=form,
-        group=group,
-        friends_data=friends_data,
-    )
