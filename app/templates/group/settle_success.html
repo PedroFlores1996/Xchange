@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settlement Complete - {{ group.name }}</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            margin-top: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 800px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2d5a2d;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .success-box {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .success-box h2 {
+            color: #155724;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .success-box p {
+            color: #155724;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #ffffff;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #83cc4f;
+            color: white;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .expense-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .expense-info {
+            flex: 1;
+        }
+
+        .expense-description {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .expense-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .expense-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #76a456;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #76a456;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #83cc4f;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Settlement Complete</h1>
+            <p>{{ group.name }}</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Created Settlement Expenses
+            </div>
+            <div class="card-body">
+                {% if settlement_expenses %}
+                    {% for expense in settlement_expenses %}
+                        <div class="expense-item">
+                            <div class="expense-info">
+                                <div class="expense-description">
+                                    <a href="{{ url_for('expense.expense_summary', expense_id=expense.id) }}">
+                                        {{ expense.description }}
+                                    </a>
+                                </div>
+                                <div class="expense-details">
+                                    Created by <strong>{{ expense.creator.username }}</strong> on {{ expense.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                </div>
+                            </div>
+                            <div class="expense-amount">
+                                {{ "%.2f"|format(expense.amount) }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No settlement expenses were created.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="btn btn-primary">
+                Back to Group Overview
+            </a>
+            <a href="{{ url_for('user.user_dashboard') }}" class="btn btn-secondary">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>

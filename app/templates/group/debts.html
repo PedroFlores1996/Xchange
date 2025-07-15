@@ -293,14 +293,23 @@
                 Debts
             </div>
             <div class="card-body">
-                <ul>
-                    <div class="debt-list-item debt-header-row">
-                        <div class="debt-header-col-balance">User Balance</div>
-                        <div class="debt-header-col-debts">Lender Debts</div>
-                        <div class="debt-header-col-debts">Borrower Debts</div>
-                    </div>
-                    {% for user in group.users %}
-                        <li class="debt-list-item">
+                {% set has_active_debts = namespace(value=false) %}
+                {% for user in group.users %}
+                    {% if user_debts[user.id]["total"] != 0 or user_debts[user.id]["payed"]|length > 0 or user_debts[user.id]["owed"]|length > 0 %}
+                        {% set has_active_debts.value = true %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if has_active_debts.value %}
+                    <ul>
+                        <div class="debt-list-item debt-header-row">
+                            <div class="debt-header-col-balance">User Balance</div>
+                            <div class="debt-header-col-debts">Lender Debts</div>
+                            <div class="debt-header-col-debts">Borrower Debts</div>
+                        </div>
+                        {% for user in group.users %}
+                            {% if user_debts[user.id]["total"] != 0 or user_debts[user.id]["payed"]|length > 0 or user_debts[user.id]["owed"]|length > 0 %}
+                                <li class="debt-list-item">
                             <!-- Total Balance Column -->
                             <div class="debt-balance-col">
                                 <ul>
@@ -390,10 +399,13 @@
                                 {% endif %}
                             </div>
                         </li>
-                    {% endfor %}
-                </ul>
-                {% if not group.users %}
-                    <p class="text-center text-muted">No debts found in this group.</p>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div style="text-align: center; padding: 50px 0; color: #666; font-size: 1.1rem;">
+                        No Active Debts
+                    </div>
                 {% endif %}
             </div>
         </div>

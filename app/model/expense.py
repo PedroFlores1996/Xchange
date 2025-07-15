@@ -23,6 +23,7 @@ class ExpenseCategory(FormEnum):
     GAS = "Gas"
     GROCERIES = "Groceries"
     OTHER = "Other"
+    SETTLEMENT = "Settlement"
     TICKETS = "Tickets"
     UTILITIES = "Utilities"
 

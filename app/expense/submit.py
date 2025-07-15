@@ -12,7 +12,7 @@ def create_expense(data: ExpenseData, balances: dict[int, dict[str, float]]) -> 
     return Expense.create(
         amount=data.amount,
         description=data.description,
-        creator_id=current_user.get_id(),
+        creator_id=data.creator_id,
         category=data.category,
         payers_split=data.payers_split,
         owers_split=data.owers_split,

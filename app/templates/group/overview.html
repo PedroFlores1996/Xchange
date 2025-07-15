@@ -66,12 +66,31 @@
             font-weight: 600; /* Bold header text */
         }
 
-        /* Card body styling with fixed height for 3 rows */
+        /* Card body styling with max height and scrolling */
         .card-body {
             padding: 10px; /* Reduced padding */
-            max-height: 490px; /* Fixed height for 3 rows */
-            min-height: 225px; /* Ensure minimum height */
+            max-height: 500px; /* Maximum height before scrolling */
+            min-height: 200px; /* Ensure minimum height */
             overflow-y: auto; /* Enable scrolling when content exceeds height */
+        }
+        
+        /* Custom scrollbar styling */
+        .card-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .card-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .card-body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .card-body::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
 
         /* List styling to look like table rows */
@@ -185,9 +204,45 @@
         li span[style*="color: green"] {
             font-weight: 600 !important;
         }
+
+        /* Flash message styling */
+        .flash-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 15px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .flash-message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .flash-message.fade-out {
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}" id="flash-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <div class="container">
         <h1>{{ group.name }}</h1>
 
@@ -296,14 +351,16 @@
                     Related Debts
                 </div>
                 <div class="card-body">
-                    <div class="total-balance">
-                        Total Balance:
-                        {% if user_group_balance < 0 %}
-                            <span style="color: red;">{{ user_group_balance }}</span>
-                        {% else %}
-                            <span style="color: green;">{{ user_group_balance }}</span>
-                        {% endif %}
-                    </div>
+                    {% if user_group_balance != 0 %}
+                        <div class="total-balance">
+                            Total Balance:
+                            {% if user_group_balance < 0 %}
+                                <span style="color: red;">{{ user_group_balance }}</span>
+                            {% else %}
+                                <span style="color: green;">{{ user_group_balance }}</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     <ul>
                         {% for debt in user_group_debts %}
                             <li>
@@ -340,7 +397,7 @@
                         {% endfor %}
                     </ul>
                     {% if user_group_debts|length == 0 %}
-                        <p>No debts to show.</p>
+                        <p style="text-align: center;">No debts to show.</p>
                     {% endif %}
                 </div>
             </div>
@@ -393,5 +450,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Auto-dismiss flash messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessage = document.getElementById('flash-message');
+            if (flashMessage) {
+                setTimeout(function() {
+                    flashMessage.classList.add('fade-out');
+                    setTimeout(function() {
+                        flashMessage.remove();
+                    }, 300); // Wait for fade-out animation to complete
+                }, 3000); // 3 seconds
+            }
+        });
+    </script>
 </body>
 </html>

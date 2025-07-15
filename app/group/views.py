@@ -8,11 +8,20 @@ from app.group import (
     get_group_user_debts,
     get_group_user_balances,
 )
+from app.debt import simplify_debts
+from app.expense import ExpenseData
+from app.model.expense import Expense, ExpenseCategory
+from app.split import SplitType
+from app.model.debt import Debt
+from app.database import db
+from app.split import split
 from app.split.constants import OWED, PAYED, TOTAL
 from app.group.forms import GroupForm, AddUserToGroupForm
 from app.model.group import Group
 from app.model.user import User
 from app.expense.forms import ExpenseForm
+from app.expense.mapper import map_balances_to_model
+from app.user import update_expense_in_users
 
 
 bp = Blueprint("groups", __name__)
@@ -131,41 +140,44 @@ def get_group_users(group_id):
         return redirect(url_for("user.user_dashboard"))
 
     form = AddUserToGroupForm()
-    
+
     if form.validate_on_submit():
         if form.friend_ids.data:
             friend_ids = [
                 int(id.strip()) for id in form.friend_ids.data.split(",") if id.strip()
             ]
-            
+
             # Get users who are not already in the group
             users_to_add = User.query.filter(
-                User.id.in_(friend_ids),
-                ~User.id.in_([user.id for user in group.users])
+                User.id.in_(friend_ids), ~User.id.in_([user.id for user in group.users])
             ).all()
-            
+
             if users_to_add:
                 group.add_users(users_to_add)
                 usernames = [user.username for user in users_to_add]
-                flash(f"Successfully added {', '.join(usernames)} to {group.name}!", "success")
+                flash(
+                    f"Successfully added {', '.join(usernames)} to {group.name}!",
+                    "success",
+                )
             else:
-                flash("No new users to add or all selected users are already in the group.", "warning")
+                flash(
+                    "No new users to add or all selected users are already in the group.",
+                    "warning",
+                )
         else:
             flash("Please select at least one user to add.", "warning")
-            
+
         return redirect(url_for("groups.get_group_users", group_id=group_id))
-    
+
     # Get available users (friends who are not already in the group)
     available_friends = [
-        friend for friend in current_user.friends 
-        if friend not in group.users
+        friend for friend in current_user.friends if friend not in group.users
     ]
-    
+
     friends_data = [
-        {"id": friend.id, "username": friend.username}
-        for friend in available_friends
+        {"id": friend.id, "username": friend.username} for friend in available_friends
     ]
-    
+
     return render_template(
         "group/users_with_add.html",
         form=form,
@@ -268,3 +280,132 @@ def new_group_expense(group_id) -> str | Response:
     )
 
 
+@bp.route("/groups/<int:group_id>/settle", methods=["GET"])
+@login_required
+def settle_debts_preview(group_id) -> str | Response:
+    """
+    Shows a preview of settlement transactions that will be created to settle all debts in the group.
+    """
+    group = get_authorized_group(group_id)
+    if not group:
+        flash("Group not found or access denied.", "danger")
+        return redirect(url_for("user.user_dashboard"))
+
+    # Get current group balances
+    group_balances = get_group_user_balances(group)
+
+    # Check if there are any non-zero balances to settle
+    if not any(balance != 0 for balance in group_balances.values()):
+        flash("No Active Debts to Settle", "info")
+        return redirect(url_for("groups.get_group_overview", group_id=group_id))
+
+    # Calculate settlement transactions using the existing algorithm
+    balance_dict = {user.id: balance for user, balance in group_balances.items()}
+    transactions = simplify_debts(balance_dict)
+
+    # Convert transaction tuples to user objects for display
+    settlement_transactions = []
+    for debtor_id, creditor_id, amount in transactions:
+        debtor = db.session.get(User, debtor_id)
+        creditor = db.session.get(User, creditor_id)
+        settlement_transactions.append(
+            {
+                "debtor": debtor,
+                "creditor": creditor,
+                "amount": amount,
+                "description": f"Settlement payment from {debtor.username} to {creditor.username}",
+            }
+        )
+
+    return render_template(
+        "group/settle_preview.html",
+        group=group,
+        settlement_transactions=settlement_transactions,
+        current_user=current_user,
+    )
+
+
+@bp.route("/groups/<int:group_id>/settle", methods=["POST"])
+@login_required
+def settle_debts_process(group_id) -> str | Response:
+    """
+    Processes the settlement by creating settlement expenses for all transactions.
+    """
+    group = get_authorized_group(group_id)
+    if not group:
+        flash("Group not found or access denied.", "danger")
+        return redirect(url_for("user.user_dashboard"))
+
+    # Get current group balances
+    group_balances = get_group_user_balances(group)
+
+    # Check if there are any non-zero balances to settle
+    if not any(balance != 0 for balance in group_balances.values()):
+        flash("No Active Debts to Settle", "info")
+        return redirect(url_for("groups.get_group_overview", group_id=group_id))
+
+    # Calculate settlement transactions
+    balance_dict = {user.id: balance for user, balance in group_balances.items()}
+    transactions = simplify_debts(balance_dict)
+
+    # Clear all existing debt records for the group FIRST
+    # This prevents the settlement expenses from affecting debt calculations
+    existing_debts = Debt.query.filter_by(group_id=group_id).all()
+    for debt in existing_debts:
+        db.session.delete(debt)
+    db.session.flush()
+
+    # Create settlement expenses with proper balance records
+    settlement_expenses = []
+    for debtor_id, creditor_id, amount in transactions:
+        debtor = db.session.get(User, debtor_id)
+        creditor = db.session.get(User, creditor_id)
+
+        # Create expense data for settlement with proper payers/owers
+        expense_data = ExpenseData(
+            description=f"Settlement payment from {debtor.username} to {creditor.username}",
+            amount=amount,
+            creator_id=current_user.id,
+            group_id=group_id,
+            category=ExpenseCategory.SETTLEMENT,
+            payers_split=SplitType.AMOUNT,
+            owers_split=SplitType.AMOUNT,
+            payers={debtor_id: amount},  # Debtor pays the full amount
+            owers={creditor_id: amount},  # Creditor receives the full amount
+        )
+
+        balances = split(
+            expense_data.amount,
+            expense_data.payers,
+            expense_data.owers,
+            expense_data.payers_split,
+            expense_data.owers_split,
+        )
+
+        # Create the expense with balance records but skip debt updates
+        expense = Expense.create(
+            amount=expense_data.amount,
+            description=expense_data.description,
+            creator_id=expense_data.creator_id,
+            category=expense_data.category,
+            payers_split=expense_data.payers_split,
+            owers_split=expense_data.owers_split,
+            group_id=expense_data.group_id,
+            balances=map_balances_to_model(balances),
+        )
+
+        update_expense_in_users(expense)
+        settlement_expenses.append(expense)
+
+    db.session.commit()
+
+    flash(
+        f"Successfully created {len(settlement_expenses)} settlement transactions.",
+        "success",
+    )
+    return render_template(
+        "group/settle_success.html",
+        group=group,
+        settlement_expenses=settlement_expenses,
+        current_user=current_user,
+    )
