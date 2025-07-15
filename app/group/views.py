@@ -14,14 +14,12 @@ from app.model.expense import Expense, ExpenseCategory
 from app.split import SplitType
 from app.model.debt import Debt
 from app.database import db
-from app.split import split
 from app.split.constants import OWED, PAYED, TOTAL
 from app.group.forms import GroupForm, AddUserToGroupForm
 from app.model.group import Group
 from app.model.user import User
 from app.expense.forms import ExpenseForm
-from app.expense.mapper import map_balances_to_model
-from app.user import update_expense_in_users
+from app.expense.submit import submit_expense
 
 
 bp = Blueprint("groups", __name__)
@@ -348,14 +346,8 @@ def settle_debts_process(group_id) -> str | Response:
     balance_dict = {user.id: balance for user, balance in group_balances.items()}
     transactions = simplify_debts(balance_dict)
 
-    # Clear all existing debt records for the group FIRST
-    # This prevents the settlement expenses from affecting debt calculations
-    existing_debts = Debt.query.filter_by(group_id=group_id).all()
-    for debt in existing_debts:
-        db.session.delete(debt)
-    db.session.flush()
-
-    # Create settlement expenses with proper balance records
+    # Create settlement expenses using the standard expense submission process
+    # The debt update logic will naturally cancel out existing debts when settlement amounts match
     settlement_expenses = []
     for debtor_id, creditor_id, amount in transactions:
         debtor = db.session.get(User, debtor_id)
@@ -370,33 +362,21 @@ def settle_debts_process(group_id) -> str | Response:
             category=ExpenseCategory.SETTLEMENT,
             payers_split=SplitType.AMOUNT,
             owers_split=SplitType.AMOUNT,
-            payers={debtor_id: amount},  # Debtor pays the full amount
-            owers={creditor_id: amount},  # Creditor receives the full amount
+            payers={debtor_id: amount},    # Debtor pays the full amount
+            owers={creditor_id: amount},   # Creditor receives the full amount
         )
 
-        balances = split(
-            expense_data.amount,
-            expense_data.payers,
-            expense_data.owers,
-            expense_data.payers_split,
-            expense_data.owers_split,
-        )
-
-        # Create the expense with balance records but skip debt updates
-        expense = Expense.create(
-            amount=expense_data.amount,
-            description=expense_data.description,
-            creator_id=expense_data.creator_id,
-            category=expense_data.category,
-            payers_split=expense_data.payers_split,
-            owers_split=expense_data.owers_split,
-            group_id=expense_data.group_id,
-            balances=map_balances_to_model(balances),
-        )
-
-        update_expense_in_users(expense)
+        # Submit the settlement expense using the standard process
+        # This will create balance records and update debts, naturally canceling existing debts
+        expense = submit_expense(expense_data)
         settlement_expenses.append(expense)
 
+    # After all settlement transactions are processed, clean up any remaining debts
+    # The settlement logic may create new debts between different user pairs
+    # even though total balances are 0, so we remove all remaining group debts
+    remaining_debts = Debt.query.filter_by(group_id=group_id).all()
+    for debt in remaining_debts:
+        db.session.delete(debt)
     db.session.commit()
 
     flash(
