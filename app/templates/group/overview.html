@@ -199,7 +199,7 @@
                 </a>
             </div>
             <div class="card">
-                <a href="#" class="card-link-btn" style="background-color: #e0e0e0; color: #999;">
+                <a href="{{ url_for('groups.settle_debts_preview', group_id=group.id) }}" class="card-link-btn">
                     Settle Debts
                 </a>
             </div>
@@ -237,46 +237,55 @@
                     Relevant Balances
                 </div>
                 <div class="card-body">
-                    <div class="total-balance">
-                        By Total Amount:
-                    </div>
-                    <ul>
-                        {% for user, total_balance in balances.items() %}
-                            <li>
+                    {% set has_active_balances = namespace(value=false) %}
+                    {% for user, total_balance in balances.items() %}
+                        {% if total_balance != 0 %}
+                            {% set has_active_balances.value = true %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if has_active_balances.value %}
+                        <div class="total-balance">
+                            By Total Amount:
+                        </div>
+                        <ul>
+                            {% for user, total_balance in balances.items() %}
                                 {% if total_balance > 0 %}
-                                    <div>
-                                        <strong>
-                                            <a href="/users/{{ user.id }}">
-                                                {{ user.username }}
-                                            </a>
-                                        </strong>
-                                        <div class="created-by">
-                                            is owed
+                                    <li>
+                                        <div>
+                                            <strong>
+                                                <a href="/users/{{ user.id }}">
+                                                    {{ user.username }}
+                                                </a>
+                                            </strong>
+                                            <div class="created-by">
+                                                is owed
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="expense-amount">
-                                        <span style="color: green;">{{ total_balance }}</span>
-                                    </div>
-                                {% else %}
-                                    <div>
-                                        <strong>
-                                            <a href="/users/{{ user.id }}">
-                                                {{ user.username }}
-                                            </a>
-                                        </strong>
-                                        <div class="created-by">
-                                            owes
+                                        <div class="expense-amount">
+                                            <span style="color: green;">{{ total_balance }}</span>
                                         </div>
-                                    </div>
-                                    <div class="expense-amount">
-                                        <span style="color: red;">{{ total_balance | abs }}</span>
-                                    </div>
+                                    </li>
+                                {% elif total_balance < 0 %}
+                                    <li>
+                                        <div>
+                                            <strong>
+                                                <a href="/users/{{ user.id }}">
+                                                    {{ user.username }}
+                                                </a>
+                                            </strong>
+                                            <div class="created-by">
+                                                owes
+                                            </div>
+                                        </div>
+                                        <div class="expense-amount">
+                                            <span style="color: red;">{{ total_balance | abs }}</span>
+                                        </div>
+                                    </li>
                                 {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    {% if balances|length == 0 %}
-                        <p>No balances to show.</p>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p style="text-align: center;">No Active Balances</p>
                     {% endif %}
                 </div>
             </div>
