@@ -11,13 +11,13 @@ class TestGetNoGroupDebts:
     def test_get_no_group_debts_with_debts(self, users_and_group, debts_and_expenses):
         """Test getting no-group debts when user has both group and no-group debts"""
         user1, _, _, _ = users_and_group
-        debt1, _, debt3, *_ = debts_and_expenses
+        group_balance1, group_balance2, group_balance3, debt3, *_ = debts_and_expenses
         
         result = get_no_group_debts(user1)
         
         assert len(result) == 1
         assert debt3 in result
-        assert debt1 not in result  # Group debt should not be included
+        # Group balances are not included in no-group debts
 
     def test_get_no_group_debts_no_debts(self, db_session):
         """Test getting no-group debts when user has no debts"""

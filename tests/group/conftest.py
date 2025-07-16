@@ -5,6 +5,7 @@ from flask_login import login_user, logout_user
 from app.model.user import User
 from app.model.group import Group
 from app.model.debt import Debt
+from app.model.group_balance import GroupBalance
 from app.model.expense import Expense
 from app.model.constants import NO_GROUP
 from decimal import Decimal
@@ -34,19 +35,21 @@ def debts_and_expenses(users_and_group, db_session):
     """Create test debts and expenses"""
     user1, user2, user3, group = users_and_group
     
-    # Create group debts using Debt.update (which creates if not exists)
-    Debt.update(user2.id, user1.id, float(Decimal("50.00")), group.id)
-    Debt.update(user3.id, user2.id, float(Decimal("30.00")), group.id)
+    # Create group balances using GroupBalance.update_balance
+    GroupBalance.update_balance(user1.id, group.id, float(Decimal("50.00")))  # user1 is owed 50 by group
+    GroupBalance.update_balance(user2.id, group.id, float(Decimal("-20.00")))  # user2 owes 20 to group (50 - 30)
+    GroupBalance.update_balance(user3.id, group.id, float(Decimal("-30.00")))  # user3 owes 30 to group
     
-    # Create no-group debts
-    Debt.update(user3.id, user1.id, float(Decimal("20.00")), NO_GROUP)
+    # Create no-group debts (individual debts)
+    Debt.update(user3.id, user1.id, float(Decimal("20.00")))
     
     db_session.commit()
     
-    # Fetch created debts
-    debt1 = Debt.find(user2.id, user1.id, group.id)
-    debt2 = Debt.find(user3.id, user2.id, group.id)
-    debt3 = Debt.find(user3.id, user1.id, NO_GROUP)
+    # Fetch created group balances and individual debt
+    group_balance1 = GroupBalance.find(user1.id, group.id)
+    group_balance2 = GroupBalance.find(user2.id, group.id)
+    group_balance3 = GroupBalance.find(user3.id, group.id)
+    debt3 = Debt.find(user3.id, user1.id)
     
     # Create expenses
     expense1 = Expense.create(
@@ -78,4 +81,4 @@ def debts_and_expenses(users_and_group, db_session):
     
     db_session.commit()
     
-    return debt1, debt2, debt3, expense1, expense2, expense3
+    return group_balance1, group_balance2, group_balance3, debt3, expense1, expense2, expense3

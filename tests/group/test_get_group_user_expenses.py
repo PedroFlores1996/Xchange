@@ -12,7 +12,7 @@ class TestGetGroupUserExpenses:
     def test_get_group_user_expenses_with_expenses(self, users_and_group, debts_and_expenses):
         """Test getting group expenses for user with expenses"""
         user1, _, _, group = users_and_group
-        *_, expense1, _, expense3 = debts_and_expenses
+        *_, expense1, expense2, expense3 = debts_and_expenses
         
         result = get_group_user_expenses(user1, group.id)
         
@@ -26,7 +26,7 @@ class TestGetGroupUserExpenses:
     def test_get_group_user_expenses_multiple_expenses(self, users_and_group, debts_and_expenses):
         """Test getting multiple group expenses and sorting"""
         user1, _, _, group = users_and_group
-        *_, expense1, _, _ = debts_and_expenses
+        *_, expense1, expense2, expense3 = debts_and_expenses
         
         # Create another expense for user1
         expense4 = Expense.create(

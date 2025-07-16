@@ -6,6 +6,7 @@ from app.user import get_user_balances
 from app.model.user import User
 from app.model.group import Group
 from app.model.debt import Debt
+from app.model.group_balance import GroupBalance
 from app.model.constants import NO_GROUP
 from decimal import Decimal
 
@@ -14,7 +15,7 @@ class TestGetUserBalances:
     """Tests for get_user_balances function"""
 
     def test_get_user_balances_with_debts(self, db_session, request_context):
-        """Test getting user balances with various debts"""
+        """Test getting user balances with various debts and group balances"""
         # Create users and groups
         user1 = User.create("user1", "user1@test.com", "password")
         user2 = User.create("user2", "user2@test.com", "password") 
@@ -27,15 +28,12 @@ class TestGetUserBalances:
         login_user(user1)
         
         try:
-            # Create debts where user1 is lender
-            Debt.update(user2.id, user1.id, float(Decimal("50.00")), group1.id)
-            Debt.update(user3.id, user1.id, float(Decimal("30.00")), group2.id)
+            # Create group balances directly
+            GroupBalance.update_balance(user1.id, group1.id, float(Decimal("30.00")))  # user1 is owed 30 in group1
+            GroupBalance.update_balance(user1.id, group2.id, float(Decimal("30.00")))  # user1 is owed 30 in group2
             
-            # Create debt where user1 is borrower
-            Debt.update(user1.id, user2.id, float(Decimal("20.00")), group1.id)
-            
-            # Create no-group debt where user1 is lender
-            Debt.update(user3.id, user1.id, float(Decimal("15.00")), NO_GROUP)
+            # Create individual debt where user1 is lender
+            Debt.update(user3.id, user1.id, float(Decimal("15.00")))
             
             db_session.commit()
             
@@ -50,17 +48,16 @@ class TestGetUserBalances:
             assert group2.id in group_balances
             assert NO_GROUP in group_balances
             
-            # user1 lent 50 to user2 in group1, borrowed 20 from user2 in group1
-            # Net in group1: 50 - 20 = 30
+            # user1 is owed 30 in group1
             assert group_balances[group1.id] == 30.0
             
-            # user1 lent 30 to user3 in group2
+            # user1 is owed 30 in group2
             assert group_balances[group2.id] == 30.0
             
-            # user1 lent 15 to user3 with no group
+            # user1 lent 15 to user3 individually (no group)
             assert group_balances[NO_GROUP] == 15.0
             
-            # Overall balance: 50 - 20 + 30 + 15 = 75
+            # Overall balance: 30 + 30 + 15 = 75
             assert overall_balance == 75.0
             
         finally:
@@ -86,8 +83,8 @@ class TestGetUserBalances:
             
             # All balances should be zero
             assert group_balances[group1.id] == 0.0
-            assert group_balances[NO_GROUP] == 0
-            assert overall_balance == 0
+            assert group_balances[NO_GROUP] == 0.0
+            assert overall_balance == 0.0
             
         finally:
             logout_user()
@@ -105,18 +102,20 @@ class TestGetUserBalances:
         login_user(user1)
         
         try:
-            # Create debts where user1 is only lender
-            Debt.update(user2.id, user1.id, float(Decimal("40.00")), group1.id)
-            Debt.update(user3.id, user1.id, float(Decimal("25.00")), NO_GROUP)
+            # Create group balance where user1 is owed money
+            GroupBalance.update_balance(user1.id, group1.id, float(Decimal("40.00")))
+            
+            # Create individual debt where user1 is lender
+            Debt.update(user3.id, user1.id, float(Decimal("25.00")))
             
             db_session.commit()
             
             group_balances, overall_balance = get_user_balances(user1)
             
-            # user1 lent 40 in group1
+            # user1 is owed 40 in group1
             assert group_balances[group1.id] == 40.0
             
-            # user1 lent 25 with no group
+            # user1 lent 25 individually (no group)
             assert group_balances[NO_GROUP] == 25.0
             
             # Overall positive balance
@@ -138,9 +137,11 @@ class TestGetUserBalances:
         login_user(user1)
         
         try:
-            # Create debts where user1 is only borrower
-            Debt.update(user1.id, user2.id, float(Decimal("35.00")), group1.id)
-            Debt.update(user1.id, user3.id, float(Decimal("20.00")), NO_GROUP)
+            # Create group balance where user1 owes money
+            GroupBalance.update_balance(user1.id, group1.id, float(Decimal("-35.00")))
+            
+            # Create individual debt where user1 is borrower
+            Debt.update(user1.id, user3.id, float(Decimal("20.00")))
             
             db_session.commit()
             
@@ -149,7 +150,7 @@ class TestGetUserBalances:
             # user1 owes 35 in group1
             assert group_balances[group1.id] == -35.0
             
-            # user1 owes 20 with no group
+            # user1 owes 20 individually (no group)
             assert group_balances[NO_GROUP] == -20.0
             
             # Overall negative balance
@@ -174,20 +175,20 @@ class TestGetUserBalances:
         login_user(user1)
         
         try:
-            # Create debts in different groups
-            Debt.update(user2.id, user1.id, float(Decimal("100.00")), group1.id)  # user1 lends in group1
-            Debt.update(user1.id, user3.id, float(Decimal("60.00")), group2.id)   # user1 borrows in group2
-            Debt.update(user4.id, user1.id, float(Decimal("30.00")), group3.id)   # user1 lends in group3
+            # Create group balances across different groups
+            GroupBalance.update_balance(user1.id, group1.id, float(Decimal("100.00")))  # user1 is owed in group1
+            GroupBalance.update_balance(user1.id, group2.id, float(Decimal("-60.00")))  # user1 owes in group2
+            GroupBalance.update_balance(user1.id, group3.id, float(Decimal("30.00")))   # user1 is owed in group3
             
             db_session.commit()
             
             group_balances, overall_balance = get_user_balances(user1)
             
             # Check individual group balances
-            assert group_balances[group1.id] == 100.0   # positive (lender)
-            assert group_balances[group2.id] == -60.0   # negative (borrower)  
-            assert group_balances[group3.id] == 30.0    # positive (lender)
-            assert group_balances[NO_GROUP] == 0        # no no-group debts
+            assert group_balances[group1.id] == 100.0   # positive (owed)
+            assert group_balances[group2.id] == -60.0   # negative (owes)  
+            assert group_balances[group3.id] == 30.0    # positive (owed)
+            assert group_balances[NO_GROUP] == 0.0      # no individual debts
             
             # Overall balance: 100 - 60 + 30 = 70
             assert overall_balance == 70.0
@@ -196,7 +197,7 @@ class TestGetUserBalances:
             logout_user()
 
     def test_get_user_balances_zero_group_balance(self, db_session, request_context):
-        """Test getting balances when group balance nets to zero"""
+        """Test getting balances when group balance is zero"""
         # Create users and group
         user1 = User.create("user1", "user1@test.com", "password")
         user2 = User.create("user2", "user2@test.com", "password")
@@ -207,15 +208,14 @@ class TestGetUserBalances:
         login_user(user1)
         
         try:
-            # Create equal debts in both directions
-            Debt.update(user2.id, user1.id, float(Decimal("50.00")), group1.id)  # user1 lends 50
-            Debt.update(user1.id, user2.id, float(Decimal("50.00")), group1.id)  # user1 borrows 50
+            # Create zero group balance (or no balance record, which defaults to 0)
+            # No GroupBalance record created, so it will default to 0.0
             
             db_session.commit()
             
             group_balances, overall_balance = get_user_balances(user1)
             
-            # Group balance should be zero (50 - 50 = 0)
+            # Group balance should be zero (default)
             assert group_balances[group1.id] == 0.0
             
             # Overall balance should be zero

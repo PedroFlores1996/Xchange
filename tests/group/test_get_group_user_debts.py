@@ -13,7 +13,7 @@ class TestGetGroupUserDebts:
     def test_get_group_user_debts_basic(self, users_and_group, debts_and_expenses):
         """Test basic debt calculation for group users"""
         user1, user2, user3, group = users_and_group
-        debt1, debt2, _, *_ = debts_and_expenses
+        group_balance1, group_balance2, group_balance3, _, *_ = debts_and_expenses
         
         result = get_group_user_debts(group)
         
@@ -21,26 +21,22 @@ class TestGetGroupUserDebts:
         assert isinstance(result, dict)
         assert len(result) == 3  # Three users in group
         
-        # Check user1 (lender of debt1)
+        # Check user1 (has positive balance - is owed 50)
         user1_debts = result[user1.id]
-        assert len(user1_debts[PAYED]) == 1
-        assert user1_debts[PAYED][0] == debt1
-        assert len(user1_debts[OWED]) == 0
+        assert len(user1_debts[PAYED]) == 0  # No individual debt records in new system
+        assert len(user1_debts[OWED]) == 0   # No individual debt records in new system
         assert user1_debts[TOTAL] == 50.0
         
-        # Check user2 (borrower of debt1, lender of debt2)
+        # Check user2 (has negative balance - owes 20)
         user2_debts = result[user2.id]
-        assert len(user2_debts[PAYED]) == 1
-        assert user2_debts[PAYED][0] == debt2
-        assert len(user2_debts[OWED]) == 1
-        assert user2_debts[OWED][0] == debt1
-        assert user2_debts[TOTAL] == -20.0  # 30 - 50
+        assert len(user2_debts[PAYED]) == 0  # No individual debt records in new system
+        assert len(user2_debts[OWED]) == 0   # No individual debt records in new system
+        assert user2_debts[TOTAL] == -20.0
         
-        # Check user3 (borrower of debt2)
+        # Check user3 (has negative balance - owes 30)
         user3_debts = result[user3.id]
-        assert len(user3_debts[PAYED]) == 0
-        assert len(user3_debts[OWED]) == 1
-        assert user3_debts[OWED][0] == debt2
+        assert len(user3_debts[PAYED]) == 0  # No individual debt records in new system
+        assert len(user3_debts[OWED]) == 0   # No individual debt records in new system
         assert user3_debts[TOTAL] == -30.0
 
     def test_get_group_user_debts_empty_group(self, db_session):

@@ -73,8 +73,16 @@ def get_group_user_balances(group: Group) -> dict[User, float]:
     """
     Returns a dictionary of users and their balances in the group.
     The balance is retrieved from the GroupBalance model.
+    Users without a GroupBalance record are assumed to have zero balance.
     """
     user_balances: dict[User, float] = {}
+    
+    # Initialize all group users with zero balance
+    for user in group.users:
+        user_balances[user] = 0.0
+    
+    # Update with actual balances from GroupBalance records
     for group_balance in group.group_balances:
         user_balances[group_balance.user] = group_balance.balance
+    
     return user_balances

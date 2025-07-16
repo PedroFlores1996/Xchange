@@ -11,6 +11,7 @@ class TestGetNoGroupUserBalances:
     def test_get_no_group_user_balances_as_lender(self, users_and_group, debts_and_expenses):
         """Test getting balances when user is a lender"""
         user1, _, user3, _ = users_and_group
+        group_balance1, group_balance2, group_balance3, debt3, *_ = debts_and_expenses
         
         result = get_no_group_user_balances(user1)
         
@@ -20,6 +21,7 @@ class TestGetNoGroupUserBalances:
     def test_get_no_group_user_balances_as_borrower(self, users_and_group, debts_and_expenses):
         """Test getting balances when user is a borrower"""
         user1, _, user3, _ = users_and_group
+        group_balance1, group_balance2, group_balance3, debt3, *_ = debts_and_expenses
         
         result = get_no_group_user_balances(user3)
         
