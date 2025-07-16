@@ -17,13 +17,22 @@ def update_expenses_in_users(expenses: list[Expense]) -> None:
 
 
 def get_user_balances(user: User) -> tuple[dict[int, float], float]:
+    # Initialize group balances with group IDs
     group_balances = dict.fromkeys([group.id for group in user.groups], 0.0)
-    group_balances[NO_GROUP] = 0
-    overall_balance = 0
-    for debt in current_user.lender_debts:
-        group_balances[debt.group_id] += debt.amount
+    group_balances[NO_GROUP] = 0.0
+    overall_balance = 0.0
+    
+    # Add individual debts to NO_GROUP category
+    for debt in user.lender_debts:
+        group_balances[NO_GROUP] += debt.amount
         overall_balance += debt.amount
-    for debt in current_user.borrower_debts:
-        group_balances[debt.group_id] -= debt.amount
+    for debt in user.borrower_debts:
+        group_balances[NO_GROUP] -= debt.amount
         overall_balance -= debt.amount
+    
+    # Add group balances from GroupBalance records
+    for group_balance in user.group_balances:
+        group_balances[group_balance.group_id] = group_balance.balance
+        overall_balance += group_balance.balance
+    
     return group_balances, overall_balance

@@ -1,4 +1,5 @@
 from app.model import Debt
+from app.model.group_balance import GroupBalance
 from app.split.constants import TOTAL
 
 
@@ -51,9 +52,17 @@ def update_debts(
     balances: dict[int, dict[str, float]], group_id: int | None = None
 ) -> None:
     total_balances = {id: balance[TOTAL] for id, balance in balances.items()}
-    transactions = simplify_debts(total_balances)
-    for debtor_id, creditor_id, amount in transactions:
-        Debt.update(debtor_id, creditor_id, amount, group_id)
+    
+    if group_id is not None:
+        # For group expenses, update GroupBalance records instead of creating individual debts
+        for user_id, balance in total_balances.items():
+            if balance != 0:  # Only update if there's a non-zero balance
+                GroupBalance.update_balance(user_id, group_id, balance)
+    else:
+        # For individual expenses (non-group), create individual debts as before
+        transactions = simplify_debts(total_balances)
+        for debtor_id, creditor_id, amount in transactions:
+            Debt.update(debtor_id, creditor_id, amount)
 
 
 def get_debts_total_balance(

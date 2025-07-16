@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from app.model.group import Group
     from app.model.debt import Debt
     from app.model.expense import Expense
+    from app.model.group_balance import GroupBalance
 
 from sqlalchemy.orm import Mapped, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -45,6 +46,7 @@ class User(db.Model, UserMixin):  # type: ignore
     expenses: Mapped[List["Expense"]] = relationship(
         secondary="expense_users", back_populates="users"
     )
+    group_balances: Mapped[List[GroupBalance]] = relationship(back_populates="user")
 
     @classmethod
     def create(cls, username: str, email: str, password: str) -> Self:

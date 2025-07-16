@@ -347,7 +347,7 @@ def settle_debts_process(group_id) -> str | Response:
     transactions = simplify_debts(balance_dict)
 
     # Create settlement expenses using the standard expense submission process
-    # The debt update logic will naturally cancel out existing debts when settlement amounts match
+    # This will create balance records and update group balances appropriately
     settlement_expenses = []
     for debtor_id, creditor_id, amount in transactions:
         debtor = db.session.get(User, debtor_id)
@@ -367,17 +367,14 @@ def settle_debts_process(group_id) -> str | Response:
         )
 
         # Submit the settlement expense using the standard process
-        # This will create balance records and update debts, naturally canceling existing debts
+        # This will create balance records and update group balances
         expense = submit_expense(expense_data)
         settlement_expenses.append(expense)
 
-    # After all settlement transactions are processed, clean up any remaining debts
-    # The settlement logic may create new debts between different user pairs
-    # even though total balances are 0, so we remove all remaining group debts
-    remaining_debts = Debt.query.filter_by(group_id=group_id).all()
-    for debt in remaining_debts:
-        db.session.delete(debt)
-    db.session.commit()
+    # After all settlement transactions are processed, clear all group balances
+    # This ensures the group is fully settled with zero balances for all users
+    from app.model.group_balance import GroupBalance
+    GroupBalance.clear_group_balances(group_id)
 
     flash(
         f"Successfully created {len(settlement_expenses)} settlement transactions.",
@@ -389,3 +386,64 @@ def settle_debts_process(group_id) -> str | Response:
         settlement_expenses=settlement_expenses,
         current_user=current_user,
     )
+
+
+@bp.route("/groups/<int:group_id>/settle/<int:user_id>", methods=["POST"])
+@login_required
+def settle_individual_balance(group_id, user_id) -> str | Response:
+    """
+    Settles an individual user's balance within a group by creating a settlement expense.
+    """
+    group = get_authorized_group(group_id)
+    if not group:
+        flash("Group not found or access denied.", "danger")
+        return redirect(url_for("user.user_dashboard"))
+
+    user = db.session.get(User, user_id)
+    if not user or user not in group.users:
+        flash("User not found or not in group.", "danger")
+        return redirect(url_for("groups.get_group_debts", group_id=group_id))
+
+    # Get user's current balance
+    from app.model.group_balance import GroupBalance
+    group_balance = GroupBalance.find(user_id, group_id)
+    
+    if not group_balance or group_balance.balance == 0:
+        flash("No balance to settle for this user.", "info")
+        return redirect(url_for("groups.get_group_debts", group_id=group_id))
+
+    balance_amount = group_balance.balance
+    
+    # Create settlement expense
+    if balance_amount > 0:
+        # User is owed money by the group, so group pays user
+        expense_data = ExpenseData(
+            description=f"Individual settlement: Group pays {user.username}",
+            amount=balance_amount,
+            creator_id=current_user.id,
+            group_id=group_id,
+            category=ExpenseCategory.SETTLEMENT,
+            payers_split=SplitType.EQUALLY,  # Group pays equally
+            owers_split=SplitType.AMOUNT,
+            payers={u.id: balance_amount / len(group.users) for u in group.users if u.id != user_id},
+            owers={user_id: balance_amount},  # User receives
+        )
+    else:
+        # User owes money to the group, so user pays group
+        expense_data = ExpenseData(
+            description=f"Individual settlement: {user.username} pays group",
+            amount=abs(balance_amount),
+            creator_id=current_user.id,
+            group_id=group_id,
+            category=ExpenseCategory.SETTLEMENT,
+            payers_split=SplitType.AMOUNT,
+            owers_split=SplitType.EQUALLY,  # Group receives equally
+            payers={user_id: abs(balance_amount)},  # User pays
+            owers={u.id: abs(balance_amount) / len(group.users) for u in group.users if u.id != user_id},
+        )
+
+    # Submit the settlement expense
+    settlement_expense = submit_expense(expense_data)
+    
+    flash(f"Successfully settled {user.username}'s balance of {balance_amount}.", "success")
+    return redirect(url_for("groups.get_group_debts", group_id=group_id))
