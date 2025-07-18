@@ -35,14 +35,22 @@
             width: 100%;
         }
 
+        .expense-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
         .card {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
             width: 100%;
-            max-width: 800px;
+            max-width: 400px;
             background-color: #ffffff;
-            margin-bottom: 24px;
+            flex: 1;
         }
 
         .card-header {
@@ -56,9 +64,8 @@
 
         .card-body {
             padding: 10px;
-            min-width: 400px; /* Increased from 300px */
-            max-height: 485px;
-            min-height: 120px;
+            max-height: 500px;
+            min-height: 200px;
             overflow-y: auto;
         }
 
@@ -107,18 +114,33 @@
         }
 
         .fixed-bottom-card {
-            max-width: 400px;
             position: fixed;
-            bottom: 0;
+            bottom: 24px;
             width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            background: none;
+            box-shadow: none;
+            border: none;
+        }
+        
+        .fixed-bottom-card .card-link-btn {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 8px;
+            margin: 0 16px;
         }
 
         .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             background-color: #f9f9f9;
-            padding: 10px;
         }
 
         .list-group-item:last-child {
@@ -144,60 +166,58 @@
 </head>
 <body>
     <div class="container">
-        <h1>{{ expense.description }}</h1>
-        <div class="card-row mt-4" style="display: flex; flex-direction: row; gap: 20px; justify-content: center; align-items: flex-start;">
+        <h1 class="expense-title">{{ expense.description }}</h1>
+        <div class="row">
             <!-- Expense Details Card -->
             <div class="card">
                 <div class="card-header">
                     Expense Details
                 </div>
                 <div class="card-body">
-                    <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="text-muted">Amount:</span>
-                        <strong style="color: #222;">{{ "%.2f"|format(expense.amount) }}</strong>
-                    </div>
-                    <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="text-muted">Category:</span>
-                        {% if expense.category %}
-                            <strong class="split-type">{{ expense.category }}</strong>
-                        {% else %}
-                            <span>{{ expense.category }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="text-muted">Group:</span>
-                        <strong class="split-type">
-                            {% if expense.group %}
-                                <a href="{{ url_for('groups.get_group_overview', group_id=expense.group.id) }}" style="color: #76a456; font-weight: 600; text-decoration: none;">
-                                    {{ expense.group.name }}
-                                </a>
+                    <ul>
+                        <li class="list-group-item">
+                            <span class="text-muted">Amount:</span>
+                            <strong style="color: #222;">{{ "%.2f"|format(expense.amount) }}</strong>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">Category:</span>
+                            {% if expense.category %}
+                                <strong class="split-type">{{ expense.category }}</strong>
                             {% else %}
-                                <span style="color: #6c757d;">No group</span>
+                                <span>{{ expense.category }}</span>
                             {% endif %}
-                        </strong>
-                    </div>
-                    <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="text-muted">Creator:</span>
-                        <strong class="split-type">
-                            <a href="{{ url_for('user.user_profile', user_id=expense.creator.id) }}" style="color: #76a456; font-weight: 600; text-decoration: none;">
-                                {{ expense.creator.username }}
-                            </a>
-                        </strong>
-                    </div>
-                    <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="text-muted">Created At:</span>
-                        <span>
-                            {{ expense.created_at.strftime('%d-%m-%Y %H:%M') }}
-                        </span>
-                    </div>
-                    <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="text-muted">Payers Split:</span>
-                        <span>{{ expense.payers_split }}</span>
-                    </div>
-                    <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="text-muted">Owers Split:</span>
-                        <span>{{ expense.owers_split }}</span>
-                    </div>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">Group:</span>
+                            <strong class="split-type">
+                                {% if expense.group %}
+                                    <a href="{{ url_for('groups.get_group_overview', group_id=expense.group.id) }}" style="color: #76a456; font-weight: 600; text-decoration: none;">
+                                        {{ expense.group.name }}
+                                    </a>
+                                {% else %}
+                                    <span style="color: #6c757d;">No group</span>
+                                {% endif %}
+                            </strong>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">Creator:</span>
+                            <strong class="split-type">
+                                <a href="{{ url_for('user.user_profile', user_id=expense.creator.id) }}" style="color: #76a456; font-weight: 600; text-decoration: none;">
+                                    {{ expense.creator.username }}
+                                </a>
+                            </strong>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">Created:</span>
+                            <span>
+                                {{ expense.created_at.strftime('%d-%m-%Y %H:%M') }}
+                            </span>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">Split Type:</span>
+                            <span class="split-type">{{ expense.owers_split }}</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <!-- Payers & Owers Card -->
@@ -208,44 +228,32 @@
                 <div class="card-body">
                     <ul>
                         {% for balance in expense.balances %}
-                            <li class="list-group-item" style="display: flex; gap: 16px; align-items: center;">
-                                <!-- Username column -->
+                            <li class="list-group-item">
                                 <div style="flex: 1;">
-                                    <a href="{{ url_for('user.user_profile', user_id=balance.user.id) }}" style="color: #76a456; font-weight: 600; text-decoration: none;">
-                                        {{ balance.user.username }}
-                                    </a>
-                                </div>
-                                <!-- Owed/Payed column with aligned labels and values -->
-                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                                    <div style="display: flex; justify-content: center; align-items: center;">
-                                        <div style="min-width: 60px; text-align: right;">
-                                            <span class="balance-label text-muted">Owed:</span>
-                                        </div>
-                                        <div style="min-width: 50px; text-align: left;">
-                                            <span class="{% if balance.owed != 0 %}owed-amount{% else %}default-amount{% endif %}">{{ "%.2f"|format(balance.owed|abs) }}</span>
-                                        </div>
-                                    </div>
-                                    <div style="display: flex; justify-content: center; align-items: center;">
-                                        <div style="min-width: 60px; text-align: right;">
-                                            <span class="balance-label text-muted">Payed:</span>
-                                        </div>
-                                        <div style="min-width: 50px; text-align: left;">
-                                            <span class="{% if balance.payed != 0 %}payed-amount{% else %}default-amount{% endif %}">{{ "%.2f"|format(balance.payed|abs) }}</span>
-                                        </div>
+                                    <strong>
+                                        <a href="{{ url_for('user.user_profile', user_id=balance.user.id) }}" style="color: #76a456; font-weight: 600; text-decoration: none;">
+                                            {{ balance.user.username }}
+                                        </a>
+                                    </strong>
+                                    <div style="font-size: 0.85rem; color: #6c757d; margin-top: 5px;">
+                                        Owed: <span class="{% if balance.owed != 0 %}owed-amount{% else %}default-amount{% endif %}">{{ "%.2f"|format(balance.owed|abs) }}</span> | 
+                                        Paid: <span class="{% if balance.payed != 0 %}payed-amount{% else %}default-amount{% endif %}">{{ "%.2f"|format(balance.payed|abs) }}</span>
                                     </div>
                                 </div>
-                                <!-- Total column -->
-                                <div style="flex: 1; text-align: right;">
-                                    <span class="balance-label text-muted">Total:</span>
-                                    <strong class="
-                                        {% if balance.total > 0 %}
-                                            payed-amount
-                                        {% elif balance.total < 0 %}
-                                            owed-amount
-                                        {% else %}
-                                            default-amount
-                                        {% endif %}
-                                    ">{{ "%.2f"|format(balance.total|abs) }}</strong>
+                                <div style="flex: 1; display: flex; justify-content: flex-end;">
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 1rem; color: #6c757d;">Balance:
+                                            <strong class="
+                                                {% if balance.total > 0 %}
+                                                    payed-amount
+                                                {% elif balance.total < 0 %}
+                                                    owed-amount
+                                                {% else %}
+                                                    default-amount
+                                                {% endif %}
+                                            " style="font-size: 1.1rem;">{{ "%.2f"|format(balance.total) }}</strong>
+                                        </div>
+                                    </div>
                                 </div>
                             </li>
                         {% endfor %}
@@ -255,12 +263,10 @@
         </div>
     </div> <!-- end of .container -->
 
-    <div class="row">
-        <div class="card fixed-bottom-card">
-            <a href="{{ url_for('user.user_dashboard') }}" class="card-link-btn secondary">
-                Back to Dashboard
-            </a>
-        </div>
+    <div class="fixed-bottom-card">
+        <a href="{{ url_for('user.user_dashboard') }}" class="card-link-btn secondary">
+            Back to Dashboard
+        </a>
     </div>
 </body>
 </html>
