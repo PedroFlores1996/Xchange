@@ -93,6 +93,11 @@
             background: #a8a8a8;
         }
 
+        /* Your Balance card specific styling */
+        .your-balance-card .card-body {
+            min-height: 80px; /* Reduced height for single row */
+        }
+
         /* List styling to look like table rows */
         ul {
             list-style-type: none; /* Remove bullet points */
@@ -310,7 +315,7 @@
             </div>
             
             <!-- Middle Column: Your Balance -->
-            <div class="card">
+            <div class="card your-balance-card">
                 <div class="card-header">
                     Your Balance
                 </div>
@@ -318,8 +323,8 @@
                     <ul>
                         {% if user_group_balance != 0 %}
                             <!-- Single row with username and balance -->
-                            <li>
-                                <div>
+                            <li style="position: relative;">
+                                <div style="flex: 1;">
                                     <strong>
                                         <a href="{{ url_for('user.user_dashboard') }}">
                                             {{ current_user.username }}
@@ -333,12 +338,21 @@
                                         {% endif %}
                                     </div>
                                 </div>
-                                <div class="expense-amount">
+                                <div style="flex: 1; display: flex; justify-content: flex-end;">
                                     {% if user_group_balance < 0 %}
                                         <span style="color: red;">{{ "%.2f"|format(user_group_balance | abs) }}</span>
                                     {% else %}
                                         <span style="color: green;">{{ "%.2f"|format(user_group_balance | abs) }}</span>
                                     {% endif %}
+                                </div>
+                                <!-- Absolutely positioned settle button -->
+                                <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                                    <a href="{{ url_for('groups.settle_individual_balance_confirmation', group_id=group.id, user_id=current_user.id) }}" 
+                                       style="background-color: #76a456; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: background-color 0.2s;"
+                                       onmouseover="this.style.backgroundColor='#83cc4f'"
+                                       onmouseout="this.style.backgroundColor='#76a456'">
+                                        Settle
+                                    </a>
                                 </div>
                             </li>
                         {% else %}
@@ -360,21 +374,6 @@
                             </li>
                         {% endif %}
                     </ul>
-                    
-                    {% if user_group_balance != 0 %}
-                        <!-- Settlement button -->
-                        <div style="text-align: center; margin-top: 15px;">
-                            <form method="GET" action="{{ url_for('groups.settle_individual_balance_confirmation', group_id=group.id, user_id=current_user.id) }}" style="display: inline;">
-                                <button type="submit" 
-                                        class="btn btn-sm btn-outline-primary"
-                                        style="font-size: 0.9rem; padding: 8px 16px; border: 1px solid #76a456; color: #76a456; border-radius: 4px; background: white; transition: all 0.2s; cursor: pointer;"
-                                        onmouseover="this.style.background='#76a456'; this.style.color='white';"
-                                        onmouseout="this.style.background='white'; this.style.color='#76a456';">
-                                    Settle My Balance
-                                </button>
-                            </form>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
             
@@ -391,9 +390,9 @@
                         {% for expense in recent_expenses %}
                             <li>
                                 <!-- Left Section: Expense Name and Creator -->
-                                <div>
+                                <div style="flex: 1; min-width: 0;">
                                     <strong>
-                                        <a href="/expenses/{{ expense.id }}" class="text-primary">
+                                        <a href="/expenses/{{ expense.id }}" class="text-primary" style="white-space: nowrap;">
                                             {{ expense.description }}
                                         </a>
                                     </strong>

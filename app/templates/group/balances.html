@@ -204,12 +204,14 @@
             <div class="card-body">
                 <ul id="balances-list">
                     {% for user, total_balance in balances_abs.items() %}
-                        <li>
-                            <div>
-                                <a href="{{ url_for('user.user_profile', user_id=user.id) }}" class="user-link">
-                                    {{ user.username }}
-                                </a>
-                                <div class="created-by">
+                        <li style="position: relative;">
+                            <div style="flex: 1;">
+                                <strong>
+                                    <a href="{{ url_for('user.user_profile', user_id=user.id) }}" class="user-link" style="font-size: 1rem;">
+                                        {{ user.username }}
+                                    </a>
+                                </strong>
+                                <div class="created-by" style="font-size: 0.9rem;">
                                     {% if total_balance > 0 %}
                                         is owed
                                     {% elif total_balance < 0 %}
@@ -219,16 +221,26 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="expense-amount">
-                                <span class="balance-label">Balance:</span>
+                            <div style="flex: 1; display: flex; justify-content: flex-end;">
                                 {% if total_balance > 0 %}
-                                    <span class="balance-positive">{{ '%.2f'|format(total_balance) }}</span>
+                                    <span class="balance-positive" style="font-size: 1.1rem; font-weight: 700;">{{ '%.2f'|format(total_balance) }}</span>
                                 {% elif total_balance < 0 %}
-                                    <span class="balance-negative">-{{ '%.2f'|format(total_balance|abs) }}</span>
+                                    <span class="balance-negative" style="font-size: 1.1rem; font-weight: 700;">{{ '%.2f'|format(total_balance|abs) }}</span>
                                 {% else %}
-                                    <span class="balance-zero">0.00</span>
+                                    <span class="balance-zero" style="font-size: 1.1rem; font-weight: 700;">0.00</span>
                                 {% endif %}
                             </div>
+                            <!-- Absolutely positioned settle button -->
+                            {% if total_balance != 0 %}
+                                <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                                    <a href="{{ url_for('groups.settle_individual_balance_confirmation', group_id=group.id, user_id=user.id) }}" 
+                                       style="background-color: #76a456; color: white; padding: 5px 14px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: background-color 0.2s;"
+                                       onmouseover="this.style.backgroundColor='#83cc4f'"
+                                       onmouseout="this.style.backgroundColor='#76a456'">
+                                        Settle
+                                    </a>
+                                </div>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>
@@ -308,15 +320,30 @@
                     createdBy = "owes";
                 }
                 let balanceLabel = "Balance:";
+                let settleButton = "";
+                if (entry.balance != 0) {
+                    settleButton = `
+                        <a href="/groups/{{ group.id }}/settle/${entry.id}" 
+                           style="background-color: #76a456; color: white; padding: 5px 14px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: background-color 0.2s;"
+                           onmouseover="this.style.backgroundColor='#83cc4f'"
+                           onmouseout="this.style.backgroundColor='#76a456'">
+                            Settle
+                        </a>
+                    `;
+                }
                 list.innerHTML += `
-                    <li>
-                        <div>
-                            <a href="${entry.url}" class="user-link">${entry.username}</a>
-                            <div class="created-by">${createdBy}</div>
+                    <li style="position: relative;">
+                        <div style="flex: 1;">
+                            <strong>
+                                <a href="${entry.url}" class="user-link" style="font-size: 1rem;">${entry.username}</a>
+                            </strong>
+                            <div class="created-by" style="font-size: 0.9rem;">${createdBy}</div>
                         </div>
-                        <div class="expense-amount">
-                            <span class="balance-label">${balanceLabel}</span>
-                            <span class="${balanceClass}">${entry.balance < 0 ? '-' : ''}${Math.abs(parseFloat(entry.balance)).toFixed(2)}</span>
+                        <div style="flex: 1; display: flex; justify-content: flex-end;">
+                            <span class="${balanceClass}" style="font-size: 1.1rem; font-weight: 700;">${entry.balance < 0 ? '' : ''}${Math.abs(parseFloat(entry.balance)).toFixed(2)}</span>
+                        </div>
+                        <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                            ${settleButton}
                         </div>
                     </li>
                 `;

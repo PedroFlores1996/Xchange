@@ -260,9 +260,9 @@
                     </div>
                     <ul>
                         {% for debt in no_group_debts %}
-                            <li>
+                            <li style="position: relative;">
                                 {% if debt.lender.username == current_user.username %}
-                                    <div>
+                                    <div style="flex: 1;">
                                         <strong>
                                             <a href="/users/{{ debt.borrower.id }}">
                                                 {{ debt.borrower.username }}
@@ -272,8 +272,11 @@
                                             owes you
                                         </div>
                                     </div>
-                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                    <div style="flex: 1; display: flex; justify-content: flex-end;">
                                         <span style="color: green;">{{ debt.amount | abs }}</span>
+                                    </div>
+                                    <!-- Absolutely positioned settle button -->
+                                    <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
                                         <a href="{{ url_for('user.settle_friend_form', friend_id=debt.borrower.id) }}" 
                                            style="background-color: #76a456; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: background-color 0.2s;"
                                            onmouseover="this.style.backgroundColor='#83cc4f'"
@@ -282,7 +285,7 @@
                                         </a>
                                     </div>
                                 {% else %}
-                                    <div>
+                                    <div style="flex: 1;">
                                         <strong>
                                             <a href="/users/{{ debt.lender.id }}">
                                                 {{ debt.lender.username }}
@@ -292,8 +295,11 @@
                                             is owed
                                         </div>
                                     </div>
-                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                    <div style="flex: 1; display: flex; justify-content: flex-end;">
                                         <span style="color: red;">{{ debt.amount | abs }}</span>
+                                    </div>
+                                    <!-- Absolutely positioned settle button -->
+                                    <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
                                         <a href="{{ url_for('user.settle_friend_form', friend_id=debt.lender.id) }}" 
                                            style="background-color: #76a456; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: background-color 0.2s;"
                                            onmouseover="this.style.backgroundColor='#83cc4f'"
@@ -394,9 +400,9 @@
                     <ul>
                         {% for expense in expenses %}
                             <li>
-                                <div style="flex: 1;">
+                                <div style="flex: 1; min-width: 0;">
                                     <strong>
-                                        <a href="/expenses/{{ expense.id }}">
+                                        <a href="/expenses/{{ expense.id }}" style="white-space: nowrap;">
                                             {{ expense.description }}
                                         </a>
                                     </strong>
