@@ -392,7 +392,7 @@ def settle_debts_process(group_id) -> str | Response:
 @login_required
 def settle_individual_balance(group_id, user_id) -> str | Response:
     """
-    Settles an individual user's balance within a group by creating a settlement expense.
+    Settles an individual user's balance within a group using minimal transactions.
     """
     group = get_authorized_group(group_id)
     if not group:
@@ -404,46 +404,79 @@ def settle_individual_balance(group_id, user_id) -> str | Response:
         flash("User not found or not in group.", "danger")
         return redirect(url_for("groups.get_group_debts", group_id=group_id))
 
-    # Get user's current balance
-    from app.model.group_balance import GroupBalance
-    group_balance = GroupBalance.find(user_id, group_id)
+    # Get all group balances
+    group_balances = get_group_user_balances(group)
+    user_balance = group_balances.get(user)
     
-    if not group_balance or group_balance.balance == 0:
+    if not user_balance or user_balance == 0:
         flash("No balance to settle for this user.", "info")
         return redirect(url_for("groups.get_group_debts", group_id=group_id))
-
-    balance_amount = group_balance.balance
     
-    # Create settlement expense
-    if balance_amount > 0:
-        # User is owed money by the group, so group pays user
-        expense_data = ExpenseData(
-            description=f"Individual settlement: Group pays {user.username}",
-            amount=balance_amount,
-            creator_id=current_user.id,
-            group_id=group_id,
-            category=ExpenseCategory.SETTLEMENT,
-            payers_split=SplitType.EQUALLY,  # Group pays equally
-            owers_split=SplitType.AMOUNT,
-            payers={u.id: balance_amount / len(group.users) for u in group.users if u.id != user_id},
-            owers={user_id: balance_amount},  # User receives
-        )
+    # Find minimal transactions to settle this user's debt
+    settlement_transactions = []
+    remaining_debt = abs(user_balance)
+    
+    if user_balance > 0:
+        # User is owed money - find who owes money (negative balances) to pay this user
+        debtors = [(u, abs(balance)) for u, balance in group_balances.items() 
+                   if u != user and balance < 0]
+        debtors.sort(key=lambda x: x[1], reverse=True)  # Sort by debt amount descending
+        
+        for debtor, debt_amount in debtors:
+            if remaining_debt <= 0:
+                break
+            
+            # Calculate how much this debtor should pay to the user
+            payment_amount = min(remaining_debt, debt_amount)
+            settlement_transactions.append({
+                'payer': debtor,
+                'receiver': user,
+                'amount': payment_amount,
+                'description': f"Settlement: {debtor.username} pays {user.username}"
+            })
+            remaining_debt -= payment_amount
+    
     else:
-        # User owes money to the group, so user pays group
+        # User owes money - find who is owed money (positive balances) to receive from this user
+        creditors = [(u, balance) for u, balance in group_balances.items() 
+                     if u != user and balance > 0]
+        creditors.sort(key=lambda x: x[1], reverse=True)  # Sort by credit amount descending
+        
+        for creditor, credit_amount in creditors:
+            if remaining_debt <= 0:
+                break
+            
+            # Calculate how much user should pay to this creditor
+            payment_amount = min(remaining_debt, credit_amount)
+            settlement_transactions.append({
+                'payer': user,
+                'receiver': creditor,
+                'amount': payment_amount,
+                'description': f"Settlement: {user.username} pays {creditor.username}"
+            })
+            remaining_debt -= payment_amount
+    
+    # Create settlement expenses for each transaction
+    settlement_expenses = []
+    for transaction in settlement_transactions:
         expense_data = ExpenseData(
-            description=f"Individual settlement: {user.username} pays group",
-            amount=abs(balance_amount),
+            description=transaction['description'],
+            amount=transaction['amount'],
             creator_id=current_user.id,
             group_id=group_id,
             category=ExpenseCategory.SETTLEMENT,
             payers_split=SplitType.AMOUNT,
-            owers_split=SplitType.EQUALLY,  # Group receives equally
-            payers={user_id: abs(balance_amount)},  # User pays
-            owers={u.id: abs(balance_amount) / len(group.users) for u in group.users if u.id != user_id},
+            owers_split=SplitType.AMOUNT,
+            payers={transaction['payer'].id: transaction['amount']},
+            owers={transaction['receiver'].id: transaction['amount']},
         )
-
-    # Submit the settlement expense
-    settlement_expense = submit_expense(expense_data)
+        
+        settlement_expense = submit_expense(expense_data)
+        settlement_expenses.append(settlement_expense)
     
-    flash(f"Successfully settled {user.username}'s balance of {balance_amount}.", "success")
+    if settlement_expenses:
+        flash(f"Successfully settled {user.username}'s balance with {len(settlement_expenses)} transactions.", "success")
+    else:
+        flash("No transactions needed to settle balance.", "info")
+    
     return redirect(url_for("groups.get_group_debts", group_id=group_id))
