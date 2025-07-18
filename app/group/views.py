@@ -388,11 +388,90 @@ def settle_debts_process(group_id) -> str | Response:
     )
 
 
+@bp.route("/groups/<int:group_id>/settle/<int:user_id>", methods=["GET"])
+@login_required
+def settle_individual_balance_confirmation(group_id, user_id) -> str | Response:
+    """
+    Shows confirmation page for settling an individual user's balance within a group.
+    """
+    group = get_authorized_group(group_id)
+    if not group:
+        flash("Group not found or access denied.", "danger")
+        return redirect(url_for("user.user_dashboard"))
+
+    user = db.session.get(User, user_id)
+    if not user or user not in group.users:
+        flash("User not found or not in group.", "danger")
+        return redirect(url_for("groups.get_group_debts", group_id=group_id))
+
+    # Get all group balances
+    group_balances = get_group_user_balances(group)
+    user_balance = group_balances.get(user)
+    
+    if not user_balance or user_balance == 0:
+        flash("No balance to settle for this user.", "info")
+        return redirect(url_for("groups.get_group_debts", group_id=group_id))
+    
+    # Find minimal transactions to settle this user's debt
+    settlement_transactions = []
+    remaining_debt = abs(user_balance)
+    
+    if user_balance > 0:
+        # User is owed money - find who owes money (negative balances) to pay this user
+        debtors = [(u, abs(balance)) for u, balance in group_balances.items() 
+                   if u != user and balance < 0]
+        debtors.sort(key=lambda x: x[1], reverse=True)  # Sort by debt amount descending
+        
+        for debtor, debt_amount in debtors:
+            if remaining_debt <= 0:
+                break
+            
+            # Calculate how much this debtor should pay to the user
+            payment_amount = min(remaining_debt, debt_amount)
+            settlement_transactions.append({
+                'payer': debtor,
+                'receiver': user,
+                'amount': payment_amount,
+                'description': f"Settlement: {debtor.username} pays {user.username}"
+            })
+            remaining_debt -= payment_amount
+    
+    else:
+        # User owes money - find who is owed money (positive balances) to receive from this user
+        creditors = [(u, balance) for u, balance in group_balances.items() 
+                     if u != user and balance > 0]
+        creditors.sort(key=lambda x: x[1], reverse=True)  # Sort by credit amount descending
+        
+        for creditor, credit_amount in creditors:
+            if remaining_debt <= 0:
+                break
+            
+            # Calculate how much user should pay to this creditor
+            payment_amount = min(remaining_debt, credit_amount)
+            settlement_transactions.append({
+                'payer': user,
+                'receiver': creditor,
+                'amount': payment_amount,
+                'description': f"Settlement: {user.username} pays {creditor.username}"
+            })
+            remaining_debt -= payment_amount
+    
+    # Show confirmation page with preview of transactions
+    return render_template(
+        "group/settle_individual_confirmation.html",
+        group=group,
+        user=user,
+        user_balance=user_balance,
+        settlement_transactions=settlement_transactions,
+        current_user=current_user,
+    )
+
+
 @bp.route("/groups/<int:group_id>/settle/<int:user_id>", methods=["POST"])
 @login_required
-def settle_individual_balance(group_id, user_id) -> str | Response:
+def settle_individual_balance_process(group_id, user_id) -> str | Response:
     """
-    Settles an individual user's balance within a group using minimal transactions.
+    Processes the settlement of an individual user's balance within a group.
     """
     group = get_authorized_group(group_id)
     if not group:
@@ -474,9 +553,11 @@ def settle_individual_balance(group_id, user_id) -> str | Response:
         settlement_expense = submit_expense(expense_data)
         settlement_expenses.append(settlement_expense)
     
-    if settlement_expenses:
-        flash(f"Successfully settled {user.username}'s balance with {len(settlement_expenses)} transactions.", "success")
-    else:
-        flash("No transactions needed to settle balance.", "info")
-    
-    return redirect(url_for("groups.get_group_debts", group_id=group_id))
+    # Show success page
+    return render_template(
+        "group/settle_individual_success.html",
+        group=group,
+        user=user,
+        settlement_expenses=settlement_expenses,
+        current_user=current_user,
+    )

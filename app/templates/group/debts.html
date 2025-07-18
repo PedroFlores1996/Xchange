@@ -332,7 +332,7 @@
                                         
                                         <!-- Add individual settlement button -->
                                         <div style="margin-top: 10px;">
-                                            <form method="POST" action="{{ url_for('groups.settle_individual_balance', group_id=group.id, user_id=user.id) }}" style="display: inline;">
+                                            <form method="GET" action="{{ url_for('groups.settle_individual_balance_confirmation', group_id=group.id, user_id=user.id) }}" style="display: inline;">
                                                 <button type="submit" 
                                                         class="btn btn-sm btn-outline-primary"
                                                         style="font-size: 0.8rem; padding: 5px 10px; border: 1px solid #76a456; color: #76a456; border-radius: 4px; background: white; transition: all 0.2s; cursor: pointer;"

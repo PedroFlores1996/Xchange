@@ -364,7 +364,7 @@
                     {% if user_group_balance != 0 %}
                         <!-- Settlement button -->
                         <div style="text-align: center; margin-top: 15px;">
-                            <form method="POST" action="{{ url_for('groups.settle_individual_balance', group_id=group.id, user_id=current_user.id) }}" style="display: inline;">
+                            <form method="GET" action="{{ url_for('groups.settle_individual_balance_confirmation', group_id=group.id, user_id=current_user.id) }}" style="display: inline;">
                                 <button type="submit" 
                                         class="btn btn-sm btn-outline-primary"
                                         style="font-size: 0.9rem; padding: 8px 16px; border: 1px solid #76a456; color: #76a456; border-radius: 4px; background: white; transition: all 0.2s; cursor: pointer;"

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settlement Successful - {{ group.name }}</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            margin-top: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 800px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #ffffff;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .success-message {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            color: #155724;
+        }
+
+        .success-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .success-description {
+            font-size: 1rem;
+        }
+
+        .transactions-list {
+            margin-top: 20px;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .transaction-description {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .transaction-amount {
+            font-weight: 700;
+            color: #28a745;
+        }
+
+        .expense-id {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #76a456;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #83cc4f;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #28a745;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">✅</div>
+            <h1>Settlement Successful!</h1>
+            <p>{{ group.name }} - {{ user.username }}</p>
+        </div>
+
+
+        {% if settlement_expenses %}
+        <div class="card">
+            <div class="card-header">
+                Created Transactions
+            </div>
+            <div class="card-body">
+                <div class="transactions-list">
+                    {% for expense in settlement_expenses %}
+                        <div class="transaction-item">
+                            <div>
+                                <div class="transaction-description">{{ expense.description }}</div>
+                                <div class="expense-id">Expense ID: {{ expense.id }}</div>
+                            </div>
+                            <div class="transaction-amount">
+                                ${{ "%.2f"|format(expense.amount) }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="action-buttons">
+            <a href="{{ url_for('groups.get_group_debts', group_id=group.id) }}" class="btn btn-secondary">
+                View Group Debts
+            </a>
+            <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="btn btn-primary">
+                Back to Group Overview
+            </a>
+        </div>
+    </div>
+</body>
+</html>
