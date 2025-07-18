@@ -7,19 +7,17 @@ from app.group import (
     get_group_user_expenses,
     get_group_user_debts,
     get_group_user_balances,
+    check_group_has_balances,
+    calculate_group_settlement_transactions,
+    handle_settle_debts_process,
+    handle_individual_balance_confirmation,
+    handle_individual_balance_process,
 )
-from app.debt import simplify_debts
-from app.expense import ExpenseData
-from app.model.expense import Expense, ExpenseCategory
-from app.split import SplitType
-from app.model.debt import Debt
-from app.database import db
 from app.split.constants import OWED, PAYED, TOTAL
 from app.group.forms import GroupForm, AddUserToGroupForm
 from app.model.group import Group
 from app.model.user import User
 from app.expense.forms import ExpenseForm
-from app.expense.submit import submit_expense
 
 
 bp = Blueprint("groups", __name__)
@@ -289,31 +287,13 @@ def settle_debts_preview(group_id) -> str | Response:
         flash("Group not found or access denied.", "danger")
         return redirect(url_for("user.user_dashboard"))
 
-    # Get current group balances
-    group_balances = get_group_user_balances(group)
-
     # Check if there are any non-zero balances to settle
-    if not any(balance != 0 for balance in group_balances.values()):
+    if not check_group_has_balances(group):
         flash("No Active Debts to Settle", "info")
         return redirect(url_for("groups.get_group_overview", group_id=group_id))
 
-    # Calculate settlement transactions using the existing algorithm
-    balance_dict = {user.id: balance for user, balance in group_balances.items()}
-    transactions = simplify_debts(balance_dict)
-
-    # Convert transaction tuples to user objects for display
-    settlement_transactions = []
-    for debtor_id, creditor_id, amount in transactions:
-        debtor = db.session.get(User, debtor_id)
-        creditor = db.session.get(User, creditor_id)
-        settlement_transactions.append(
-            {
-                "debtor": debtor,
-                "creditor": creditor,
-                "amount": amount,
-                "description": f"Settlement payment from {debtor.username} to {creditor.username}",
-            }
-        )
+    # Calculate settlement transactions
+    settlement_transactions = calculate_group_settlement_transactions(group)
 
     return render_template(
         "group/settle_preview.html",
@@ -334,56 +314,17 @@ def settle_debts_process(group_id) -> str | Response:
         flash("Group not found or access denied.", "danger")
         return redirect(url_for("user.user_dashboard"))
 
-    # Get current group balances
-    group_balances = get_group_user_balances(group)
-
-    # Check if there are any non-zero balances to settle
-    if not any(balance != 0 for balance in group_balances.values()):
-        flash("No Active Debts to Settle", "info")
+    result = handle_settle_debts_process(group)
+    
+    if not result['success']:
+        flash(result['message'], result['message_type'])
         return redirect(url_for("groups.get_group_overview", group_id=group_id))
 
-    # Calculate settlement transactions
-    balance_dict = {user.id: balance for user, balance in group_balances.items()}
-    transactions = simplify_debts(balance_dict)
-
-    # Create settlement expenses using the standard expense submission process
-    # This will create balance records and update group balances appropriately
-    settlement_expenses = []
-    for debtor_id, creditor_id, amount in transactions:
-        debtor = db.session.get(User, debtor_id)
-        creditor = db.session.get(User, creditor_id)
-
-        # Create expense data for settlement with proper payers/owers
-        expense_data = ExpenseData(
-            description=f"Settlement payment from {debtor.username} to {creditor.username}",
-            amount=amount,
-            creator_id=current_user.id,
-            group_id=group_id,
-            category=ExpenseCategory.SETTLEMENT,
-            payers_split=SplitType.AMOUNT,
-            owers_split=SplitType.AMOUNT,
-            payers={debtor_id: amount},    # Debtor pays the full amount
-            owers={creditor_id: amount},   # Creditor receives the full amount
-        )
-
-        # Submit the settlement expense using the standard process
-        # This will create balance records and update group balances
-        expense = submit_expense(expense_data)
-        settlement_expenses.append(expense)
-
-    # After all settlement transactions are processed, clear all group balances
-    # This ensures the group is fully settled with zero balances for all users
-    from app.model.group_balance import GroupBalance
-    GroupBalance.clear_group_balances(group_id)
-
-    flash(
-        f"Successfully created {len(settlement_expenses)} settlement transactions.",
-        "success",
-    )
+    flash(result['message'], result['message_type'])
     return render_template(
         "group/settle_success.html",
         group=group,
-        settlement_expenses=settlement_expenses,
+        settlement_expenses=result['settlement_expenses'],
         current_user=current_user,
     )
 
@@ -399,70 +340,18 @@ def settle_individual_balance_confirmation(group_id, user_id) -> str | Response:
         flash("Group not found or access denied.", "danger")
         return redirect(url_for("user.user_dashboard"))
 
-    user = db.session.get(User, user_id)
-    if not user or user not in group.users:
-        flash("User not found or not in group.", "danger")
-        return redirect(url_for("groups.get_group_debts", group_id=group_id))
-
-    # Get all group balances
-    group_balances = get_group_user_balances(group)
-    user_balance = group_balances.get(user)
+    result = handle_individual_balance_confirmation(group, user_id)
     
-    if not user_balance or user_balance == 0:
-        flash("No balance to settle for this user.", "info")
+    if not result['success']:
+        flash(result['message'], result['message_type'])
         return redirect(url_for("groups.get_group_debts", group_id=group_id))
     
-    # Find minimal transactions to settle this user's debt
-    settlement_transactions = []
-    remaining_debt = abs(user_balance)
-    
-    if user_balance > 0:
-        # User is owed money - find who owes money (negative balances) to pay this user
-        debtors = [(u, abs(balance)) for u, balance in group_balances.items() 
-                   if u != user and balance < 0]
-        debtors.sort(key=lambda x: x[1], reverse=True)  # Sort by debt amount descending
-        
-        for debtor, debt_amount in debtors:
-            if remaining_debt <= 0:
-                break
-            
-            # Calculate how much this debtor should pay to the user
-            payment_amount = min(remaining_debt, debt_amount)
-            settlement_transactions.append({
-                'payer': debtor,
-                'receiver': user,
-                'amount': payment_amount,
-                'description': f"Settlement: {debtor.username} pays {user.username}"
-            })
-            remaining_debt -= payment_amount
-    
-    else:
-        # User owes money - find who is owed money (positive balances) to receive from this user
-        creditors = [(u, balance) for u, balance in group_balances.items() 
-                     if u != user and balance > 0]
-        creditors.sort(key=lambda x: x[1], reverse=True)  # Sort by credit amount descending
-        
-        for creditor, credit_amount in creditors:
-            if remaining_debt <= 0:
-                break
-            
-            # Calculate how much user should pay to this creditor
-            payment_amount = min(remaining_debt, credit_amount)
-            settlement_transactions.append({
-                'payer': user,
-                'receiver': creditor,
-                'amount': payment_amount,
-                'description': f"Settlement: {user.username} pays {creditor.username}"
-            })
-            remaining_debt -= payment_amount
-    
-    # Show confirmation page with preview of transactions
     return render_template(
         "group/settle_individual_confirmation.html",
         group=group,
-        user=user,
-        user_balance=user_balance,
-        settlement_transactions=settlement_transactions,
+        user=result['user'],
+        user_balance=result['user_balance'],
+        settlement_transactions=result['settlement_transactions'],
         current_user=current_user,
     )
 
@@ -478,86 +367,16 @@ def settle_individual_balance_process(group_id, user_id) -> str | Response:
         flash("Group not found or access denied.", "danger")
         return redirect(url_for("user.user_dashboard"))
 
-    user = db.session.get(User, user_id)
-    if not user or user not in group.users:
-        flash("User not found or not in group.", "danger")
-        return redirect(url_for("groups.get_group_debts", group_id=group_id))
-
-    # Get all group balances
-    group_balances = get_group_user_balances(group)
-    user_balance = group_balances.get(user)
+    result = handle_individual_balance_process(group, user_id)
     
-    if not user_balance or user_balance == 0:
-        flash("No balance to settle for this user.", "info")
+    if not result['success']:
+        flash(result['message'], result['message_type'])
         return redirect(url_for("groups.get_group_debts", group_id=group_id))
     
-    # Find minimal transactions to settle this user's debt
-    settlement_transactions = []
-    remaining_debt = abs(user_balance)
-    
-    if user_balance > 0:
-        # User is owed money - find who owes money (negative balances) to pay this user
-        debtors = [(u, abs(balance)) for u, balance in group_balances.items() 
-                   if u != user and balance < 0]
-        debtors.sort(key=lambda x: x[1], reverse=True)  # Sort by debt amount descending
-        
-        for debtor, debt_amount in debtors:
-            if remaining_debt <= 0:
-                break
-            
-            # Calculate how much this debtor should pay to the user
-            payment_amount = min(remaining_debt, debt_amount)
-            settlement_transactions.append({
-                'payer': debtor,
-                'receiver': user,
-                'amount': payment_amount,
-                'description': f"Settlement: {debtor.username} pays {user.username}"
-            })
-            remaining_debt -= payment_amount
-    
-    else:
-        # User owes money - find who is owed money (positive balances) to receive from this user
-        creditors = [(u, balance) for u, balance in group_balances.items() 
-                     if u != user and balance > 0]
-        creditors.sort(key=lambda x: x[1], reverse=True)  # Sort by credit amount descending
-        
-        for creditor, credit_amount in creditors:
-            if remaining_debt <= 0:
-                break
-            
-            # Calculate how much user should pay to this creditor
-            payment_amount = min(remaining_debt, credit_amount)
-            settlement_transactions.append({
-                'payer': user,
-                'receiver': creditor,
-                'amount': payment_amount,
-                'description': f"Settlement: {user.username} pays {creditor.username}"
-            })
-            remaining_debt -= payment_amount
-    
-    # Create settlement expenses for each transaction
-    settlement_expenses = []
-    for transaction in settlement_transactions:
-        expense_data = ExpenseData(
-            description=transaction['description'],
-            amount=transaction['amount'],
-            creator_id=current_user.id,
-            group_id=group_id,
-            category=ExpenseCategory.SETTLEMENT,
-            payers_split=SplitType.AMOUNT,
-            owers_split=SplitType.AMOUNT,
-            payers={transaction['payer'].id: transaction['amount']},
-            owers={transaction['receiver'].id: transaction['amount']},
-        )
-        
-        settlement_expense = submit_expense(expense_data)
-        settlement_expenses.append(settlement_expense)
-    
-    # Show success page
     return render_template(
         "group/settle_individual_success.html",
         group=group,
-        user=user,
-        settlement_expenses=settlement_expenses,
+        user=result['user'],
+        settlement_expenses=result['settlement_expenses'],
         current_user=current_user,
     )
