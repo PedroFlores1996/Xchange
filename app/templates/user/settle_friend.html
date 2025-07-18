@@ -16,16 +16,11 @@
         }
 
         .container {
-            margin-top: 20px;
+            margin-top: 10px;
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 600px;
-            width: 100%;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 0 20px;
         }
 
         .header {
@@ -48,7 +43,9 @@
             border-radius: 8px;
             overflow: hidden;
             background-color: #ffffff;
-            width: 100%;
+            width: auto;
+            min-width: 600px;
+            max-width: 800px;
             margin-bottom: 20px;
         }
 
@@ -57,12 +54,15 @@
             color: white;
             padding: 15px;
             font-size: 1.2rem;
-            font-weight: 600;
             text-align: center;
+            font-weight: 600;
         }
 
         .card-body {
             padding: 20px;
+            max-height: 600px;
+            min-height: auto;
+            overflow-y: auto;
         }
 
         .debt-info {
@@ -92,22 +92,29 @@
             font-size: 1rem;
         }
 
-        .settlement-info {
+        .transactions-list {
+            margin-top: 20px;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 6px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             background-color: #f9f9f9;
         }
 
-        .settlement-description {
+        .transaction-description {
             font-weight: 600;
             color: #333;
-            margin-bottom: 5px;
         }
 
-        .settlement-details {
-            color: #666;
+        .transaction-amount {
+            font-weight: 700;
+            color: #28a745;
         }
 
         .action-buttons {
@@ -152,52 +159,47 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Settle Debt</h1>
-            <p>with {{ friend.username }}</p>
+            <h1>Confirm Settlement</h1>
+            <p>{{ current_user.username }} - {{ friend.username }}</p>
         </div>
 
         <div class="card">
             <div class="card-header">
-                Current Debt Status
+                Settlement Transactions
             </div>
             <div class="card-body">
-                <div class="debt-info">
-                    {% if debt_amount > 0 %}
-                        <div class="debt-amount positive">{{ "%.2f"|format(debt_amount) }}</div>
-                        <div class="debt-description">{{ friend.username }} owes you</div>
-                    {% elif debt_amount < 0 %}
-                        <div class="debt-amount negative">{{ "%.2f"|format(-debt_amount) }}</div>
-                        <div class="debt-description">You owe {{ friend.username }}</div>
-                    {% else %}
-                        <div class="debt-amount">0.00</div>
-                        <div class="debt-description">No debt between you</div>
+                <div class="transactions-list">
+                    {% if debt_amount != 0 %}
+                        <div class="transaction-item">
+                            <div class="transaction-description">
+                                {% if debt_amount > 0 %}
+                                    Settlement: {{ friend.username }} pays {{ current_user.username }}
+                                {% else %}
+                                    Settlement: {{ current_user.username }} pays {{ friend.username }}
+                                {% endif %}
+                            </div>
+                            <div class="transaction-amount">
+                                {{ "%.2f"|format(debt_amount|abs) }}
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
-
-                {% if debt_amount != 0 %}
-                    <div class="settlement-info">
-                        <div class="settlement-description">
-                            Settlement Transaction:
-                        </div>
-                        <div class="settlement-details">
-                            {% if debt_amount > 0 %}
-                                <strong>{{ friend.username }}</strong> will pay <strong>{{ current_user.username }}</strong> {{ "%.2f"|format(debt_amount) }}
-                            {% else %}
-                                <strong>{{ current_user.username }}</strong> will pay <strong>{{ friend.username }}</strong> {{ "%.2f"|format(-debt_amount) }}
-                            {% endif %}
-                        </div>
-                    </div>
-                {% endif %}
             </div>
         </div>
 
         <div class="action-buttons">
-            <a href="{{ url_for('user.user_profile', user_id=friend.id) }}" class="btn btn-secondary">
+            <a href="{{ url_for('user.user_profile', user_id=friend.id) }}" 
+               style="font-size: 0.9rem; padding: 8px 16px; border: 1px solid #6c757d; color: #6c757d; border-radius: 4px; background: white; transition: all 0.2s; text-decoration: none; display: inline-block; margin-right: 10px;"
+               onmouseover="this.style.background='#6c757d'; this.style.color='white';"
+               onmouseout="this.style.background='white'; this.style.color='#6c757d';">
                 Cancel
             </a>
             {% if debt_amount != 0 %}
                 <form method="POST" action="{{ url_for('user.settle_friend_debt', friend_id=friend.id) }}" style="display: inline;">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" 
+                            style="font-size: 0.9rem; padding: 8px 16px; border: 1px solid #76a456; color: #76a456; border-radius: 4px; background: white; transition: all 0.2s; cursor: pointer;"
+                            onmouseover="this.style.background='#76a456'; this.style.color='white';"
+                            onmouseout="this.style.background='white'; this.style.color='#76a456';">
                         Confirm Settlement
                     </button>
                 </form>
