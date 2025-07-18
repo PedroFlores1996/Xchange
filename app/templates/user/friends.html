@@ -191,17 +191,27 @@
                                         {{ friend.email }}
                                     </div>
                                 </div>
-                                <div style="text-align: right">
-                                    {% if debts[friend.id] is defined %}
-                                        {% if debts[friend.id] > 0 %}
-                                            <span style="color: #6c757d;">owes you</span>
-                                            <span style="color: #198754;">{{ '%.2f'|format(debts[friend.id]|abs) }}</span>
+                                <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                    <div>
+                                        {% if debts[friend.id] is defined %}
+                                            {% if debts[friend.id] > 0 %}
+                                                <span style="color: #6c757d;">owes you</span>
+                                                <span style="color: #198754;">{{ '%.2f'|format(debts[friend.id]|abs) }}</span>
+                                            {% else %}
+                                                <span style="color: #6c757d;">is owed</span>
+                                                <span style="color: #dc3545;">{{ '%.2f'|format(debts[friend.id]|abs) }}</span>
+                                            {% endif %}
                                         {% else %}
-                                            <span style="color: #6c757d;">is owed</span>
-                                            <span style="color: #dc3545;">{{ '%.2f'|format(debts[friend.id]|abs) }}</span>
+                                            <span style="color: #6c757d; font-weight: 400;">No debt</span>
                                         {% endif %}
-                                    {% else %}
-                                        <span style="color: #6c757d; font-weight: 400;">No debt</span>
+                                    </div>
+                                    {% if debts[friend.id] is defined and debts[friend.id] != 0 %}
+                                        <a href="{{ url_for('user.settle_friend_form', friend_id=friend.id) }}" 
+                                           style="background-color: #76a456; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: background-color 0.2s;"
+                                           onmouseover="this.style.backgroundColor='#83cc4f'"
+                                           onmouseout="this.style.backgroundColor='#76a456'">
+                                            Settle
+                                        </a>
                                     {% endif %}
                                 </div>
                             </li>

@@ -23,7 +23,11 @@
         <h1 class="text-center">Total Balance</h1>
         <h2 class="text-center 
             {% if balance > 0 %}balance-positive{% elif balance < 0 %}balance-negative{% else %}balance-zero{% endif %}">
-            {{ balance }}
+            {% if balance >= 0 %}
+                {{ "%.2f"|format(balance) }}
+            {% else %}
+                -{{ "%.2f"|format(-balance) }}
+            {% endif %}
         </h2>
     </div>
     <div class="container mt-5">
@@ -42,7 +46,7 @@
                     <tr>
                         <td>{{ debt.lender.username }}</td>
                         <td>{{ debt.borrower.username }}</td>
-                        <td>{{ debt.amount }}</td>
+                        <td>{{ "%.2f"|format(debt.amount) }}</td>
                         <td>
                             {% if debt.group %}
                                 {{ debt.group.name }}

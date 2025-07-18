@@ -251,11 +251,11 @@
                     <div class="total-balance">
                         Total Balance:
                         {% if no_group_balance < 0 %}
-                            <span style="color: red;">{{ no_group_balance }}</span>
+                            <span style="color: red;">-{{ "%.2f"|format(-no_group_balance) }}</span>
                         {% elif no_group_balance > 0 %}
-                            <span style="color: green;">{{ no_group_balance }}</span>
+                            <span style="color: green;">{{ "%.2f"|format(no_group_balance) }}</span>
                         {% else %}
-                            {{ no_group_balance }}
+                            {{ "%.2f"|format(no_group_balance) }}
                         {% endif %}
                     </div>
                     <ul>
@@ -272,8 +272,14 @@
                                             owes you
                                         </div>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
                                         <span style="color: green;">{{ debt.amount | abs }}</span>
+                                        <a href="{{ url_for('user.settle_friend_form', friend_id=debt.borrower.id) }}" 
+                                           style="background-color: #76a456; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: background-color 0.2s;"
+                                           onmouseover="this.style.backgroundColor='#83cc4f'"
+                                           onmouseout="this.style.backgroundColor='#76a456'">
+                                            Settle
+                                        </a>
                                     </div>
                                 {% else %}
                                     <div>
@@ -286,8 +292,14 @@
                                             is owed
                                         </div>
                                     </div>
-                                    <div>
+                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
                                         <span style="color: red;">{{ debt.amount | abs }}</span>
+                                        <a href="{{ url_for('user.settle_friend_form', friend_id=debt.lender.id) }}" 
+                                           style="background-color: #76a456; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: background-color 0.2s;"
+                                           onmouseover="this.style.backgroundColor='#83cc4f'"
+                                           onmouseout="this.style.backgroundColor='#76a456'">
+                                            Settle
+                                        </a>
                                     </div>
                                 {% endif %}
                             </li>
@@ -308,11 +320,11 @@
                     <div class="total-balance">
                         Total Balance:
                         {% if overall_group_balance < 0 %}
-                            <span style="color: red;">{{ overall_group_balance }}</span>
+                            <span style="color: red;">-{{ "%.2f"|format(-overall_group_balance) }}</span>
                         {% elif overall_group_balance > 0 %}
-                            <span style="color: green;">{{ overall_group_balance }}</span>
+                            <span style="color: green;">{{ "%.2f"|format(overall_group_balance) }}</span>
                         {% else %}
-                            {{ overall_group_balance }}
+                            {{ "%.2f"|format(overall_group_balance) }}
                         {% endif %}
                     </div>
                     <ul>
@@ -330,7 +342,7 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <span style="color: red;">{{ group_balances[group.id] }}</span>
+                                        <span style="color: red;">{{ "%.2f"|format(-group_balances[group.id]) }}</span>
                                     </div>
                                 {% elif group_balances[group.id] > 0 %}
                                     <div>
@@ -344,7 +356,7 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <span style="color: green;">{{ group_balances[group.id] }}</span>
+                                        <span style="color: green;">{{ "%.2f"|format(group_balances[group.id]) }}</span>
                                     </div>
                                 {% else %}
                                     <div>
@@ -358,7 +370,7 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <strong>{{ group_balances[group.id] }}</strong>
+                                        <strong>{{ "%.2f"|format(group_balances[group.id]) }}</strong>
                                     </div>
                                 {% endif %}
                             </li>
@@ -396,7 +408,7 @@
                                     </div>
                                 </div>
                                 <div class="expense-amount">
-                                    <span>{{ expense.amount }}</span>
+                                    <span>{{ "%.2f"|format(expense.amount) }}</span>
                                 </div>
                             </li>
                         {% endfor %}

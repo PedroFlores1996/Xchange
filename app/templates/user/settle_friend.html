@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settle Debt with {{ friend.username }}</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            margin-top: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 600px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #ffffff;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #83cc4f;
+            color: white;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .debt-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .debt-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .debt-amount.positive {
+            color: #198754;
+        }
+
+        .debt-amount.negative {
+            color: #dc3545;
+        }
+
+        .debt-description {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .settlement-info {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .settlement-description {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .settlement-details {
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #76a456;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #83cc4f;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Settle Debt</h1>
+            <p>with {{ friend.username }}</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Current Debt Status
+            </div>
+            <div class="card-body">
+                <div class="debt-info">
+                    {% if debt_amount > 0 %}
+                        <div class="debt-amount positive">{{ "%.2f"|format(debt_amount) }}</div>
+                        <div class="debt-description">{{ friend.username }} owes you</div>
+                    {% elif debt_amount < 0 %}
+                        <div class="debt-amount negative">{{ "%.2f"|format(-debt_amount) }}</div>
+                        <div class="debt-description">You owe {{ friend.username }}</div>
+                    {% else %}
+                        <div class="debt-amount">0.00</div>
+                        <div class="debt-description">No debt between you</div>
+                    {% endif %}
+                </div>
+
+                {% if debt_amount != 0 %}
+                    <div class="settlement-info">
+                        <div class="settlement-description">
+                            Settlement Transaction:
+                        </div>
+                        <div class="settlement-details">
+                            {% if debt_amount > 0 %}
+                                <strong>{{ friend.username }}</strong> will pay <strong>{{ current_user.username }}</strong> {{ "%.2f"|format(debt_amount) }}
+                            {% else %}
+                                <strong>{{ current_user.username }}</strong> will pay <strong>{{ friend.username }}</strong> {{ "%.2f"|format(-debt_amount) }}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ url_for('user.user_profile', user_id=friend.id) }}" class="btn btn-secondary">
+                Cancel
+            </a>
+            {% if debt_amount != 0 %}
+                <form method="POST" action="{{ url_for('user.settle_friend_debt', friend_id=friend.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-primary">
+                        Confirm Settlement
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

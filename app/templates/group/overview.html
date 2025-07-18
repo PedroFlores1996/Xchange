@@ -335,9 +335,9 @@
                                 </div>
                                 <div class="expense-amount">
                                     {% if user_group_balance < 0 %}
-                                        <span style="color: red;">{{ user_group_balance | abs }}</span>
+                                        <span style="color: red;">{{ "%.2f"|format(user_group_balance | abs) }}</span>
                                     {% else %}
-                                        <span style="color: green;">{{ user_group_balance | abs }}</span>
+                                        <span style="color: green;">{{ "%.2f"|format(user_group_balance | abs) }}</span>
                                     {% endif %}
                                 </div>
                             </li>
@@ -406,7 +406,7 @@
                                 </div>
                                 <!-- Right Section: Expense Amount -->
                                 <div class="expense-amount">
-                                    <span>{{ expense.amount }}</span>
+                                    <span>{{ "%.2f"|format(expense.amount) }}</span>
                                 </div>
                             </li>
                         {% endfor %}

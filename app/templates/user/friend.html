@@ -372,6 +372,15 @@
                                     {% endif %}
                             </li>
                         </ul>
+                        <!-- Settlement button -->
+                        <div style="text-align: center; margin-top: 15px;">
+                            <a href="{{ url_for('user.settle_friend_form', friend_id=friend.id) }}" 
+                               style="background-color: #76a456; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: background-color 0.2s; display: inline-block;"
+                               onmouseover="this.style.backgroundColor='#83cc4f'"
+                               onmouseout="this.style.backgroundColor='#76a456'">
+                                Settle Debt
+                            </a>
+                        </div>
                     </div>
                 {% else %}
                     <div class="no-expenses">No debts between you and {{ friend.username }}</div>

@@ -224,7 +224,7 @@
                                 {% if total_balance > 0 %}
                                     <span class="balance-positive">{{ '%.2f'|format(total_balance) }}</span>
                                 {% elif total_balance < 0 %}
-                                    <span class="balance-negative">{{ '%.2f'|format(total_balance) }}</span>
+                                    <span class="balance-negative">-{{ '%.2f'|format(total_balance|abs) }}</span>
                                 {% else %}
                                     <span class="balance-zero">0.00</span>
                                 {% endif %}
@@ -316,7 +316,7 @@
                         </div>
                         <div class="expense-amount">
                             <span class="balance-label">${balanceLabel}</span>
-                            <span class="${balanceClass}">${parseFloat(entry.balance).toFixed(2)}</span>
+                            <span class="${balanceClass}">${entry.balance < 0 ? '-' : ''}${Math.abs(parseFloat(entry.balance)).toFixed(2)}</span>
                         </div>
                     </li>
                 `;

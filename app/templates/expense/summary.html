@@ -154,7 +154,7 @@
                 <div class="card-body">
                     <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="text-muted">Amount:</span>
-                        <strong style="color: #222;">{{ expense.amount }}</strong>
+                        <strong style="color: #222;">{{ "%.2f"|format(expense.amount) }}</strong>
                     </div>
                     <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="text-muted">Category:</span>
@@ -167,9 +167,13 @@
                     <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="text-muted">Group:</span>
                         <strong class="split-type">
-                            <a href="{{ url_for('groups.get_group_overview', group_id=expense.group.id) }}" style="color: #76a456; font-weight: 600; text-decoration: none;">
-                                {{ expense.group.name }}
-                            </a>
+                            {% if expense.group %}
+                                <a href="{{ url_for('groups.get_group_overview', group_id=expense.group.id) }}" style="color: #76a456; font-weight: 600; text-decoration: none;">
+                                    {{ expense.group.name }}
+                                </a>
+                            {% else %}
+                                <span style="color: #6c757d;">No group</span>
+                            {% endif %}
                         </strong>
                     </div>
                     <div class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
@@ -218,7 +222,7 @@
                                             <span class="balance-label text-muted">Owed:</span>
                                         </div>
                                         <div style="min-width: 50px; text-align: left;">
-                                            <span class="{% if balance.owed != 0 %}owed-amount{% else %}default-amount{% endif %}">{{ balance.owed }}</span>
+                                            <span class="{% if balance.owed != 0 %}owed-amount{% else %}default-amount{% endif %}">{{ "%.2f"|format(balance.owed|abs) }}</span>
                                         </div>
                                     </div>
                                     <div style="display: flex; justify-content: center; align-items: center;">
@@ -226,7 +230,7 @@
                                             <span class="balance-label text-muted">Payed:</span>
                                         </div>
                                         <div style="min-width: 50px; text-align: left;">
-                                            <span class="{% if balance.payed != 0 %}payed-amount{% else %}default-amount{% endif %}">{{ balance.payed }}</span>
+                                            <span class="{% if balance.payed != 0 %}payed-amount{% else %}default-amount{% endif %}">{{ "%.2f"|format(balance.payed|abs) }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -241,7 +245,7 @@
                                         {% else %}
                                             default-amount
                                         {% endif %}
-                                    ">{{ balance.total }}</strong>
+                                    ">{{ "%.2f"|format(balance.total|abs) }}</strong>
                                 </div>
                             </li>
                         {% endfor %}
