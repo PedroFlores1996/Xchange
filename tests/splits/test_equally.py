@@ -25,7 +25,6 @@ def test_1():
 
     splits = split_equally(total_amount, users)
 
-    print(splits)
     assert sum(splits.values()) == total_amount
 
 
@@ -35,15 +34,15 @@ def test_2():
 
     splits = split_equally(total_amount, users)
 
-    print(splits)
     assert sum(splits.values()) == total_amount
 
 
 def test_3():
     total_amount = 100.0
     users = {1: None, 2: None, 3: None, 4: None, 5: None, 6: None, 7: None}
+
     splits = split_equally(total_amount, users)
-    print(splits)
+
     assert sum(splits.values()) == total_amount
 
 
@@ -61,7 +60,7 @@ def test_4():
         9: None,
     }
     splits = split_equally(total_amount, users)
-    print(splits)
+
     assert sum(splits.values()) == total_amount
 
 

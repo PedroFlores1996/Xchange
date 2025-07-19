@@ -11,7 +11,6 @@ This module tests all aspects of the index blueprint including:
 import pytest
 from flask import url_for
 from flask_login import current_user
-from unittest.mock import patch
 
 
 class TestHomePageView:
