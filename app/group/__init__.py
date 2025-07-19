@@ -328,3 +328,175 @@ def handle_individual_balance_process(group: Group, user_id: int) -> dict:
         'user': user,
         'settlement_expenses': settlement_expenses
     }
+
+
+def handle_create_group(form_data: dict) -> dict:
+    """
+    Handles the business logic for creating a new group.
+    Returns a dictionary with the result status and data.
+    """
+    from flask_login import current_user
+    
+    # Start with current user
+    user_ids = [current_user.id]
+
+    # Add friend IDs if provided
+    if form_data.get('friend_ids'):
+        friend_ids = [
+            int(id.strip()) for id in form_data['friend_ids'].split(",") if id.strip()
+        ]
+        user_ids.extend(friend_ids)
+
+    # Fallback to old users field for backwards compatibility
+    if form_data.get('users'):
+        old_user_ids = [id for id in form_data['users'] if id]
+        user_ids.extend(old_user_ids)
+
+    # Remove duplicates just in case
+    user_ids = list(set(user_ids))
+
+    # Query User objects
+    users = User.query.filter(User.id.in_(user_ids)).all()
+
+    # Create group using the model's create method
+    group = Group.create(
+        name=form_data['name'],
+        users=users,
+        description=form_data.get('description'),
+    )
+    
+    return {
+        'success': True,
+        'group': group,
+        'message': "Group created successfully!",
+        'message_type': 'success'
+    }
+
+
+def prepare_group_overview_data(group: Group) -> dict:
+    """
+    Prepares all data needed for the group overview template.
+    Returns a dictionary with organized data for the template.
+    """
+    from flask_login import current_user
+    
+    # Get the current user's total balance in the group
+    group_user_debts = get_group_user_debts(group)
+
+    # Get all users balances in the group
+    group_user_balances = get_group_user_balances(group)
+
+    # Get the current user's debts in the group
+    current_user_debts = group_user_debts.get(
+        current_user.id, {OWED: [], PAYED: [], TOTAL: 0.0}
+    )
+    user_debts_ordered_by_amount = sorted(
+        current_user_debts[OWED] + current_user_debts[PAYED],
+        key=lambda x: x.amount,
+        reverse=True,
+    )
+
+    # Get group expenses sorted by most recent
+    recent_expenses = get_group_user_expenses(current_user, group.id)
+
+    return {
+        'group': group,
+        'balances': group_user_balances,
+        'user_group_balance': current_user_debts[TOTAL],
+        'user_group_debts': user_debts_ordered_by_amount,
+        'recent_expenses': recent_expenses,
+    }
+
+
+def handle_add_users_to_group(group: Group, form_data: dict) -> dict:
+    """
+    Handles the business logic for adding users to a group.
+    Returns a dictionary with the result status and data.
+    """
+    if not form_data.get('friend_ids'):
+        return {
+            'success': False,
+            'message': "Please select at least one user to add.",
+            'message_type': 'warning'
+        }
+    
+    friend_ids = [
+        int(id.strip()) for id in form_data['friend_ids'].split(",") if id.strip()
+    ]
+
+    # Get users who are not already in the group
+    users_to_add = User.query.filter(
+        User.id.in_(friend_ids), ~User.id.in_([user.id for user in group.users])
+    ).all()
+
+    if users_to_add:
+        group.add_users(users_to_add)
+        usernames = [user.username for user in users_to_add]
+        return {
+            'success': True,
+            'message': f"Successfully added {', '.join(usernames)} to {group.name}!",
+            'message_type': 'success'
+        }
+    else:
+        return {
+            'success': False,
+            'message': "No new users to add or all selected users are already in the group.",
+            'message_type': 'warning'
+        }
+
+
+def prepare_group_users_data(group: Group) -> dict:
+    """
+    Prepares data needed for the group users template.
+    Returns a dictionary with available friends data.
+    """
+    from flask_login import current_user
+    
+    # Get available users (friends who are not already in the group)
+    available_friends = [
+        friend for friend in current_user.friends if friend not in group.users
+    ]
+
+    friends_data = [
+        {"id": friend.id, "username": friend.username} for friend in available_friends
+    ]
+
+    return {
+        'friends_data': friends_data
+    }
+
+
+def prepare_group_balances_data(group: Group) -> dict:
+    """
+    Prepares all balance data needed for the group balances template.
+    Returns a dictionary with differently sorted balance data.
+    """
+    # Get group balances for all users in the group
+    group_balances = get_group_user_balances(group)
+
+    # Sort balances from most negative to most positive
+    balances_by_amount = dict(
+        sorted(
+            group_balances.items(),
+            key=lambda item: item[1],
+        )
+    )
+
+    # Sort balances from most positive to most negative
+    balances_by_amount_reversed = dict(reversed(balances_by_amount.items()))
+
+    # Sort balances by absolute value descending
+    balances_by_abs_amount = dict(
+        sorted(
+            group_balances.items(),
+            key=lambda item: abs(item[1]),
+            reverse=True,
+        )
+    )
+
+    return {
+        'group': group,
+        'balances_abs': balances_by_abs_amount,
+        'balances': balances_by_amount,
+        'balances_reversed': balances_by_amount_reversed,
+    }
