@@ -86,3 +86,30 @@ def expenses_and_balances(users_and_groups, db_session):
     db_session.commit()
     
     return expense1, expense2, expense3, balance1, balance2
+
+
+@pytest.fixture
+def user_with_friends(db_session):
+    """Create a user with friends for testing"""
+    user = User.create("mainuser", "main@test.com", "password")
+    friend1 = User.create("friend1", "friend1@test.com", "password")
+    friend2 = User.create("friend2", "friend2@test.com", "password")
+    
+    user.add_friends(friend1)
+    user.add_friends(friend2)
+    
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
+def user_with_groups(db_session):
+    """Create a user with groups for testing"""
+    user = User.create("usergroups", "usergroups@test.com", "password")
+    other_user = User.create("other", "other@test.com", "password")
+    
+    group1 = Group.create("Group 1", [user, other_user])
+    group2 = Group.create("Group 2", [user, other_user])
+    
+    db_session.commit()
+    return user

@@ -82,3 +82,16 @@ def debts_and_expenses(users_and_group, db_session):
     db_session.commit()
     
     return group_balance1, group_balance2, group_balance3, debt3, expense1, expense2, expense3
+
+
+@pytest.fixture
+def group_with_users(db_session):
+    """Create a group with users for testing"""
+    user1 = User.create("testuser1", "user1@test.com", "password")
+    user2 = User.create("testuser2", "user2@test.com", "password")
+    user3 = User.create("testuser3", "user3@test.com", "password")
+    
+    group = Group.create("Test Group", [user1, user2])
+    db_session.commit()
+    
+    return group
