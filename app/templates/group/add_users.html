@@ -122,7 +122,7 @@
         .btn {
             background-color: #76a456;
             color: #fff;
-            padding: 12px 24px;
+            padding: 8px 20px;
             border: none;
             border-radius: 8px;
             font-weight: 600;
@@ -130,8 +130,7 @@
             cursor: pointer;
             text-decoration: none;
             transition: background 0.2s;
-            display: inline-block;
-            text-align: center;
+            margin-bottom: 10px;
         }
         .btn:hover, .btn:focus {
             background-color: #83cc4f;
@@ -141,9 +140,6 @@
         }
         .btn-secondary:hover, .btn-secondary:focus {
             background-color: #5a6268;
-        }
-        .submit-container {
-            text-align: center;
         }
         .fixed-bottom-card {
             position: fixed;
@@ -261,7 +257,7 @@
                         {{ form.friend_ids }}
                     </div>
                     
-                    <div class="submit-container">
+                    <div style="text-align:center; margin-top: 10px;">
                         {{ form.submit(class="btn") }}
                     </div>
                 </form>
