@@ -80,12 +80,30 @@ def get_group_overview(group_id):
         return jsonify({"error": "Group not found or access denied"}), 404
 
 
-@bp.route("/groups/<int:group_id>/users", methods=["GET", "POST"])
+@bp.route("/groups/<int:group_id>/users", methods=["GET"])
 @login_required
 def get_group_users(group_id):
     """
-    Shows all users in a group with the ability to add new users.
-    Displays existing group members and form to add new ones.
+    Shows all users in a group.
+    Displays existing group members only.
+    """
+    group = get_authorized_group(group_id)
+    if not group:
+        flash("Group not found or access denied.", "danger")
+        return redirect(url_for("user.user_dashboard"))
+
+    return render_template(
+        "group/users.html",
+        group=group,
+    )
+
+
+@bp.route("/groups/<int:group_id>/add-users", methods=["GET", "POST"])
+@login_required
+def add_users_to_group(group_id):
+    """
+    Shows form to add new users to a group.
+    Handles both displaying the form and processing submissions.
     """
     group = get_authorized_group(group_id)
     if not group:
@@ -98,13 +116,13 @@ def get_group_users(group_id):
         form_data = {"friend_ids": form.friend_ids.data}
         result = handle_add_users_to_group(group, form_data)
         flash(result["message"], result["message_type"])
-        return redirect(url_for("groups.get_group_users", group_id=group_id))
+        return redirect(url_for("groups.add_users_to_group", group_id=group_id))
 
     # Prepare template data
     template_data = prepare_group_users_data(group)
 
     return render_template(
-        "group/users_with_add.html",
+        "group/add_users.html",
         form=form,
         group=group,
         **template_data,

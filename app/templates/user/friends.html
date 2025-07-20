@@ -10,16 +10,16 @@
             margin: 0;
             padding: 0;
             background-color: #f8f9fa;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
         }
         .container {
-            margin-top: 10px;
-            flex: 1;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 0 16px;
             display: flex;
             flex-direction: column;
+            gap: 16px;
             align-items: center;
+            padding-bottom: 100px;
         }
         h1, h2 {
             text-align: center;
@@ -38,32 +38,24 @@
         }
         .card {
             width: 100%;
-            max-width: 500px;
-            margin: 24px auto 0 auto;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             background-color: #fff;
-            min-height: 100px;
+            padding: 6px;
         }
         .card-header {
             background-color: #83cc4f;
             color: #fff;
-            padding: 10px;
+            padding: 10px 14px;
             font-size: 1rem;
             text-align: center;
             font-weight: 600;
             border-radius: 8px 8px 0 0;
+            margin: -6px -6px 6px -6px;
         }
         .card-body {
-            padding: 10px;
-            max-height: 420px;
-            min-height: 0;
-            overflow-y: auto;
-        }
-        /* Add this for the Friends List card only */
-        .friends-card .card-body {
-            max-height: 600px; /* Smaller height for friends list */
-            min-height: 0;
+            padding: 6px;
+            max-height: 400px;
             overflow-y: auto;
         }
 
@@ -73,10 +65,9 @@
             margin-bottom: 10px; /* Optional: Add spacing below the balance */
         }
         .btn {
-            display: inline-block;
             background-color: #76a456;
             color: #fff;
-            padding: 8px 20px;
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
             font-weight: 600;
@@ -84,7 +75,14 @@
             cursor: pointer;
             text-decoration: none;
             transition: background 0.2s;
-            margin-bottom: 10px;
+            display: block;
+            text-align: center;
+            width: calc(100% + 12px);
+            margin-left: -6px;
+            margin-right: -6px;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .btn:hover, .btn:focus {
             background-color: #83cc4f;
@@ -168,10 +166,30 @@
             color: #6c757d;
             font-weight: 400;
         }
+        .page-info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #6c757d;
+        }
+        .page-info h1 {
+            color: #333;
+            margin: 0 0 8px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Page Info Header -->
+        <div class="page-info">
+            <h1>Your Friends</h1>
+            <p>Manage your friends and debts</p>
+        </div>
+
+        <!-- Add Friend Button -->
+        <a href="{{ url_for('user.add_friend_form') }}" class="btn">
+            Add New Friend
+        </a>
+
         <!-- Friends List Section -->
         <div class="card friends-card">
             <div class="card-header">Your Friends</div>

@@ -253,10 +253,10 @@
 
         <!-- Clean 3x3 Grid Layout -->
         <div class="stacked-cards" style="margin-bottom: 20px;">
-            <!-- Left Column: All Users -->
+            <!-- Left Column: Add Users -->
             <div class="card">
-                <a href="{{ url_for('groups.get_group_users', group_id=group.id) }}" class="card-link-btn">
-                    All Users
+                <a href="{{ url_for('groups.add_users_to_group', group_id=group.id) }}" class="card-link-btn">
+                    Add Users
                 </a>
             </div>
             
@@ -277,10 +277,10 @@
 
         <!-- Second Row -->
         <div class="stacked-cards" style="margin-bottom: 20px;">
-            <!-- Left Column: Placeholder Button -->
+            <!-- Left Column: All Users Button -->
             <div class="card">
-                <a href="#" class="card-link-btn secondary" style="cursor: not-allowed; opacity: 0.6;">
-                    Coming Soon
+                <a href="{{ url_for('groups.get_group_users', group_id=group.id) }}" class="card-link-btn">
+                    All Users
                 </a>
             </div>
             
