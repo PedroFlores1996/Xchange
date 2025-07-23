@@ -170,10 +170,9 @@ class TestGetGroupOverviewView:
 class TestGetGroupUsersView:
     """Test the get_group_users view endpoint"""
 
-    @patch('app.group.views.prepare_group_users_data')
     @patch('app.group.views.get_authorized_group')
     @patch('app.group.views.render_template')
-    def test_get_group_users_get(self, mock_render, mock_get_group, mock_prepare, client, app, db_session):
+    def test_get_group_users_get(self, mock_render, mock_get_group, client, app, db_session):
         """Test GET request to group users page"""
         with app.test_request_context():
             # Create and login user
@@ -185,18 +184,13 @@ class TestGetGroupUsersView:
             # Mock authorized group
             mock_group = MagicMock()
             mock_get_group.return_value = mock_group
-            
-            # Mock template data
-            mock_template_data = {'friends_data': []}
-            mock_prepare.return_value = mock_template_data
             mock_render.return_value = "mocked template"
             
             response = client.get('/groups/123/users')
             
             assert response.status_code == 200
             mock_get_group.assert_called_once_with(123)
-            mock_prepare.assert_called_once_with(mock_group)
-            assert mock_render.called
+            mock_render.assert_called_once_with('group/users.html', group=mock_group)
             
             logout_user()
 
@@ -223,7 +217,7 @@ class TestGetGroupUsersView:
                 'message_type': 'success'
             }
             
-            response = client.post('/groups/123/users', data={
+            response = client.post('/groups/123/add-users', data={
                 'friend_ids': '456,789',
                 'csrf_token': 'test'
             }, follow_redirects=False)
