@@ -2,11 +2,10 @@
 
 > **An expense-sharing web application built with Flask** 🚀
 
-Split bills, track debts, and settle up with friends seamlessly. Whether it's dinner with friends, group trips, or shared household expenses, Xchange makes managing shared costs effortless.
+A pet project designed to consolidate Python, Flask, and SQL integration skills through real-world application development. This expense-sharing platform demonstrates modern web development practices, database design, and full-stack implementation while providing a practical tool for managing shared expenses with friends and groups.
 
 [![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-3.1.0-green.svg)](https://flask.palletsprojects.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
