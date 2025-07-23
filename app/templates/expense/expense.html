@@ -197,12 +197,55 @@
             font-size: 0.9rem;
             margin-top: 4px;
         }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .flash-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flash-message.danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .flash-message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .flash-message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
             <div class="card-header">Expense Details</div>
+            
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
             
             <form id="expense-form" action="{{ url_for('expense.expenses') }}" method="post">
                 {{ form.hidden_tag() }}
@@ -357,10 +400,20 @@
             const amountFields = document.querySelectorAll(`.${users_label}-amount`);
 
             amountFields.forEach(field => {
+                const input = field.querySelector('input[type="text"]');
+                
                 if (splitType === 'Equally') {
                     field.classList.remove('show');
+                    // Remove HTML5 required attribute
+                    if (input) {
+                        input.removeAttribute('required');
+                    }
                 } else {
                     field.classList.add('show');
+                    // Add HTML5 required attribute
+                    if (input) {
+                        input.setAttribute('required', 'required');
+                    }
                 }
 
                 const label = field.querySelector('label');
@@ -376,6 +429,32 @@
             if (selectElement && userIdInput) {
                 userIdInput.value = selectElement.value;
             }
+            // Update dropdown options to prevent duplicates
+            updateAllDropdownOptions(type);
+        }
+
+        function getSelectedUserIds(type) {
+            const selectedIds = [];
+            const selectElements = document.querySelectorAll(`[id^="${type}-"][id$="-username"]`);
+            selectElements.forEach(selectElement => {
+                if (selectElement.value) {
+                    selectedIds.push(selectElement.value);
+                }
+            });
+            return selectedIds;
+        }
+
+        function updateAllDropdownOptions(type) {
+            const selectedIds = getSelectedUserIds(type);
+            const selectElements = document.querySelectorAll(`[id^="${type}-"][id$="-username"]`);
+            
+            selectElements.forEach(selectElement => {
+                const currentValue = selectElement.value;
+                const filteredUsers = availableUsers.filter(user => 
+                    !selectedIds.includes(user.id.toString()) || user.id.toString() === currentValue
+                );
+                updateDropdownOptions(selectElement, filteredUsers);
+            });
         }
 
         function addUserRow(type) {
@@ -384,7 +463,12 @@
             const newDiv = document.createElement('div');
             newDiv.className = 'user-row';
 
-            const options = availableUsers.map(user => `<option value="${user.id}">${user.username}</option>`).join("");
+            // Get filtered users excluding already selected ones
+            const selectedIds = getSelectedUserIds(type);
+            const filteredUsers = availableUsers.filter(user => 
+                !selectedIds.includes(user.id.toString())
+            );
+            const options = filteredUsers.map(user => `<option value="${user.id}">${user.username}</option>`).join("");
 
             newDiv.innerHTML = `
                 <div class="form-group">
@@ -399,17 +483,32 @@
                     <input type="text" name="${type}-${newIndex}-amount" class="form-control" placeholder="0.00" oninput="validateAmount(this)">
                 </div>
                 <div class="form-group remove-field">
-                    <button type="button" class="btn btn-danger btn-small" onclick="removeRow(this)">Remove</button>
+                    <button type="button" class="btn btn-danger btn-small" onclick="removeRow(this, '${type}')">Remove</button>
                 </div>
             `;
 
             containerDiv.appendChild(newDiv);
             toggleAmount(type);
+            
+            // Set initial user ID for the new dropdown
+            const newSelect = document.getElementById(`${type}-${newIndex}-username`);
+            if (newSelect && newSelect.value) {
+                updateUserId(type, newIndex);
+            }
+            
+            // Apply required attribute based on current split type
+            const splitType = document.getElementById(`${type}_split`).value;
+            const newAmountInput = newDiv.querySelector('.amount-field input[type="text"]');
+            if (newAmountInput && splitType !== 'Equally') {
+                newAmountInput.setAttribute('required', 'required');
+            }
         }
 
-        function removeRow(button) {
+        function removeRow(button, type) {
             const row = button.closest('.user-row');
             row.remove();
+            // Refresh dropdown options after removal
+            updateAllDropdownOptions(type);
         }
 
         function updateDropdowns(type, users) {
@@ -417,6 +516,8 @@
             selectElements.forEach(selectElement => {
                 updateDropdownOptions(selectElement, users);
             });
+            // Apply filtering after updating with new users
+            updateAllDropdownOptions(type);
         }
 
         function updateUsersByGroup() {
@@ -501,6 +602,77 @@
             }
         }
 
+        function validateRequiredAmountFields() {
+            let isValid = true;
+            const errors = [];
+
+            // Check payers
+            const payersSplit = document.getElementById('payers_split').value;
+            if (payersSplit === 'Amount' || payersSplit === 'Percentage') {
+                const payerAmountFields = document.querySelectorAll('.payers-amount input[type="text"]');
+                payerAmountFields.forEach((field, index) => {
+                    if (!field.value || field.value.trim() === '') {
+                        isValid = false;
+                        field.style.borderColor = '#dc3545';
+                        errors.push(`Payer ${index + 1} ${payersSplit.toLowerCase()} is required`);
+                    } else {
+                        field.style.borderColor = '#ddd';
+                    }
+                });
+            }
+
+            // Check owers
+            const owersSplit = document.getElementById('owers_split').value;
+            if (owersSplit === 'Amount' || owersSplit === 'Percentage') {
+                const owerAmountFields = document.querySelectorAll('.owers-amount input[type="text"]');
+                owerAmountFields.forEach((field, index) => {
+                    if (!field.value || field.value.trim() === '') {
+                        isValid = false;
+                        field.style.borderColor = '#dc3545';
+                        errors.push(`Ower ${index + 1} ${owersSplit.toLowerCase()} is required`);
+                    } else {
+                        field.style.borderColor = '#ddd';
+                    }
+                });
+            }
+
+            return { isValid, errors };
+        }
+
+        function handleFormSubmit(event) {
+            const validation = validateRequiredAmountFields();
+            
+            if (!validation.isValid) {
+                event.preventDefault();
+                
+                // Clear existing error messages
+                const existingErrors = document.querySelectorAll('.validation-error');
+                existingErrors.forEach(error => error.remove());
+                
+                // Show error messages
+                validation.errors.forEach(error => {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'flash-message danger validation-error';
+                    errorDiv.textContent = error;
+                    
+                    const flashContainer = document.querySelector('.flash-messages') || 
+                        document.querySelector('.card-header').parentNode;
+                    
+                    if (!document.querySelector('.flash-messages')) {
+                        const flashDiv = document.createElement('div');
+                        flashDiv.className = 'flash-messages';
+                        flashContainer.insertBefore(flashDiv, flashContainer.querySelector('form'));
+                    }
+                    
+                    document.querySelector('.flash-messages').appendChild(errorDiv);
+                });
+                
+                return false;
+            }
+            
+            return true;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const payerSelectElements = document.querySelectorAll('[id^="payers-"][id$="-username"]');
             payerSelectElements.forEach((selectElement, index) => {
@@ -514,6 +686,14 @@
 
             toggleAmount('payers');
             toggleAmount('owers');
+            
+            // Apply initial filtering
+            updateAllDropdownOptions('payers');
+            updateAllDropdownOptions('owers');
+            
+            // Add form validation on submit
+            const form = document.getElementById('expense-form');
+            form.addEventListener('submit', handleFormSubmit);
             
             // If there's a pre-selected group, set it and update users and group field
             if (preSelectedGroupId) {
