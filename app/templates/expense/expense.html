@@ -218,7 +218,7 @@
                     
                     <div class="form-group">
                         <label for="amount" class="form-label">Amount:</label>
-                        {{ form.amount(class="form-control", id="amount") }}
+                        {{ form.amount(class="form-control", id="amount", placeholder="0.00", oninput="validateAmount(this)") }}
                         {% for error in form.amount.errors %}
                             <div class="error">{{ error }}</div>
                         {% endfor %}
