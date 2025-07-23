@@ -1,12 +1,11 @@
 # 💰 Xchange
 
-> **A modern expense-sharing web application built with Flask** 🚀
+> **An expense-sharing web application built with Flask** 🚀
 
 Split bills, track debts, and settle up with friends seamlessly. Whether it's dinner with friends, group trips, or shared household expenses, Xchange makes managing shared costs effortless.
 
 [![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-3.1.0-green.svg)](https://flask.palletsprojects.com/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
@@ -20,11 +19,9 @@ Split bills, track debts, and settle up with friends seamlessly. Whether it's di
 
 ### 👥 **Group Management**
 - **Create Groups**: Organize expenses by groups (trips, roommates, projects)
-- **Member Management**: Add/remove members with full permission controls
 - **Group Overview**: Visual dashboards showing balances and recent activity
 
 ### 🤝 **Social Features**
-- **Friend System**: Connect with friends for easier expense sharing
 - **User Profiles**: Manage your account and view your expense history
 - **Activity Feed**: Track all expense activities and updates
 
@@ -42,20 +39,7 @@ Split bills, track debts, and settle up with friends seamlessly. Whether it's di
 
 ## 🚀 Quick Start
 
-### Option 1: Docker (Recommended)
-```bash
-# Clone the repository
-git clone <your-repo-url>
-cd Xchange
-
-# Start with Docker
-docker-compose up --build
-
-# Open your browser
-open http://localhost:8000
-```
-
-### Option 2: Local Development
+### Local Development
 ```bash
 # Clone and setup
 git clone <your-repo-url>
@@ -87,18 +71,11 @@ python runserver.py
 🔐 Authentication     → Flask-Login
 📝 Forms              → WTForms + Flask-WTF
 🔄 Migrations         → Flask-Migrate (Alembic)
-🐳 Containerization   → Docker + Docker Compose
 ```
 
 ### **Project Structure**
 ```
 Xchange/
-├── 🐳 Docker Configuration
-│   ├── Dockerfile              # Development container
-│   ├── Dockerfile.prod         # Production container
-│   ├── docker-compose.yml      # Development setup
-│   └── docker-compose.prod.yml # Production setup
-│
 ├── 🔧 Application Core
 │   ├── app/
 │   │   ├── __init__.py         # App factory
@@ -153,7 +130,6 @@ Xchange/
 │
 └── 📚 Documentation
     ├── README.md               # This file
-    ├── DOCKER.md              # Docker deployment guide
     └── CLAUDE.md              # Development instructions
 ```
 
@@ -216,42 +192,11 @@ pytest tests/user/
 
 ---
 
-## 🐳 Docker Deployment
-
-### Development
-```bash
-# Start development environment
-docker-compose up --build
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
-### Production
-```bash
-# Set environment variables
-echo "SECRET_KEY=your-secure-key" > .env
-
-# Deploy with production config
-docker-compose -f docker-compose.prod.yml up -d --build
-
-# Scale the application
-docker-compose -f docker-compose.prod.yml up --scale web=3 -d
-```
-
-See [DOCKER.md](DOCKER.md) for detailed deployment instructions.
-
----
-
 ## 🛠️ Development
 
 ### Prerequisites
 - Python 3.13+
 - SQLite (included) or PostgreSQL
-- Docker (optional)
 
 ### Development Commands
 ```bash
@@ -369,23 +314,6 @@ We welcome contributions! Here's how you can help:
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **Flask Team** for the amazing web framework
-- **SQLAlchemy** for robust database ORM
-- **Docker** for seamless containerization
-- **All Contributors** who help make this project better
-
----
-
-## 📞 Support
-
-- 📧 **Email**: your-email@example.com
-- 🐛 **Issues**: [GitHub Issues](https://github.com/your-username/xchange/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/your-username/xchange/discussions)
 
 ---
 
