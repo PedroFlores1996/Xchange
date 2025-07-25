@@ -21,14 +21,8 @@ def expenses() -> str | Response:
     form = ExpenseForm()
 
     if form.validate_on_submit():
-        result = handle_expense_creation(form)
-
-        if result["success"]:
-            template_data = prepare_expense_summary_data(result["expense"])
-            return render_template("expense/summary.html", **template_data)
-        else:
-            flash(result["message"], result["message_type"])
-            return redirect(url_for(result["redirect_to"]))
+        expense_summary = handle_expense_creation(form)
+        return render_template("expense/summary.html", **expense_summary)
     else:
         # Flash individual field errors
         for field_name, field_errors in form.errors.items():
@@ -36,14 +30,15 @@ def expenses() -> str | Response:
                 flash(f"{field_name.replace('_', ' ').title()}: {error}", "danger")
 
     # Prepare template data for the expense form
-    template_data = prepare_expense_form_data(form)
+    expense_form_data = prepare_expense_form_data(current_user)
+    expense_form_data["form"] = form  # Use the validated form instance
 
     # Check for group context from URL parameter only
     if group_id_param := request.args.get("group_id"):
         try:
             group_id = int(group_id_param)
             if group := get_authorized_group(group_id):
-                template_data["group"] = group
+                expense_form_data["group"] = group
             else:
                 flash("You don't have access to this group.", "danger")
                 return redirect(url_for("user.user_dashboard"))
@@ -51,7 +46,7 @@ def expenses() -> str | Response:
             flash("Invalid group ID provided.", "danger")
             return redirect(url_for("user.user_dashboard"))
 
-    return render_template("expense/expense.html", **template_data)
+    return render_template("expense/expense.html", **expense_form_data)
 
 
 @bp.route("/expenses/<int:expense_id>", methods=["GET"])
