@@ -356,8 +356,8 @@
     </div>
 
     <div class="fixed-bottom-card">
-        {% if pre_selected_group_id %}
-            <a href="{{ url_for('groups.get_group_overview', group_id=pre_selected_group_id) }}">
+        {% if group %}
+            <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}">
                 Back to Overview
             </a>
         {% else %}
@@ -387,7 +387,7 @@
     
     <!-- Pre-selected group data -->
     <script id="pre-selected-group-data" type="application/json">
-    {% if pre_selected_group_id %}{{ pre_selected_group_id }}{% else %}null{% endif %}
+    {% if group %}{{ group.id }}{% else %}null{% endif %}
     </script>
     
     <script>
