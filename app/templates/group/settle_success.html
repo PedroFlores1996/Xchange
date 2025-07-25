@@ -16,12 +16,11 @@
         }
 
         .container {
-            margin-top: 20px;
+            margin-top: 10px;
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 800px;
             width: 100%;
             margin-left: auto;
             margin-right: auto;
@@ -34,7 +33,7 @@
         }
 
         .header h1 {
-            color: #2d5a2d;
+            color: #76a456;
             margin-bottom: 10px;
         }
 
@@ -70,7 +69,9 @@
             border-radius: 8px;
             overflow: hidden;
             background-color: #ffffff;
-            width: 100%;
+            width: auto;
+            min-width: 600px;
+            max-width: 800px;
             margin-bottom: 20px;
         }
 
@@ -165,8 +166,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>✅ Settlement Complete</h1>
             <p>{{ group.name }}</p>
+            <h1>✅ Settlement Complete</h1>
         </div>
 
         <div class="card">
@@ -201,9 +202,6 @@
         <div class="action-buttons">
             <a href="{{ url_for('groups.get_group_overview', group_id=group.id) }}" class="btn btn-primary">
                 Back to Group Overview
-            </a>
-            <a href="{{ url_for('user.user_dashboard') }}" class="btn btn-secondary">
-                Back to Dashboard
             </a>
         </div>
     </div>
