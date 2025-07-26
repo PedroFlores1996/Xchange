@@ -30,11 +30,11 @@ def get_group_user_debts(
     this function creates a structure compatible with the old format for backward compatibility.
     """
     group_debts = {user.id: {PAYED: [], OWED: [], TOTAL: 0.0} for user in group.users}
-    
+
     # Get balances from GroupBalance model
     for group_balance in group.group_balances:
         group_debts[group_balance.user_id][TOTAL] = group_balance.balance
-        
+
     return group_debts
 
 
@@ -81,15 +81,15 @@ def get_group_user_balances(group: Group) -> dict[User, float]:
     Users without a GroupBalance record are assumed to have zero balance.
     """
     user_balances: dict[User, float] = {}
-    
+
     # Initialize all group users with zero balance
     for user in group.users:
         user_balances[user] = 0.0
-    
+
     # Update with actual balances from GroupBalance records
     for group_balance in group.group_balances:
         user_balances[group_balance.user] = group_balance.balance
-    
+
     return user_balances
 
 
@@ -121,108 +121,130 @@ def calculate_group_settlement_transactions(group: Group) -> list[dict]:
     group_balances = get_group_user_balances(group)
     balance_dict = {user.id: balance for user, balance in group_balances.items()}
     transactions = simplify_debts(balance_dict)
-    
+
     settlement_transactions = []
     for debtor_id, creditor_id, amount in transactions:
         debtor = db.session.get(User, debtor_id)
         creditor = db.session.get(User, creditor_id)
-        settlement_transactions.append({
-            "debtor": debtor,
-            "creditor": creditor,
-            "amount": amount,
-            "description": f"Settlement payment from {debtor.username} to {creditor.username}",
-        })
-    
+        settlement_transactions.append(
+            {
+                "debtor": debtor,
+                "creditor": creditor,
+                "amount": amount,
+                "description": f"Settlement payment from {debtor.username} to {creditor.username}",
+            }
+        )
+
     return settlement_transactions
 
 
-def calculate_individual_settlement_transactions(group: Group, user: User) -> list[dict]:
+def calculate_individual_settlement_transactions(
+    group: Group, user: User
+) -> list[dict]:
     """
     Calculates settlement transactions for settling an individual user's balance within a group.
     Returns a list of transaction dictionaries with payer, receiver, amount, and description.
     """
     group_balances = get_group_user_balances(group)
     user_balance = group_balances.get(user)
-    
+
     if not user_balance or user_balance == 0:
         return []
-    
+
     settlement_transactions = []
     remaining_debt = abs(user_balance)
-    
+
     if user_balance > 0:
         # User is owed money - find who owes money (negative balances) to pay this user
-        debtors = [(u, abs(balance)) for u, balance in group_balances.items() 
-                   if u != user and balance < 0]
+        debtors = [
+            (u, abs(balance))
+            for u, balance in group_balances.items()
+            if u != user and balance < 0
+        ]
         debtors.sort(key=lambda x: x[1], reverse=True)  # Sort by debt amount descending
-        
+
         for debtor, debt_amount in debtors:
             if remaining_debt <= 0:
                 break
-            
+
             payment_amount = min(remaining_debt, debt_amount)
-            settlement_transactions.append({
-                'payer': debtor,
-                'receiver': user,
-                'amount': payment_amount,
-                'description': f"Settlement: {debtor.username} pays {user.username}"
-            })
+            settlement_transactions.append(
+                {
+                    "payer": debtor,
+                    "receiver": user,
+                    "amount": round(
+                        payment_amount, 2
+                    ),  # Only round for the final transaction
+                    "description": f"Settlement: {debtor.username} pays {user.username}",
+                }
+            )
             remaining_debt -= payment_amount
-    
+
     else:
         # User owes money - find who is owed money (positive balances) to receive from this user
-        creditors = [(u, balance) for u, balance in group_balances.items() 
-                     if u != user and balance > 0]
-        creditors.sort(key=lambda x: x[1], reverse=True)  # Sort by credit amount descending
-        
+        creditors = [
+            (u, balance)
+            for u, balance in group_balances.items()
+            if u != user and balance > 0
+        ]
+        creditors.sort(
+            key=lambda x: x[1], reverse=True
+        )  # Sort by credit amount descending
+
         for creditor, credit_amount in creditors:
             if remaining_debt <= 0:
                 break
-            
+
             payment_amount = min(remaining_debt, credit_amount)
-            settlement_transactions.append({
-                'payer': user,
-                'receiver': creditor,
-                'amount': payment_amount,
-                'description': f"Settlement: {user.username} pays {creditor.username}"
-            })
+            settlement_transactions.append(
+                {
+                    "payer": user,
+                    "receiver": creditor,
+                    "amount": round(
+                        payment_amount, 2
+                    ),  # Only round for the final transaction
+                    "description": f"Settlement: {user.username} pays {creditor.username}",
+                }
+            )
             remaining_debt -= payment_amount
-    
+
     return settlement_transactions
 
 
-def create_settlement_expenses_from_transactions(settlement_transactions: list[dict], group_id: int, creator_id: int | None = None) -> list[Expense]:
+def create_settlement_expenses_from_transactions(
+    settlement_transactions: list[dict], group_id: int, creator_id: int | None = None
+) -> list[Expense]:
     """
     Creates settlement expenses from a list of settlement transactions.
     Returns a list of created Expense objects.
     """
     if creator_id is None:
         creator_id = current_user.id
-        
+
     settlement_expenses = []
     for transaction in settlement_transactions:
         # Handle both formats: group settlement uses 'debtor'/'creditor', individual uses 'payer'/'receiver'
-        payer = transaction.get('payer') or transaction.get('debtor')
-        receiver = transaction.get('receiver') or transaction.get('creditor')
-        
+        payer = transaction.get("payer") or transaction.get("debtor")
+        receiver = transaction.get("receiver") or transaction.get("creditor")
+
         if not payer or not receiver:
             continue  # Skip invalid transactions
-        
+
         expense_data = ExpenseData(
-            description=transaction['description'],
-            amount=transaction['amount'],
+            description=transaction["description"],
+            amount=transaction["amount"],
             creator_id=creator_id,
             group_id=group_id,
             category=ExpenseCategory.SETTLEMENT,
             payers_split=SplitType.AMOUNT,
             owers_split=SplitType.AMOUNT,
-            payers={payer.id: transaction['amount']},
-            owers={receiver.id: transaction['amount']},
+            payers={payer.id: transaction["amount"]},
+            owers={receiver.id: transaction["amount"]},
         )
-        
+
         settlement_expense = submit_expense(expense_data)
         settlement_expenses.append(settlement_expense)
-    
+
     return settlement_expenses
 
 
@@ -233,12 +255,18 @@ def create_group_settlement_expenses(group: Group) -> list[Expense]:
     """
     settlement_transactions = calculate_group_settlement_transactions(group)
     # Use current_user.id if available, otherwise use the first user in the group
-    creator_id = current_user.id if current_user and current_user.is_authenticated else (group.users[0].id if group.users else 1)
-    settlement_expenses = create_settlement_expenses_from_transactions(settlement_transactions, group.id, creator_id)
-    
+    creator_id = (
+        current_user.id
+        if current_user and current_user.is_authenticated
+        else (group.users[0].id if group.users else 1)
+    )
+    settlement_expenses = create_settlement_expenses_from_transactions(
+        settlement_transactions, group.id, creator_id
+    )
+
     # Clear all group balances after settlement
     GroupBalance.clear_group_balances(group.id)
-    
+
     return settlement_expenses
 
 
@@ -249,18 +277,18 @@ def handle_settle_debts_process(group: Group) -> dict:
     """
     if not check_group_has_balances(group):
         return {
-            'success': False,
-            'message': "No Active Debts to Settle",
-            'message_type': 'info'
+            "success": False,
+            "message": "No Active Debts to Settle",
+            "message_type": "info",
         }
-    
+
     settlement_expenses = create_group_settlement_expenses(group)
-    
+
     return {
-        'success': True,
-        'message': f"Successfully created {len(settlement_expenses)} settlement transactions.",
-        'message_type': 'success',
-        'settlement_expenses': settlement_expenses
+        "success": True,
+        "message": f"Successfully created {len(settlement_expenses)} settlement transactions.",
+        "message_type": "success",
+        "settlement_expenses": settlement_expenses,
     }
 
 
@@ -272,28 +300,28 @@ def handle_individual_balance_confirmation(group: Group, user_id: int) -> dict:
     user = validate_user_in_group(group, user_id)
     if not user:
         return {
-            'success': False,
-            'message': "User not found or not in group.",
-            'message_type': 'danger'
+            "success": False,
+            "message": "User not found or not in group.",
+            "message_type": "danger",
         }
-    
+
     settlement_transactions = calculate_individual_settlement_transactions(group, user)
-    
+
     if not settlement_transactions:
         return {
-            'success': False,
-            'message': "No balance to settle for this user.",
-            'message_type': 'info'
+            "success": False,
+            "message": "No balance to settle for this user.",
+            "message_type": "info",
         }
-    
+
     group_balances = get_group_user_balances(group)
     user_balance = group_balances.get(user)
-    
+
     return {
-        'success': True,
-        'user': user,
-        'user_balance': user_balance,
-        'settlement_transactions': settlement_transactions
+        "success": True,
+        "user": user,
+        "user_balance": user_balance,
+        "settlement_transactions": settlement_transactions,
     }
 
 
@@ -305,29 +333,34 @@ def handle_individual_balance_process(group: Group, user_id: int) -> dict:
     user = validate_user_in_group(group, user_id)
     if not user:
         return {
-            'success': False,
-            'message': "User not found or not in group.",
-            'message_type': 'danger'
+            "success": False,
+            "message": "User not found or not in group.",
+            "message_type": "danger",
         }
-    
+
     settlement_transactions = calculate_individual_settlement_transactions(group, user)
-    
+
     if not settlement_transactions:
         return {
-            'success': False,
-            'message': "No balance to settle for this user.",
-            'message_type': 'info'
+            "success": False,
+            "message": "No balance to settle for this user.",
+            "message_type": "info",
         }
-    
+
     # Use current_user.id if available, otherwise use the requesting user's id
-    creator_id = current_user.id if current_user and current_user.is_authenticated else user_id
-    settlement_expenses = create_settlement_expenses_from_transactions(settlement_transactions, group.id, creator_id)
-    
-    return {
-        'success': True,
-        'user': user,
-        'settlement_expenses': settlement_expenses
-    }
+    creator_id = (
+        current_user.id if current_user and current_user.is_authenticated else user_id
+    )
+    settlement_expenses = create_settlement_expenses_from_transactions(
+        settlement_transactions, group.id, creator_id
+    )
+
+    # Clear the user's balance after settlement to prevent precision errors
+    from app.model.group_balance import GroupBalance
+
+    GroupBalance.set_balance(user.id, group.id, 0.0)
+
+    return {"success": True, "user": user, "settlement_expenses": settlement_expenses}
 
 
 def handle_create_group(form_data: dict) -> dict:
@@ -336,20 +369,20 @@ def handle_create_group(form_data: dict) -> dict:
     Returns a dictionary with the result status and data.
     """
     from flask_login import current_user
-    
+
     # Start with current user
     user_ids = [current_user.id]
 
     # Add friend IDs if provided
-    if form_data.get('friend_ids'):
+    if form_data.get("friend_ids"):
         friend_ids = [
-            int(id.strip()) for id in form_data['friend_ids'].split(",") if id.strip()
+            int(id.strip()) for id in form_data["friend_ids"].split(",") if id.strip()
         ]
         user_ids.extend(friend_ids)
 
     # Fallback to old users field for backwards compatibility
-    if form_data.get('users'):
-        old_user_ids = [id for id in form_data['users'] if id]
+    if form_data.get("users"):
+        old_user_ids = [id for id in form_data["users"] if id]
         user_ids.extend(old_user_ids)
 
     # Remove duplicates just in case
@@ -360,16 +393,16 @@ def handle_create_group(form_data: dict) -> dict:
 
     # Create group using the model's create method
     group = Group.create(
-        name=form_data['name'],
+        name=form_data["name"],
         users=users,
-        description=form_data.get('description'),
+        description=form_data.get("description"),
     )
-    
+
     return {
-        'success': True,
-        'group': group,
-        'message': "Group created successfully!",
-        'message_type': 'success'
+        "success": True,
+        "group": group,
+        "message": "Group created successfully!",
+        "message_type": "success",
     }
 
 
@@ -379,7 +412,7 @@ def prepare_group_overview_data(group: Group) -> dict:
     Returns a dictionary with organized data for the template.
     """
     from flask_login import current_user
-    
+
     # Get the current user's total balance in the group
     group_user_debts = get_group_user_debts(group)
 
@@ -400,11 +433,11 @@ def prepare_group_overview_data(group: Group) -> dict:
     recent_expenses = get_group_user_expenses(current_user, group.id)
 
     return {
-        'group': group,
-        'balances': group_user_balances,
-        'user_group_balance': current_user_debts[TOTAL],
-        'user_group_debts': user_debts_ordered_by_amount,
-        'recent_expenses': recent_expenses,
+        "group": group,
+        "balances": group_user_balances,
+        "user_group_balance": current_user_debts[TOTAL],
+        "user_group_debts": user_debts_ordered_by_amount,
+        "recent_expenses": recent_expenses,
     }
 
 
@@ -413,15 +446,15 @@ def handle_add_users_to_group(group: Group, form_data: dict) -> dict:
     Handles the business logic for adding users to a group.
     Returns a dictionary with the result status and data.
     """
-    if not form_data.get('friend_ids'):
+    if not form_data.get("friend_ids"):
         return {
-            'success': False,
-            'message': "Please select at least one user to add.",
-            'message_type': 'warning'
+            "success": False,
+            "message": "Please select at least one user to add.",
+            "message_type": "warning",
         }
-    
+
     friend_ids = [
-        int(id.strip()) for id in form_data['friend_ids'].split(",") if id.strip()
+        int(id.strip()) for id in form_data["friend_ids"].split(",") if id.strip()
     ]
 
     # Get users who are not already in the group
@@ -433,15 +466,15 @@ def handle_add_users_to_group(group: Group, form_data: dict) -> dict:
         group.add_users(users_to_add)
         usernames = [user.username for user in users_to_add]
         return {
-            'success': True,
-            'message': f"Successfully added {', '.join(usernames)} to {group.name}!",
-            'message_type': 'success'
+            "success": True,
+            "message": f"Successfully added {', '.join(usernames)} to {group.name}!",
+            "message_type": "success",
         }
     else:
         return {
-            'success': False,
-            'message': "No new users to add or all selected users are already in the group.",
-            'message_type': 'warning'
+            "success": False,
+            "message": "No new users to add or all selected users are already in the group.",
+            "message_type": "warning",
         }
 
 
@@ -451,7 +484,7 @@ def prepare_group_users_data(group: Group) -> dict:
     Returns a dictionary with available friends data.
     """
     from flask_login import current_user
-    
+
     # Get available users (friends who are not already in the group)
     available_friends = [
         friend for friend in current_user.friends if friend not in group.users
@@ -461,9 +494,7 @@ def prepare_group_users_data(group: Group) -> dict:
         {"id": friend.id, "username": friend.username} for friend in available_friends
     ]
 
-    return {
-        'friends_data': friends_data
-    }
+    return {"friends_data": friends_data}
 
 
 def prepare_group_balances_data(group: Group) -> dict:
@@ -495,8 +526,8 @@ def prepare_group_balances_data(group: Group) -> dict:
     )
 
     return {
-        'group': group,
-        'balances_abs': balances_by_abs_amount,
-        'balances': balances_by_amount,
-        'balances_reversed': balances_by_amount_reversed,
+        "group": group,
+        "balances_abs": balances_by_abs_amount,
+        "balances": balances_by_amount,
+        "balances_reversed": balances_by_amount_reversed,
     }
