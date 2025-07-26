@@ -53,45 +53,15 @@ def simplify_debts(balances: dict[int, float]) -> list[tuple[int, int, float]]:
 def update_debts(
     balances: dict[int, dict[str, float]], group_id: int | None = None
 ) -> None:
-    # Extract total balances and apply balanced rounding
-    total_balances = {id: round(balance[TOTAL], 2) for id, balance in balances.items()}
-
-    # Check for rounding errors and fix them
+    # Extract total balances (should already be properly balanced from split functions)
+    total_balances = {id: balance[TOTAL] for id, balance in balances.items()}
+    
+    # Verify balances sum to zero (debug check)
     total_sum = sum(total_balances.values())
-    rounding_error = round(total_sum, 2)
-
-    print(f"        📊 Pre-balanced totals: {total_balances}")
-    print(f"        📊 Sum: {total_sum:.15f}, Rounding error: {rounding_error:.2f}")
-
-    if abs(rounding_error) >= 0.005:  # More than half a cent error
-        # Find someone with a non-zero balance to absorb the rounding error
-        # Prefer someone who owes money (negative balance) to pay the extra cent(s)
-        candidates = [
-            (user_id, balance)
-            for user_id, balance in total_balances.items()
-            if abs(balance) >= 0.005
-        ]
-
-        if candidates:
-            # Sort by balance (negative first, then by magnitude)
-            candidates.sort(key=lambda x: (x[1] >= 0, abs(x[1])))
-            chosen_user_id = candidates[0][0]
-
-            print(
-                f"        🎯 Assigning rounding error of {rounding_error:.2f} to user {chosen_user_id}"
-            )
-            print(
-                f"        ⚖️  User {chosen_user_id}: {total_balances[chosen_user_id]:.2f} -> {total_balances[chosen_user_id] - rounding_error:.2f}"
-            )
-
-            total_balances[chosen_user_id] = round(
-                total_balances[chosen_user_id] - rounding_error, 2
-            )
-
-        print(f"        🎉 Final balanced totals: {total_balances}")
-        print(f"        🎉 Final sum: {sum(total_balances.values()):.15f}")
-    else:
-        print(f"        ✅ No significant rounding error detected")
+    if abs(total_sum) > 0.005:  # More than half a cent error
+        print(f"WARNING: Unbalanced expense detected! Total sum: {total_sum:.6f}")
+        print(f"Balances: {total_balances}")
+        # Still proceed but log the issue
 
     if group_id is not None:
         # For group expenses, update GroupBalance records instead of creating individual debts

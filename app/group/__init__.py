@@ -1,5 +1,5 @@
 from flask_login import current_user
-from app.debt import get_debts_total_balance, simplify_debts
+from app.debt import simplify_debts
 from app.model import Debt, User, Expense
 from app.model.group_balance import GroupBalance
 from app.model.group import Group

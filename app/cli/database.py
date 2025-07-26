@@ -591,48 +591,70 @@ def _generate_random_balances(participants: List[User], amount: float,
 
 
 def _generate_random_percentages(num_people: int) -> List[float]:
-    """Generate random percentages that sum to 100."""
+    """Generate random percentages that sum to 100 using tenths arithmetic."""
     import random
     
-    percentages = []
-    remaining = 100.0
-    for i in range(num_people - 1):
-        # Each person gets between 10% and 60% of remaining percentage
-        max_pct = min(remaining * 0.6, remaining - (num_people - i - 1) * 1.0)
-        min_pct = max(remaining * 0.1, 1.0)
-        
-        if max_pct <= min_pct:
-            pct = min_pct
-        else:
-            pct = round(random.uniform(min_pct, max_pct), 1)
-        
-        percentages.append(pct)
-        remaining -= pct
+    # Work in tenths (1000 = 100.0%) to avoid floating point precision errors
+    total_tenths = 1000  # 100.0% = 1000 tenths
+    percentages_tenths = []
+    remaining_tenths = total_tenths
     
-    percentages.append(round(remaining, 1))  # Last person gets remainder
+    for i in range(num_people - 1):
+        # Each person gets between 10% and 60% of remaining percentage (in tenths)
+        max_tenths = min(int(remaining_tenths * 0.6), remaining_tenths - (num_people - i - 1) * 10)
+        min_tenths = max(int(remaining_tenths * 0.1), 10)
+        
+        if max_tenths <= min_tenths:
+            pct_tenths = min_tenths
+        else:
+            pct_tenths = random.randint(min_tenths, max_tenths)
+        
+        percentages_tenths.append(pct_tenths)
+        remaining_tenths -= pct_tenths
+    
+    percentages_tenths.append(remaining_tenths)  # Last person gets remainder
+    
+    # Convert back to percentages
+    percentages = [tenths / 10.0 for tenths in percentages_tenths]
+    
+    # Verify the total sums correctly (should always be true now)
+    total_check = sum(percentages)
+    assert abs(total_check - 100.0) < 0.05, f"Percentage generation failed: {total_check} != 100.0"
+    
     return percentages
 
 
 def _generate_random_amounts(num_people: int, total_amount: float) -> List[float]:
-    """Generate random amounts that sum to total_amount."""
+    """Generate random amounts that sum to total_amount using cents arithmetic."""
     import random
     
-    amounts = []
-    remaining = total_amount
-    for i in range(num_people - 1):
-        # Each person gets between 10% and 60% of remaining amount
-        max_amount = min(remaining * 0.6, remaining - (num_people - i - 1) * 0.01)
-        min_amount = max(remaining * 0.1, 0.01)
-        
-        if max_amount <= min_amount:
-            amount = min_amount
-        else:
-            amount = round(random.uniform(min_amount, max_amount), 2)
-        
-        amounts.append(amount)
-        remaining -= amount
+    # Work in cents to avoid floating point precision errors
+    total_cents = round(total_amount * 100)
+    amounts_cents = []
+    remaining_cents = total_cents
     
-    amounts.append(round(remaining, 2))  # Last person gets remainder
+    for i in range(num_people - 1):
+        # Each person gets between 10% and 60% of remaining amount (in cents)
+        max_cents = min(int(remaining_cents * 0.6), remaining_cents - (num_people - i - 1))
+        min_cents = max(int(remaining_cents * 0.1), 1)
+        
+        if max_cents <= min_cents:
+            amount_cents = min_cents
+        else:
+            amount_cents = random.randint(min_cents, max_cents)
+        
+        amounts_cents.append(amount_cents)
+        remaining_cents -= amount_cents
+    
+    amounts_cents.append(remaining_cents)  # Last person gets remainder
+    
+    # Convert back to dollars
+    amounts = [cents / 100.0 for cents in amounts_cents]
+    
+    # Verify the total sums correctly (should always be true now)
+    total_check = sum(amounts)
+    assert abs(total_check - total_amount) < 0.005, f"Amount generation failed: {total_check} != {total_amount}"
+    
     return amounts
 
 
