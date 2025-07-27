@@ -3,7 +3,6 @@ from app.model.expense import Expense, ExpenseCategory
 from app.model.user import User
 from app.model.constants import NO_GROUP
 from app.expense import ExpenseData
-from app.expense.submit import submit_expense
 from app.split import SplitType
 from app.database import db
 
@@ -25,7 +24,7 @@ def get_user_balances(user: User) -> tuple[dict[int, float], float]:
     group_balances = dict.fromkeys([group.id for group in user.groups], 0.0)
     group_balances[NO_GROUP] = 0.0
     overall_balance = 0.0
-    
+
     # Add individual debts to NO_GROUP category
     for debt in user.lender_debts:
         group_balances[NO_GROUP] += debt.amount
@@ -33,12 +32,12 @@ def get_user_balances(user: User) -> tuple[dict[int, float], float]:
     for debt in user.borrower_debts:
         group_balances[NO_GROUP] -= debt.amount
         overall_balance -= debt.amount
-    
+
     # Add group balances from GroupBalance records
     for group_balance in user.group_balances:
         group_balances[group_balance.group_id] = group_balance.balance
         overall_balance += group_balance.balance
-    
+
     return group_balances, overall_balance
 
 
@@ -48,7 +47,7 @@ def prepare_dashboard_data(user: User) -> dict:
     Returns a dictionary with dashboard template data.
     """
     from app.group import get_no_group_debts
-    
+
     # 1st Column: Debts outside any group
     no_group_debts = get_no_group_debts(user)
     no_group_debts = sorted(
@@ -66,13 +65,13 @@ def prepare_dashboard_data(user: User) -> dict:
     overall_group_balance = overall_balance - no_group_balance
 
     return {
-        'current_user': user,
-        'no_group_debts': no_group_debts,
-        'no_group_balance': no_group_balance,
-        'groups': groups_sorted,
-        'group_balances': group_balances,
-        'overall_group_balance': overall_group_balance,
-        'expenses': user.expenses,
+        "current_user": user,
+        "no_group_debts": no_group_debts,
+        "no_group_balance": no_group_balance,
+        "groups": groups_sorted,
+        "group_balances": group_balances,
+        "overall_group_balance": overall_group_balance,
+        "expenses": user.expenses,
     }
 
 
@@ -84,25 +83,25 @@ def handle_add_friend(user: User, email: str) -> dict:
     if friend := User.get_user_by_email(email):
         if friend in user.friends:
             return {
-                'success': False,
-                'message': f"User {friend.username} with email {email} is already your friend",
-                'message_type': 'info',
-                'redirect_to': 'user.add_friend_form'
+                "success": False,
+                "message": f"User {friend.username} with email {email} is already your friend",
+                "message_type": "info",
+                "redirect_to": "user.add_friend_form",
             }
         else:
             user.add_friends(friend)
             return {
-                'success': True,
-                'message': f"User {friend.username} with email {email} added as a friend",
-                'message_type': 'success',
-                'redirect_to': 'user.friends'
+                "success": True,
+                "message": f"User {friend.username} with email {email} added as a friend",
+                "message_type": "success",
+                "redirect_to": "user.friends",
             }
     else:
         return {
-            'success': False,
-            'message': f"No user found with email {email}",
-            'message_type': 'danger',
-            'redirect_to': 'user.add_friend_form'
+            "success": False,
+            "message": f"No user found with email {email}",
+            "message_type": "danger",
+            "redirect_to": "user.add_friend_form",
         }
 
 
@@ -112,18 +111,15 @@ def prepare_friends_data(user: User) -> dict:
     Returns a dictionary with friends template data.
     """
     from app.group import get_no_group_user_balances
-    
+
     friends_debts = get_no_group_user_balances(user)
     friends = sorted(
         user.friends,
         key=lambda friend: abs(friends_debts.get(friend.id, 0)),
         reverse=True,
     )
-    
-    return {
-        'friends': friends,
-        'debts': friends_debts
-    }
+
+    return {"friends": friends, "debts": friends_debts}
 
 
 def prepare_groups_data(user: User) -> dict:
@@ -139,12 +135,12 @@ def prepare_groups_data(user: User) -> dict:
     )
     no_group_balance = group_balances.pop(NO_GROUP)
     overall_group_balance = overall_balance - no_group_balance
-    
+
     return {
-        'current_user': user,
-        'groups': groups_sorted,
-        'group_balances': group_balances,
-        'overall_balance': overall_group_balance,
+        "current_user": user,
+        "groups": groups_sorted,
+        "group_balances": group_balances,
+        "overall_balance": overall_group_balance,
     }
 
 
@@ -161,9 +157,9 @@ def prepare_balances_data(user: User) -> dict:
     )
 
     return {
-        'groups': user.groups,
-        'group_balances': sorted_group_balances,
-        'overall_balance': overall_balance,
+        "groups": user.groups,
+        "group_balances": sorted_group_balances,
+        "overall_balance": overall_balance,
     }
 
 
@@ -175,27 +171,22 @@ def validate_friend_access(user: User, user_id: int) -> dict:
     # Check if the user_id corresponds to the current_user's ID
     if user_id == user.id:
         return {
-            'valid': False,
-            'redirect_required': True,
-            'redirect_to': 'user.user_dashboard'
+            "valid": False,
+            "redirect_required": True,
+            "redirect_to": "user.user_dashboard",
         }
 
     # Check if the user_id belongs to one of the current_user's friends
-    friend = next(
-        (friend for friend in user.friends if friend.id == user_id), None
-    )
-    
+    friend = next((friend for friend in user.friends if friend.id == user_id), None)
+
     if not friend:
         return {
-            'valid': False,
-            'error': "User not found, or not added as a friend",
-            'status_code': 403
+            "valid": False,
+            "error": "User not found, or not added as a friend",
+            "status_code": 403,
         }
-    
-    return {
-        'valid': True,
-        'friend': friend
-    }
+
+    return {"valid": True, "friend": friend}
 
 
 def prepare_user_profile_data(user: User, friend: User) -> dict:
@@ -229,10 +220,10 @@ def prepare_user_profile_data(user: User, friend: User) -> dict:
     common_groups.sort(key=lambda group: group.name)
 
     return {
-        'friend': friend,
-        'debt': debt_with_friend,
-        'expenses': expenses_with_friend,
-        'common_groups': common_groups,
+        "friend": friend,
+        "debt": debt_with_friend,
+        "expenses": expenses_with_friend,
+        "common_groups": common_groups,
     }
 
 
@@ -241,22 +232,17 @@ def validate_friend_for_settlement(user: User, friend_id: int) -> dict:
     Validates if the friend_id represents a valid friend for settlement.
     Returns validation result and friend data if valid.
     """
-    friend = next(
-        (friend for friend in user.friends if friend.id == friend_id), None
-    )
-    
+    friend = next((friend for friend in user.friends if friend.id == friend_id), None)
+
     if not friend:
         return {
-            'valid': False,
-            'message': "Friend not found",
-            'message_type': 'error',
-            'redirect_to': 'user.friends'
+            "valid": False,
+            "message": "Friend not found",
+            "message_type": "error",
+            "redirect_to": "user.friends",
         }
-    
-    return {
-        'valid': True,
-        'friend': friend
-    }
+
+    return {"valid": True, "friend": friend}
 
 
 def calculate_friend_debt(user: User, friend: User) -> tuple[object, float]:
@@ -288,18 +274,20 @@ def calculate_friend_debt(user: User, friend: User) -> tuple[object, float]:
     return debt_with_friend, debt_amount
 
 
-def process_friend_debt_settlement(user: User, friend: User, debt_with_friend: object) -> dict:
+def process_friend_debt_settlement(
+    user: User, friend: User, debt_with_friend: object
+) -> dict:
     """
     Processes the settlement of debt between current user and friend.
     Returns the result of the settlement process.
     """
-    
+
     if not debt_with_friend:
         return {
-            'success': False,
-            'message': "No debt found between you and this friend",
-            'message_type': 'info',
-            'redirect_to': f'user.user_profile'
+            "success": False,
+            "message": "No debt found between you and this friend",
+            "message_type": "info",
+            "redirect_to": f"user.user_profile",
         }
 
     # Calculate settlement details
@@ -320,6 +308,8 @@ def process_friend_debt_settlement(user: User, friend: User, debt_with_friend: o
     )
 
     try:
+        from app.expense.submit import submit_expense
+
         expense_data = ExpenseData(
             creator_id=user.id,
             group_id=None,  # Individual settlement, no group
@@ -335,17 +325,17 @@ def process_friend_debt_settlement(user: User, friend: User, debt_with_friend: o
         expense = submit_expense(expense_data)
 
         return {
-            'success': True,
-            'message': f"Successfully settled debt with {friend.username} for {amount:.2f}",
-            'message_type': 'success',
-            'redirect_to': f'user.user_profile'
+            "success": True,
+            "message": f"Successfully settled debt with {friend.username} for {amount:.2f}",
+            "message_type": "success",
+            "redirect_to": f"user.user_profile",
         }
 
     except Exception as e:
         db.session.rollback()
         return {
-            'success': False,
-            'message': f"Error settling debt: {str(e)}",
-            'message_type': 'error',
-            'redirect_to': f'user.user_profile'
+            "success": False,
+            "message": f"Error settling debt: {str(e)}",
+            "message_type": "error",
+            "redirect_to": f"user.user_profile",
         }

@@ -16,12 +16,9 @@ from app.split import SplitType
 
 def max_decimals(max) -> None:
     def _max_decimals(form, field) -> None:
-        """
-        Validates that the value has at most 2 decimal places.
-        """
+        """Validates max decimal places."""
         if field.data is not None:
-            decimal_value = Decimal(str(field.data))
-            if decimal_value.as_tuple().exponent < -max:
+            if Decimal(str(field.data)).as_tuple().exponent < -max:
                 raise ValidationError("Amount must have at most 2 decimal places.")
 
     return _max_decimals
@@ -40,9 +37,7 @@ class ExpenseForm(FlaskForm):
     )
     description = StringField("Description", validators=[DataRequired()])
     category = SelectField(
-        "Category",
-        choices=ExpenseCategory.choices(),
-        coerce=ExpenseCategory.coerce,
+        "Category", choices=ExpenseCategory.choices(), coerce=ExpenseCategory.coerce
     )
     payers_split = SelectField(
         "Split",
@@ -59,16 +54,10 @@ class ExpenseForm(FlaskForm):
         default=SplitType.EQUALLY,
     )
     payers = FieldList(
-        FormField(ExpenseUserForm),
-        "Payers",
-        validators=[DataRequired()],
-        min_entries=1,
+        FormField(ExpenseUserForm), "Payers", validators=[DataRequired()], min_entries=1
     )
     owers = FieldList(
-        FormField(ExpenseUserForm),
-        "Owers",
-        validators=[DataRequired()],
-        min_entries=1,
+        FormField(ExpenseUserForm), "Owers", validators=[DataRequired()], min_entries=1
     )
     group_id = IntegerField("Group ID", validators=[Optional()])
 
@@ -86,7 +75,7 @@ class ExpenseForm(FlaskForm):
         if split_type == SplitType.EQUALLY:
             return
 
-        total = sum([user.amount.data for user in users])
+        total = sum(user.amount.data for user in users)
         if split_type == SplitType.AMOUNT and total != self.amount.data:
             return f"{users.label.text} total must equal to the expense total."
         elif split_type == SplitType.PERCENTAGE and total != 100:
@@ -100,12 +89,10 @@ class ExpenseForm(FlaskForm):
     def validate(self, extra_validators=None) -> bool:
         if not super().validate():
             return False
-
         try:
             self.validate_single_ower_not_payer()
             self.validate_sum(self.payers, self.payers_split.data)
             self.validate_sum(self.owers, self.owers_split.data)
         except ValidationError:
             return False
-
         return True
