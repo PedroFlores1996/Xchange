@@ -12,27 +12,15 @@ def simplify_debts(balances: dict[int, float]) -> list[tuple[int, int, float]]:
     :return: A list of transactions in the form (debtor_id, creditor_id, amount).
     """
     # Convert to integer arithmetic (*100) to eliminate floating point precision issues
-    print(f"DEBUG: Input balances: {balances}")
     net_balances_cents = {
         user_id: round(balance * 100) for user_id, balance in balances.items() if balance != 0
     }
-    print(f"DEBUG: Balances in cents: {net_balances_cents}")
-    print(f"DEBUG: Sum of balances in cents: {sum(net_balances_cents.values())}")
 
     # List to store the transactions
     transactions = []
-    max_iterations = 100  # Prevent infinite loops and stdout overflow
 
     # While there are unsettled balances
     while net_balances_cents:
-        if max_iterations <= 0:
-            raise RuntimeError("Max iterations reached while simplifying debts.")
-        max_iterations -= 1
-        # Convert back to dollars for display
-        net_balances_display = {user_id: cents / 100 for user_id, cents in net_balances_cents.items()}
-        print(f"Current net balances: {net_balances_display}")
-        print(f"DEBUG: Current balances in cents: {net_balances_cents}")
-        print(f"DEBUG: Sum of current balances in cents: {sum(net_balances_cents.values())}")
 
         # Find the person who owes the most (most negative balance)
         debtor_id = min(net_balances_cents, key=net_balances_cents.get)

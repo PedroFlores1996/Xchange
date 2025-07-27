@@ -37,7 +37,6 @@ def clear_data() -> None:
     """Clear all data from the database tables."""
     meta = db.metadata
     for table in reversed(meta.sorted_tables):
-        print(f"Clearing table {table.name}...")
         db.session.execute(table.delete())
     db.session.commit()
     print("All data cleared successfully.")
@@ -92,49 +91,19 @@ def _create_expense_with_balances(description: str, amount: float, creator_id: i
     from app.expense.mapper import map_balances_to_model
     from app.debt import update_debts
     
-    print(f"        🔍 _create_expense_with_balances: Starting...")
-    print(f"        📝 Description: {description}")
-    print(f"        💰 Amount: ${amount}")
-    print(f"        👤 Creator ID: {creator_id}")
-    print(f"        🏠 Group ID: {group_id}")
-    print(f"        🔀 Payers Split Type: {payers_split.name}")
-    print(f"        🔀 Owers Split Type: {owers_split.name}")
-    print(f"        📊 Balances: {len(balances)} entries")
-    print(f"        📊 Raw balances: {balances}")
+    update_debts(balances, group_id)
+    mapped_balances = map_balances_to_model(balances)
     
-    print(f"        🔍 Step 5a: Calling update_debts...")
-    try:
-        update_debts(balances, group_id)
-        print(f"        ✅ update_debts completed")
-    except Exception as e:
-        print(f"        💥 update_debts failed: {e}")
-        raise
+    expense = Expense.create(
+        description=description,
+        amount=amount,
+        creator_id=creator_id,
+        group_id=group_id,
+        payers_split=payers_split,
+        owers_split=owers_split,
+        balances=mapped_balances,
+    )
     
-    print(f"        🔍 Step 5b: Mapping balances to model...")
-    try:
-        mapped_balances = map_balances_to_model(balances)
-        print(f"        ✅ map_balances_to_model completed: {len(mapped_balances)} mapped")
-    except Exception as e:
-        print(f"        💥 map_balances_to_model failed: {e}")
-        raise
-    
-    print(f"        🔍 Step 5c: Creating Expense record...")
-    try:
-        expense = Expense.create(
-            description=description,
-            amount=amount,
-            creator_id=creator_id,
-            group_id=group_id,
-            payers_split=payers_split,
-            owers_split=owers_split,
-            balances=mapped_balances,
-        )
-        print(f"        ✅ Expense.create completed with ID: {expense.id}")
-    except Exception as e:
-        print(f"        💥 Expense.create failed: {e}")
-        raise
-    
-    print(f"        ✅ _create_expense_with_balances: Completed successfully")
     return expense
 
 
@@ -269,19 +238,14 @@ def test_data_big() -> None:
     import sys
     
     def timeout_handler(signum, frame):
-        print(f"\n⏰ TIMEOUT: test_data_big exceeded time limit!")
-        print("💾 Attempting to rollback any pending transactions...")
         try:
             db.session.rollback()
-            print("   ✅ Rollback completed")
-        except Exception as e:
-            print(f"   ⚠️ Rollback failed: {e}")
-        print("🚫 Exiting due to timeout")
+        except Exception:
+            pass
         sys.exit(1)
     
     # Set timeout for 5 minutes (300 seconds)
     timeout_seconds = 300
-    print(f"🕐 Starting test_data_big with {timeout_seconds}s timeout...")
     
     # Set up the timeout signal
     signal.signal(signal.SIGALRM, timeout_handler)
@@ -293,61 +257,42 @@ def test_data_big() -> None:
         
         # If we get here, it completed successfully
         signal.alarm(0)  # Cancel the alarm
-        print("✅ Completed within timeout limit!")
+        print("Extensive test data created successfully.")
         
     except KeyboardInterrupt:
         signal.alarm(0)  # Cancel the alarm
-        print(f"\n🛑 Interrupted by user!")
-        print("💾 Attempting to rollback any pending transactions...")
         try:
             db.session.rollback()
-            print("   ✅ Rollback completed")
-        except Exception as e:
-            print(f"   ⚠️ Rollback failed: {e}")
-        print("🚫 Exiting due to user interruption")
+        except Exception:
+            pass
         sys.exit(1)
         
     except Exception as e:
         signal.alarm(0)  # Cancel the alarm
-        print(f"\n💥 Error occurred: {e}")
-        print("💾 Attempting to rollback any pending transactions...")
         try:
             db.session.rollback()
-            print("   ✅ Rollback completed")
-        except Exception as rollback_error:
-            print(f"   ⚠️ Rollback failed: {rollback_error}")
+        except Exception:
+            pass
         raise
 
 
 def _test_data_big() -> None:
     """Create extensive test data with many users, groups, and expenses."""
     import random
-    import time
     from app.split import SplitType
     from app.split.constants import OWED, PAYED, TOTAL
     
-    print("🚀 Starting extensive test data creation...")
-    start_time = time.time()
-    
     # Create 50 users
-    print("👥 Creating 50 users...")
-    step_start = time.time()
     users = _create_users(50)
-    print(f"   ✅ Users created in {time.time() - step_start:.2f}s")
     
     # Create 8 groups with descriptive names
-    print("🏠 Creating 8 groups...")
-    step_start = time.time()
     group_names = [
         "Weekend Warriors", "Office Team", "College Friends", "Family Trip",
         "Book Club", "Hiking Group", "Cooking Club", "Gaming Squad"
     ]
     groups = _create_groups(group_names)
-    print(f"   ✅ Groups created in {time.time() - step_start:.2f}s")
     
     # Assign users to groups with some overlap
-    print("🔗 Assigning users to groups...")
-    step_start = time.time()
     group_assignments = [
         list(range(0, 12)),      # Weekend Warriors: 12 members
         list(range(8, 20)),      # Office Team: 12 members (some overlap)
@@ -359,40 +304,24 @@ def _test_data_big() -> None:
         list(range(45, 50)) + list(range(0, 10))  # Gaming Squad: 15 members
     ]
     _assign_users_to_groups(users, groups, group_assignments)
-    print(f"   ✅ Group assignments completed in {time.time() - step_start:.2f}s")
     
     # Make strategic friendships (not everyone with everyone)
-    print("👫 Creating friendships...")
-    step_start = time.time()
-    friendship_count = 0
     for i, user in enumerate(users):
-        if i % 10 == 0:  # Progress indicator
-            print(f"   Processing user {i+1}/50...")
-            
         # Add friends from same groups
         for group in user.groups:
             for group_member in group.users:
                 if group_member != user and random.random() < 0.8:  # 80% chance
                     user.add_friends(group_member)
-                    friendship_count += 1
         
         # Add some random friends outside groups
         for j in range(5):  # Each user gets 5 random friends
             friend_idx = random.randint(0, len(users) - 1)
             if friend_idx != i:
                 user.add_friends(users[friend_idx])
-                friendship_count += 1
     
-    print(f"   ✅ Created {friendship_count} friendships in {time.time() - step_start:.2f}s")
-    
-    print("💾 Committing friendship data...")
-    step_start = time.time()
     db.session.commit()
-    print(f"   ✅ Friendship commit completed in {time.time() - step_start:.2f}s")
     
     # Create many expenses with different patterns
-    print("💰 Preparing expense creation...")
-    step_start = time.time()
     expenses = []
     expense_descriptions = [
         # Group expenses
@@ -405,15 +334,9 @@ def _test_data_big() -> None:
         "Coffee", "Lunch", "Taxi", "Groceries", "Books", "Medicine",
         "Phone Bill", "Internet", "Utilities", "Rent Share"
     ]
-    print(f"   ✅ Expense prep completed in {time.time() - step_start:.2f}s")
     
     # Generate group expenses (80 expenses)
-    print("🏢 Creating 80 group expenses...")
-    step_start = time.time()
     for i in range(80):
-        if i % 10 == 0:  # Progress indicator
-            print(f"   Creating group expense {i+1}/80...")
-            
         group = random.choice(groups)
         group_users = list(group.users)
         
@@ -433,10 +356,6 @@ def _test_data_big() -> None:
         payers_split = random.choice([SplitType.EQUALLY, SplitType.AMOUNT, SplitType.PERCENTAGE])
         owers_split = random.choice([SplitType.EQUALLY, SplitType.AMOUNT, SplitType.PERCENTAGE])
         
-        # Special attention to percentage splits
-        if payers_split == SplitType.PERCENTAGE or owers_split == SplitType.PERCENTAGE:
-            print(f"   🚨 GROUP PERCENTAGE SPLIT DETECTED! Payers: {payers_split.name}, Owers: {owers_split.name}")
-        
         # Generate balances based on split types
         balances = _generate_random_balances(participants, amount, payers_split, owers_split)
         
@@ -445,67 +364,35 @@ def _test_data_big() -> None:
             payers_split, owers_split, balances
         )
         expenses.append(expense)
-    print(f"   ✅ Group expenses created in {time.time() - step_start:.2f}s")
     
     # Generate individual expenses (40 expenses)
-    print("👤 Creating 40 individual expenses...")
-    step_start = time.time()
     for i in range(40):
-        if i % 10 == 0:  # Progress indicator
-            print(f"   Creating individual expense {i+1}/40...")
-            
-        print(f"      🔍 Step 1: Selecting participants...")
         # Pick 2-4 random users (not necessarily from same group)
         num_participants = random.randint(2, 4)
         participants = random.sample(users, num_participants)
-        print(f"      ✅ Selected {num_participants} participants")
         
-        print(f"      🔍 Step 2: Generating expense details...")
         # Random expense details
         amount = round(random.uniform(10.0, 200.0), 2)
         description = random.choice(expense_descriptions)
         creator = random.choice(participants)
-        print(f"      ✅ Amount: ${amount}, Creator: {creator.username}")
         
-        print(f"      🔍 Step 3: Determining split types...")
         # Random split types
         payers_split = random.choice([SplitType.EQUALLY, SplitType.AMOUNT, SplitType.PERCENTAGE])
         owers_split = random.choice([SplitType.EQUALLY, SplitType.AMOUNT, SplitType.PERCENTAGE])
-        print(f"      ✅ Payers: {payers_split.name}, Owers: {owers_split.name}")
         
-        # Special attention to percentage splits
-        if payers_split == SplitType.PERCENTAGE or owers_split == SplitType.PERCENTAGE:
-            print(f"      🚨 PERCENTAGE SPLIT DETECTED! Payers: {payers_split.name}, Owers: {owers_split.name}")
-        
-        print(f"      🔍 Step 4: Generating balances...")
         # Generate balances
         balances = _generate_random_balances(participants, amount, payers_split, owers_split)
-        print(f"      ✅ Generated balances for {len(balances)} users")
         
-        print(f"      🔍 Step 5: Creating expense record...")
         expense = _create_expense_with_balances(
             f"Individual {description} #{i+1}", amount, creator.id, None,
             payers_split, owers_split, balances
         )
-        print(f"      ✅ Created expense with ID: {expense.id}")
         expenses.append(expense)
-        print(f"      🎉 Individual expense {i+1}/40 completed")
-    print(f"   ✅ Individual expenses created in {time.time() - step_start:.2f}s")
     
     # Update all expenses in users
-    print("🔄 Updating expenses in users...")
-    step_start = time.time()
     update_expenses_in_users(expenses)
-    print(f"   ✅ User expenses updated in {time.time() - step_start:.2f}s")
     
-    print("💾 Final database commit...")
-    step_start = time.time()
     db.session.commit()
-    print(f"   ✅ Final commit completed in {time.time() - step_start:.2f}s")
-    
-    total_time = time.time() - start_time
-    print(f"\n🎉 Extensive test data created successfully in {total_time:.2f}s!")
-    print(f"📊 Created: {len(users)} users, {len(groups)} groups, {len(expenses)} expenses")
 
 
 def _generate_random_balances(participants: List[User], amount: float, 
@@ -515,24 +402,17 @@ def _generate_random_balances(participants: List[User], amount: float,
     from app.split.constants import OWED, PAYED, TOTAL
     from app.split import equally, amount as amount_split, percentage
     
-    print(f"        🔍 _generate_random_balances: Using REAL split functions with {len(participants)} participants, ${amount}")
-    
-    print(f"        🔍 Deciding payers vs owers...")
     # Randomly decide who are payers vs owers
     num_payers = random.randint(1, max(1, len(participants) - 1))
     payers = random.sample(participants, num_payers)
     owers = [p for p in participants if p not in payers]
-    print(f"        ✅ Initial: {len(payers)} payers, {len(owers)} owers")
     
     # If no owers, make at least one participant an ower
     if not owers:
-        print(f"        🔧 No owers found, reassigning...")
         ower = random.choice(participants)
         owers = [ower]
         payers = [p for p in participants if p != ower]
-        print(f"        ✅ Reassigned: {len(payers)} payers, {len(owers)} owers")
     
-    print(f"        🔍 Generating payer amounts using {payers_split.name} split...")
     # Generate payer data using real split functions
     if payers_split == SplitType.EQUALLY:
         payer_data = {payer.id: None for payer in payers}  # equally split doesn't need values
@@ -550,9 +430,6 @@ def _generate_random_balances(participants: List[User], amount: float,
         result = amount_split.split(payer_data, ower_data)
         payer_amounts = {pid: result[pid][PAYED] for pid in payer_data.keys()}
     
-    print(f"        ✅ Payer amounts from real split: {payer_amounts}")
-    
-    print(f"        🔍 Generating ower amounts using {owers_split.name} split...")
     # Generate ower data using real split functions  
     if owers_split == SplitType.EQUALLY:
         ower_data = {ower.id: None for ower in owers}
@@ -567,8 +444,6 @@ def _generate_random_balances(participants: List[User], amount: float,
         payer_data = {}  # No payers for this split
         result = amount_split.split(payer_data, ower_data)
         ower_amounts = {oid: result[oid][OWED] for oid in ower_data.keys()}
-    
-    print(f"        ✅ Ower amounts from real split: {ower_amounts}")
     
     # Build final balances
     balances = {}
@@ -586,7 +461,6 @@ def _generate_random_balances(participants: List[User], amount: float,
             OWED: ower_amounts[ower.id]
         }
     
-    print(f"        ✅ _generate_random_balances: Completed using REAL splits, returning {len(balances)} balances")
     return balances
 
 
@@ -662,8 +536,6 @@ def _distribute_amount(num_people: int, total_amount: float, split_type: SplitTy
     """Distribute an amount among people based on split type."""
     import random
     
-    print(f"          🔍 _distribute_amount: {num_people} people, ${total_amount}, {split_type.name}")
-    
     if split_type == SplitType.EQUALLY:
         # Use the same balanced rounding logic as equally.py
         base_amount_cents = int((total_amount * 100) // num_people)
@@ -673,8 +545,6 @@ def _distribute_amount(num_people: int, total_amount: float, split_type: SplitTy
         total_cents = int(total_amount * 100)
         distributed_cents = base_amount_cents * num_people
         spare_cents = total_cents - distributed_cents
-        
-        print(f"          🔧 Equal split: {base_amount_cents/100:.2f} each, {spare_cents} spare cents")
         
         # Randomly assign spare cents
         user_indices = list(range(num_people))
@@ -687,12 +557,9 @@ def _distribute_amount(num_people: int, total_amount: float, split_type: SplitTy
                 user_indices = list(range(num_people))
         
         amounts = [cents / 100.0 for cents in amounts_cents]
-        print(f"          ✅ Equal split result (balanced): {amounts}")
-        print(f"          ✅ Total check: {sum(amounts):.2f} (should equal {total_amount:.2f})")
         return amounts
     
     elif split_type == SplitType.AMOUNT:
-        print(f"          🔍 Amount split: Distributing randomly...")
         # Generate random amounts that sum to total
         amounts = []
         remaining = total_amount
@@ -702,14 +569,12 @@ def _distribute_amount(num_people: int, total_amount: float, split_type: SplitTy
             min_amount = max(remaining * 0.1, 0.01)
             
             if max_amount <= min_amount:
-                print(f"          ⚠️ Warning: max_amount ({max_amount}) <= min_amount ({min_amount})")
                 amount = min_amount
             else:
                 amount = round(random.uniform(min_amount, max_amount), 2)
             
             amounts.append(amount)
             remaining -= amount
-            print(f"          Person {i+1}: ${amount}, remaining: ${remaining}")
         amounts.append(round(remaining, 2))  # Last person gets remainder
         
         # Verify total and fix any rounding error
@@ -717,16 +582,11 @@ def _distribute_amount(num_people: int, total_amount: float, split_type: SplitTy
         rounding_error = round(total_amount - total_distributed, 2)
         
         if rounding_error != 0.0:
-            print(f"          🔧 Fixing amount split rounding error: {rounding_error:.2f}")
             amounts[-1] = round(amounts[-1] + rounding_error, 2)
-            print(f"          ⚖️  Adjusted last person: {amounts[-1]:.2f}")
         
-        print(f"          ✅ Amount split result (balanced): {amounts}")
-        print(f"          ✅ Total check: {sum(amounts):.2f} (should equal {total_amount:.2f})")
         return amounts
     
     elif split_type == SplitType.PERCENTAGE:
-        print(f"          🔍 Percentage split: Distributing randomly...")
         # Generate random percentages that sum to 100%
         percentages = []
         remaining = 100.0
@@ -736,16 +596,13 @@ def _distribute_amount(num_people: int, total_amount: float, split_type: SplitTy
             min_pct = max(remaining * 0.1, 1.0)
             
             if max_pct <= min_pct:
-                print(f"          ⚠️ Warning: max_pct ({max_pct}) <= min_pct ({min_pct})")
                 pct = min_pct
             else:
                 pct = round(random.uniform(min_pct, max_pct), 1)
             
             percentages.append(pct)
             remaining -= pct
-            print(f"          Person {i+1}: {pct}%, remaining: {remaining}%")
         percentages.append(round(remaining, 1))  # Last person gets remainder
-        print(f"          ✅ Percentages: {percentages}")
         
         # Convert percentages to amounts with balanced rounding
         raw_amounts = [total_amount * pct / 100.0 for pct in percentages]
@@ -757,14 +614,9 @@ def _distribute_amount(num_people: int, total_amount: float, split_type: SplitTy
         rounding_error = round(total_raw - total_rounded, 2)
         
         if rounding_error != 0.0:
-            print(f"          🔧 Fixing rounding error: {rounding_error:.2f}")
             # Assign the error to the last person (could be random, but this is simpler)
             amounts[-1] = round(amounts[-1] + rounding_error, 2)
-            print(f"          ⚖️  Adjusted last person: {amounts[-1]:.2f}")
         
-        print(f"          ✅ Percentage split result (balanced): {amounts}")
-        print(f"          ✅ Total check: {sum(amounts):.2f} (should equal {total_amount:.2f})")
         return amounts
     
-    print(f"          ✅ Default equal split fallback")
     return [round(total_amount / num_people, 2)] * num_people
