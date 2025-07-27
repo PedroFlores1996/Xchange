@@ -368,7 +368,6 @@ def handle_create_group(form_data: dict) -> dict:
     Handles the business logic for creating a new group.
     Returns a dictionary with the result status and data.
     """
-    from flask_login import current_user
 
     # Start with current user
     user_ids = [current_user.id]
@@ -411,7 +410,6 @@ def prepare_group_overview_data(group: Group) -> dict:
     Prepares all data needed for the group overview template.
     Returns a dictionary with organized data for the template.
     """
-    from flask_login import current_user
 
     # Get the current user's total balance in the group
     group_user_debts = get_group_user_debts(group)
@@ -483,7 +481,6 @@ def prepare_group_users_data(group: Group) -> dict:
     Prepares data needed for the group users template.
     Returns a dictionary with available friends data.
     """
-    from flask_login import current_user
 
     # Get available users (friends who are not already in the group)
     available_friends = [

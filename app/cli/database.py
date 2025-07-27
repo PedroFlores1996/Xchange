@@ -1,4 +1,7 @@
 from typing import List
+import random
+import signal
+import sys
 
 import sqlalchemy
 from flask_migrate import stamp
@@ -9,7 +12,7 @@ from app.debt import update_debts
 from app.model.group import Group
 from app.model.user import User
 from app.model.expense import Expense
-from app.split import SplitType
+from app.split import SplitType, equally, amount as amount_split, percentage
 from app.expense.mapper import map_balances_to_model
 from app.user import update_expenses_in_users
 
@@ -44,7 +47,6 @@ def clear_data() -> None:
 
 def _create_users(count: int) -> List[User]:
     """Create a specified number of users."""
-    from app.model.user import User
     users = []
     for i in range(1, count + 1):
         user = User.create(
@@ -56,7 +58,6 @@ def _create_users(count: int) -> List[User]:
 
 def _create_groups(names: List[str]) -> List[Group]:
     """Create groups with the given names."""
-    from app.model.group import Group
     groups = []
     for name in names:
         group = Group(name=name)
@@ -87,9 +88,6 @@ def _create_expense_with_balances(description: str, amount: float, creator_id: i
                                  group_id: int, payers_split: SplitType, owers_split: SplitType,
                                  balances: dict) -> Expense:
     """Create an expense with the given parameters and update debts."""
-    from app.model.expense import Expense
-    from app.expense.mapper import map_balances_to_model
-    from app.debt import update_debts
     
     update_debts(balances, group_id)
     mapped_balances = map_balances_to_model(balances)
@@ -110,8 +108,6 @@ def _create_expense_with_balances(description: str, amount: float, creator_id: i
 @cli.command("test-data")
 def test_data() -> None:
     """Create test data."""
-    from app.split import SplitType
-    from app.split.constants import OWED, PAYED, TOTAL
 
     # Create users and groups
     users = _create_users(10)
@@ -234,8 +230,6 @@ def test_data() -> None:
 @cli.command("test-data-big")
 def test_data_big() -> None:
     """Create extensive test data with timeout protection."""
-    import signal
-    import sys
     
     def timeout_handler(signum, frame):
         try:
@@ -278,9 +272,6 @@ def test_data_big() -> None:
 
 def _test_data_big() -> None:
     """Create extensive test data with many users, groups, and expenses."""
-    import random
-    from app.split import SplitType
-    from app.split.constants import OWED, PAYED, TOTAL
     
     # Create 50 users
     users = _create_users(50)
@@ -398,9 +389,6 @@ def _test_data_big() -> None:
 def _generate_random_balances(participants: List[User], amount: float, 
                             payers_split: SplitType, owers_split: SplitType) -> dict:
     """Generate random but valid balances for participants using the actual split functions."""
-    import random
-    from app.split.constants import OWED, PAYED, TOTAL
-    from app.split import equally, amount as amount_split, percentage
     
     # Randomly decide who are payers vs owers
     num_payers = random.randint(1, max(1, len(participants) - 1))
@@ -466,7 +454,6 @@ def _generate_random_balances(participants: List[User], amount: float,
 
 def _generate_random_percentages(num_people: int) -> List[float]:
     """Generate random percentages that sum to 100 using tenths arithmetic."""
-    import random
     
     # Work in tenths (1000 = 100.0%) to avoid floating point precision errors
     total_tenths = 1000  # 100.0% = 1000 tenths
@@ -500,7 +487,6 @@ def _generate_random_percentages(num_people: int) -> List[float]:
 
 def _generate_random_amounts(num_people: int, total_amount: float) -> List[float]:
     """Generate random amounts that sum to total_amount using cents arithmetic."""
-    import random
     
     # Work in cents to avoid floating point precision errors
     total_cents = round(total_amount * 100)
@@ -534,7 +520,6 @@ def _generate_random_amounts(num_people: int, total_amount: float) -> List[float
 
 def _distribute_amount(num_people: int, total_amount: float, split_type: SplitType) -> List[float]:
     """Distribute an amount among people based on split type."""
-    import random
     
     if split_type == SplitType.EQUALLY:
         # Use the same balanced rounding logic as equally.py

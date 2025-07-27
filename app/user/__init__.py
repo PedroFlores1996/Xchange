@@ -1,7 +1,11 @@
 from flask_login import current_user
-from app.model.expense import Expense
+from app.model.expense import Expense, ExpenseCategory
 from app.model.user import User
 from app.model.constants import NO_GROUP
+from app.expense import ExpenseData
+from app.expense.submit import submit_expense
+from app.split import SplitType
+from app.database import db
 
 
 def update_expense_in_users(expense: Expense) -> None:
@@ -289,11 +293,6 @@ def process_friend_debt_settlement(user: User, friend: User, debt_with_friend: o
     Processes the settlement of debt between current user and friend.
     Returns the result of the settlement process.
     """
-    from app.expense import ExpenseData
-    from app.model.expense import ExpenseCategory
-    from app.expense.submit import submit_expense
-    from app.split import SplitType
-    from app.database import db
     
     if not debt_with_friend:
         return {
