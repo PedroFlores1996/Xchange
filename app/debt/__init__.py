@@ -11,41 +11,57 @@ def simplify_debts(balances: dict[int, float]) -> list[tuple[int, int, float]]:
                      Positive values indicate the user is owed money, and negative values indicate the user owes money.
     :return: A list of transactions in the form (debtor_id, creditor_id, amount).
     """
-    # Filter out users with a net balance of 0
-    net_balances = {
-        user_id: balance for user_id, balance in balances.items() if balance != 0
+    # Convert to integer arithmetic (*100) to eliminate floating point precision issues
+    print(f"DEBUG: Input balances: {balances}")
+    net_balances_cents = {
+        user_id: round(balance * 100) for user_id, balance in balances.items() if balance != 0
     }
+    print(f"DEBUG: Balances in cents: {net_balances_cents}")
+    print(f"DEBUG: Sum of balances in cents: {sum(net_balances_cents.values())}")
 
     # List to store the transactions
     transactions = []
+    max_iterations = 100  # Prevent infinite loops and stdout overflow
 
     # While there are unsettled balances
-    while net_balances:
+    while net_balances_cents:
+        if max_iterations <= 0:
+            raise RuntimeError("Max iterations reached while simplifying debts.")
+        max_iterations -= 1
+        # Convert back to dollars for display
+        net_balances_display = {user_id: cents / 100 for user_id, cents in net_balances_cents.items()}
+        print(f"Current net balances: {net_balances_display}")
+        print(f"DEBUG: Current balances in cents: {net_balances_cents}")
+        print(f"DEBUG: Sum of current balances in cents: {sum(net_balances_cents.values())}")
+
         # Find the person who owes the most (most negative balance)
-        debtor_id = min(net_balances, key=net_balances.get)
-        debtor_amount = net_balances[debtor_id]
+        debtor_id = min(net_balances_cents, key=net_balances_cents.get)
+        debtor_amount_cents = net_balances_cents[debtor_id]
 
         # Find the person who is owed the most (most positive balance)
-        creditor_id = max(net_balances, key=net_balances.get)
-        creditor_amount = net_balances[creditor_id]
+        creditor_id = max(net_balances_cents, key=net_balances_cents.get)
+        creditor_amount_cents = net_balances_cents[creditor_id]
 
-        # Determine the amount to transfer with proper rounding
-        transaction_amount = round(min(-debtor_amount, creditor_amount), 2)
+        # Determine the amount to transfer (in cents)
+        transaction_amount_cents = min(-debtor_amount_cents, creditor_amount_cents)
+        transaction_amount = transaction_amount_cents / 100
 
-        # Record the transaction
+        # Record the transaction (in dollars)
         transactions.append((debtor_id, creditor_id, transaction_amount))
 
-        # Update the balances with proper rounding for monetary amounts
-        net_balances[debtor_id] = round(net_balances[debtor_id] + transaction_amount, 2)
-        net_balances[creditor_id] = round(
-            net_balances[creditor_id] - transaction_amount, 2
+        # Update the balances (in cents for exact arithmetic)
+        net_balances_cents[debtor_id] = (
+            net_balances_cents[debtor_id] + transaction_amount_cents
+        )
+        net_balances_cents[creditor_id] = (
+            net_balances_cents[creditor_id] - transaction_amount_cents
         )
 
-        # Remove users with settled balances (use epsilon comparison for floating point rounding errors)
-        if abs(net_balances[debtor_id]) < 0.01:
-            del net_balances[debtor_id]
-        if abs(net_balances[creditor_id]) < 0.01:
-            del net_balances[creditor_id]
+        # Remove users with settled balances (should be exactly 0)
+        if net_balances_cents[debtor_id] == 0:
+            del net_balances_cents[debtor_id]
+        if creditor_id in net_balances_cents and net_balances_cents[creditor_id] == 0:
+            del net_balances_cents[creditor_id]
 
     return transactions
 
@@ -55,13 +71,6 @@ def update_debts(
 ) -> None:
     # Extract total balances (should already be properly balanced from split functions)
     total_balances = {id: balance[TOTAL] for id, balance in balances.items()}
-    
-    # Verify balances sum to zero (debug check)
-    total_sum = sum(total_balances.values())
-    if abs(total_sum) > 0.005:  # More than half a cent error
-        print(f"WARNING: Unbalanced expense detected! Total sum: {total_sum:.6f}")
-        print(f"Balances: {total_balances}")
-        # Still proceed but log the issue
 
     if group_id is not None:
         # For group expenses, update GroupBalance records instead of creating individual debts
